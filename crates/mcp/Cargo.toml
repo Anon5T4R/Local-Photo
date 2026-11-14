@@ -1,0 +1,16 @@
+[package]
+name = "localphoto-mcp"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Local Photo MCP server (L5): JSON-RPC 2.0 over stdio, driving a running app or a headless session"
+
+[lints]
+workspace = true
+
+[dependencies]
+localphoto-engine = { workspace = true }
+localphoto-codecs = { workspace = true }
+localphoto-raster = { workspace = true }
+serde_json = { workspace = true }
+log = { workspace = true }

@@ -1,0 +1,50 @@
+[package]
+name = "localphoto-ui-egui"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Local Photo egui frontend (Lightroom-style UI); swappable — nothing below depends on it (L5)"
+
+[lints]
+workspace = true
+
+[dependencies]
+craft-ui = { workspace = true }
+craft-window = { workspace = true }
+localphoto-geom = { workspace = true }
+localphoto-meta = { workspace = true }
+localphoto-color = { workspace = true }
+localphoto-raster = { workspace = true }
+localphoto-develop = { workspace = true }
+localphoto-pipeline = { workspace = true }
+localphoto-catalog = { workspace = true }
+web-time = { workspace = true }
+localphoto-engine = { workspace = true }
+localphoto-slideshow = { workspace = true }
+localphoto-preview = { workspace = true }
+egui = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+log = { workspace = true }
+
+[dev-dependencies]
+# tests record why they skip (`cargo xtask ci` lists the skips)
+localphoto-testkit = { workspace = true }
+# The model-setup tests install and resume a real denoise model. Without this the engine's
+# `default_loader` is the "this build cannot run denoise models" stub when the package is tested
+# on its own (`cargo test -p localphoto-ui-egui`); a workspace test only passed by feature
+# unification with the desktop app's default `denoise` feature.
+localphoto-engine = { workspace = true, features = ["denoise"] }
+egui_kittest = { workspace = true, features = ["wgpu", "snapshot"] }
+localphoto-denoise = { workspace = true, features = ["runtime"] }
+localphoto-codecs = { workspace = true }
+localphoto-faces = { workspace = true }
+localphoto-merge = { workspace = true }
+
+[build-dependencies]
+serde_json = { workspace = true }
+toml = "1"
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+craft-update = { workspace = true }

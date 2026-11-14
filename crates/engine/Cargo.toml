@@ -1,0 +1,66 @@
+[package]
+name = "localphoto-engine"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Local Photo engine: session, command registry, history, render jobs, view-models (L4)"
+
+[lints]
+workspace = true
+
+[dependencies]
+# Paths stored in a Lightroom catalog are followed only to local files or the catalog's share.
+craft-docpath = { workspace = true }
+localphoto-geom = { workspace = true }
+localphoto-color = { workspace = true }
+localphoto-raster = { workspace = true }
+localphoto-develop = { workspace = true }
+localphoto-scenes = { workspace = true }
+localphoto-pipeline = { workspace = true }
+localphoto-gpu = { workspace = true }
+localphoto-catalog = { workspace = true }
+web-time = { workspace = true }
+localphoto-preview = { workspace = true }
+localphoto-codecs = { workspace = true }
+localphoto-raw = { workspace = true }
+localphoto-denoise-core = { workspace = true }
+localphoto-denoise = { workspace = true, optional = true }
+localphoto-meta = { workspace = true }
+localphoto-lensdb = { workspace = true }
+localphoto-faces = { workspace = true }
+miniz_oxide = { workspace = true }
+localphoto-merge = { workspace = true }
+localphoto-geocode = { workspace = true }
+localphoto-slideshow = { workspace = true }
+rayon = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+log = { workspace = true }
+ab_glyph = { workspace = true }
+# Apply the font’s vertical substitutions and origins to Japanese watermarks.
+harfrust = { version = "0.13", default-features = false, features = ["std"] }
+unicode-segmentation = "1.13"
+localphoto-segment = { workspace = true, optional = true }
+
+# model downloads run natively only (the web build fetches no models)
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+localphoto-fetch = { workspace = true }
+# capture-time parsing for face recognition (native only)
+chrono = { workspace = true }
+
+[features]
+# AI masks with SAM 3 (Object / Describe). Off for the web and CLI builds.
+sam = ["dep:localphoto-segment"]
+denoise = ["dep:localphoto-denoise", "localphoto-denoise/runtime", "localphoto-gpu/denoise"]
+rawnind-model = ["denoise", "localphoto-denoise/rawnind-model", "localphoto-denoise-core/rawnind-model"]
+
+[dev-dependencies]
+# tests record why they skip (`cargo xtask ci` lists the skips)
+localphoto-testkit = { workspace = true }
+# HDR JPEG XL tests read the file's colour encoding
+jxl-oxide = { workspace = true }
+# Lossless synthetic HEIC files (the import test; decoded when the codecs' `heif` feature is on).
+localphoto-heif = { workspace = true, features = ["testdata"] }
+libc = { workspace = true }
+localphoto-tiff = { workspace = true }

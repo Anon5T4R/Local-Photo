@@ -1,0 +1,26 @@
+[package]
+name = "localphoto-pipeline"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Local Photo develop pipeline: scene-referred, float, resolution independent (CPU reference) (L2)"
+
+[lints]
+workspace = true
+
+[dependencies]
+localphoto-geom = { workspace = true }
+localphoto-color = { workspace = true }
+localphoto-raster = { workspace = true }
+localphoto-develop = { workspace = true }
+localphoto-raw = { workspace = true }
+localphoto-inpaint = { workspace = true }
+rayon = { workspace = true }
+serde = { workspace = true }
+
+[dev-dependencies]
+dhat = { workspace = true }
+localphoto-scenes = { workspace = true }
+proptest = { workspace = true }
+image = { workspace = true }
+serde_json = { workspace = true }

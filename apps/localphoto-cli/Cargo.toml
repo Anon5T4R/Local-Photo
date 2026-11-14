@@ -1,0 +1,39 @@
+[package]
+name = "localphoto-cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish = false
+description = "Local Photo command-line tool: headless render, command listing and the MCP server"
+
+[[bin]]
+name = "localphoto-cli"
+path = "src/main.rs"
+
+[lints]
+workspace = true
+
+[dependencies]
+localphoto-engine = { workspace = true }
+localphoto-denoise = { workspace = true }
+localphoto-sysmem = { workspace = true }
+localphoto-mcp = { workspace = true }
+localphoto-ui-egui = { workspace = true }
+localphoto-codecs = { workspace = true }
+localphoto-raster = { workspace = true }
+localphoto-merge = { workspace = true }
+serde_json = { workspace = true }
+dhat = { workspace = true, optional = true }
+
+[features]
+default = ["denoise"]
+denoise = ["localphoto-engine/denoise"]
+rawnind-model = ["denoise", "localphoto-engine/rawnind-model"]
+# Heap profiling: `cargo run --release -p localphoto-cli --features dhat-heap -- snapshot …` counts
+# every allocation (live/peak bytes in `library.memory` / `ui.inspect`) and writes dhat-heap.json
+# (open it in DHAT's viewer: allocation sites by bytes at the peak). Slows allocation-heavy work.
+dhat-heap = ["dep:dhat"]
+
+# Open HEIC/HEIF photos (the optional localphoto-heif crate). Not default so distributors choose
+# it (HEVC patents); build with `--features heif` to include it.
+heif = ["localphoto-codecs/heif"]

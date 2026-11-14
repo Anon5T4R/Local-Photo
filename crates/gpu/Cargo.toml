@@ -1,0 +1,36 @@
+[package]
+name = "localphoto-gpu"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Local Photo GPU develop pipeline: wgpu compute (WGSL) twin of the CPU pipeline, which stays the reference (L3)"
+
+[lints]
+workspace = true
+
+[dependencies]
+localphoto-denoise = { workspace = true, optional = true }
+localphoto-geom = { workspace = true }
+localphoto-color = { workspace = true }
+localphoto-raster = { workspace = true }
+localphoto-develop = { workspace = true }
+localphoto-faces = { workspace = true }
+localphoto-pipeline = { workspace = true }
+log = { workspace = true }
+
+# Native only: Metal / Vulkan / DX12 through wgpu (pure Rust; the drivers are the system's).
+# The browser build keeps the CPU pipeline (WebGPU needs async device creation: see docs/gpu-pipeline.md).
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+wgpu = { workspace = true }
+pollster = { workspace = true }
+bytemuck = { workspace = true }
+
+[features]
+default = []
+denoise = ["dep:localphoto-denoise", "localphoto-denoise/runtime"]
+
+[dev-dependencies]
+# tests record why they skip (`cargo xtask ci` lists the skips)
+localphoto-testkit = { workspace = true }
+localphoto-scenes = { workspace = true }
+localphoto-raw = { workspace = true }
