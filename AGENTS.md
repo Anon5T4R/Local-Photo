@@ -30,7 +30,9 @@ Biblioteca de fotos + revelação RAW não destrutiva; o Lightroom é a referên
 ## Build
 ```
 cargo build --locked          # debug
-cargo test --locked           # testes
+CRAFT_FONTS_DIR=assets/craft-fonts cargo test --locked   # testes (o set completo de fontes,
+                                                         # como no CI; sem ele os testes de
+                                                         # glifos/acessibilidade pulam ou falham)
 cargo xtask ci                # gate completo (fmt, clippy, testes, camadas, assets, wasm)
 packaging/windows/package.ps1 # MSI + portable (Windows)
 packaging/linux/package.sh    # AppImage/deb/rpm/tar (Linux)

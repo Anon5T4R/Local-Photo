@@ -35,7 +35,10 @@ fn recursive_discovery_includes_sony_sr2_and_srf_case_insensitively() {
     let src = temp_dir("sony-discovery");
     std::fs::create_dir_all(src.join("trip/day2")).unwrap();
     let names = ["r1.SR2", "f828.srf", "trip/r1.sr2", "trip/f828.SRF", "trip/day2/r1.Sr2", "trip/day2/f828.SrF", "control.JPG"];
-    let mut expected: Vec<String> = names.iter().map(|name| src.join(name).to_string_lossy().into_owned()).collect();
+    // `Path::join` keeps a "/" inside the joined name as written; normalize it so the expected
+    // paths carry the platform's separator, as discovery reports them.
+    let mut expected: Vec<String> =
+        names.iter().map(|name| src.join(name).components().collect::<std::path::PathBuf>().to_string_lossy().into_owned()).collect();
     for path in &expected {
         std::fs::write(path, b"discovery only, not a decoded photo").unwrap();
     }

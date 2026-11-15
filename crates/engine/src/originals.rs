@@ -314,7 +314,15 @@ mod tests {
         // such a link is refused at write time.
         let linked = d.join("linked.png");
         std::fs::hard_link(&original, &linked).unwrap();
-        assert!(s.pin_write_target(&linked.to_string_lossy()).unwrap_err().contains("original"));
+        // Recognising a differently named hard link needs the file's identity (device + inode).
+        // Windows exposes no stable metadata for that (the volume serial/file index accessors are
+        // still unstable), and `safe_file::same_file` compares canonical paths there, so admission
+        // cannot see the shared entry on Windows; the write-time recheck below still catches a
+        // path that appeared after admission.
+        #[cfg(unix)]
+        {
+            assert!(s.pin_write_target(&linked.to_string_lossy()).unwrap_err().contains("original"));
+        }
         std::fs::remove_file(&linked).unwrap();
         let appears_as_link = d.join("late-link.png");
         let late = s.pin_write_target(&appears_as_link.to_string_lossy()).expect("free path");

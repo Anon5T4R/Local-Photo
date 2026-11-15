@@ -52,6 +52,16 @@ Nunca edite `libs/craft-libs/crates/update` à mão.
 - macOS: `packaging/macos/dmg/dmg-layout.DS_Store` ainda carrega o nome upstream no layout do
   Finder (regenerar exige macOS); o bundle em si já é `Local Photo.app`.
 - Testes rodam no CI só no Linux (como no upstream); no Windows o job compila `cargo test
-  --no-run` — os testes de UI renderizam por wgpu e o runner não tem GPU.
+  --no-run` — os testes de UI renderizam por wgpu e o runner não tem GPU. Três testes do upstream
+  não passavam no Windows e foram corrigidos/limitados aqui: dois comparavam caminhos montados com
+  `join("a/b")` (separador misto) e um espera detecção de hard link por nome diferente, que no
+  Windows dependeria do file index (metadata instável) — a asserção de *admissão* ficou `#[cfg(unix)]`
+  e a de *write-time* (caminho que apareceu) continua valendo nos dois.
 - `docs/images/` e `docs/showcase/` são capturas do app upstream (título antigo nos pixels);
   regenerar quando o visual estabilizar.
+- **Flake de carga (não suprimido):** `tests_segment::background_requests_never_wait_and_failures_come_back_as_messages`
+  mede o tempo de enfileirar pedidos ao modelo (< 1 s) e estourou uma vez (1,8 s) no Windows
+  local com a suíte inteira em paralelo; passa isolado e no binário do crate (1301 testes). Código
+  intocado aqui — se flecar no CI, investigar contenção de I/O do modelo antes de mexer no limite.
+- Testes locais pedem `CRAFT_FONTS_DIR=assets/craft-fonts` (o teste de acessibilidade desenha "▸",
+  que só existe no set do craft-fonts; o CI já define a variável).
