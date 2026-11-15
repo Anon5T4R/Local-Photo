@@ -43,6 +43,9 @@ Nunca edite `libs/craft-libs/crates/update` à mão.
   Discord próprios).
 - `packaging/windows/package.ps1` monta o zip portable com `ZipArchive` e barras `/` (o
   `Compress-Archive` do PS 5.1 grava `\`, que o updater recusa).
+- `crates/ui-egui/src/render.rs` (`request_needed`): `clippy::needless_bool` novo do stable 1.100
+  reprovava o `if … { return false; } true` do upstream. Condição negada (sugestão do próprio
+  lint), sem mudança de comportamento — divergência local mínima até o upstream acompanhar.
 - `.github/`, README, AGENTS/CLAUDE e `docs/releasing.md` reescritos para a suíte.
 
 ## Pendências/gaps conhecidos desta porta

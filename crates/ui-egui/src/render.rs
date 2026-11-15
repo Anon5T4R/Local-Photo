@@ -450,10 +450,9 @@ impl Renderer {
         if let Some(&(k, p)) = self.pending.get(&slot) {
             return k != key || (p != priority && self.is_queued(slot));
         }
-        if self.textures.get(&slot).is_some_and(|t| t.key == key) || self.failed.get(&slot).is_some_and(|f| f.0 == key && f.2 == self.catalog_rev) {
-            return false;
-        }
-        true
+        // A texture, or a recorded failure, for this exact key and catalog revision means the
+        // request was already served.
+        !(self.textures.get(&slot).is_some_and(|t| t.key == key) || self.failed.get(&slot).is_some_and(|f| f.0 == key && f.2 == self.catalog_rev))
     }
     /// Free a view slot's texture and stage cache (the view is no longer shown).
     pub fn release(&mut self, slot: Slot) {
