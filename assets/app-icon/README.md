@@ -16,7 +16,7 @@ one white glyph, and the "Taylor" signature at the tile's foot.
 | Fuchsia | `#e879f9` → `#a21caf` | gradient of the tile (top-left to bottom-right) |
 | White | `#ffffff` | the iris blades (the glyph) |
 | White at 16% | `#ffffff` | the sheen over the top half |
-| White at 55% | `#ffffff` | the signature "Taylor" at the tile's foot |
+| White at 85% | `#ffffff` | the signature "Taylor" at the tile's foot |
 
 The tile colour was picked from the suite's free hues: amber (paint), teal (vector), emerald
 (sheets), orange (slides), blue (office, image), red-orange (PDF), indigo (keys), purple (utils).
@@ -24,13 +24,22 @@ The tile colour was picked from the suite's free hues: amber (paint), teal (vect
 ## Geometry
 
 `viewBox="0 0 512 512"`. The glyph is drawn with a mask so the tile gradient shows through the
-opening and the blade cuts: a circle of radius 132 at (256, 252), a hexagon of radius 52 rotated
-15°, and each hexagon edge continued past its end vertex to the outer ring (10-unit cuts). The six
-blades are therefore exactly the ring minus the cuts, and composite over any gradient.
+opening and the blade cuts: a circle of radius 155 at (256, 252), a hexagon of radius 61 rotated
+15°, and each hexagon edge continued past its end vertex to the outer ring (11.5-unit cuts). The
+six blades are therefore exactly the ring minus the cuts, and composite over any gradient. The ring
+is 310 units across, 69 % of the 448-unit tile - the same visual weight as the palette (paint) and
+the bezier (vector).
 
 macOS files (`.icns`, `localphoto-macos-512.png`) widen the viewBox to `-62 -62 636 636`, standing
 in for Apple's 824/1024 body; Windows and Linux files use the full-bleed tile, so the iris reads at
 16-48 px.
+
+## Variants
+
+`variants/localphoto-graphite.svg` is the same artwork on a graphite tile (`#64748b` → `#0f172a`) -
+kept documented, not shipped: neutral tiles break the suite's one strong hue per app (amber, teal,
+emerald, orange, blue, red-orange, indigo, purple, fuchsia). Use it only if a light/high-contrast
+environment ever needs it; rendering it is `packaging/icons.sh` pointed at that file.
 
 ## Provenance
 

@@ -11,15 +11,15 @@
     <!-- Glyph mask: white where an iris blade is, black where the tile shows through (the
          hexagonal opening and the six blade cuts), so it composites over the gradient. -->
     <mask id="iris">
-      <circle cx="256" cy="252" r="132" fill="#ffffff"/>
-      <polygon points="306.23,265.46 269.46,302.23 219.23,288.77 205.77,238.54 242.54,201.77 292.77,215.23" fill="#000000"/>
-      <g stroke="#000000" stroke-width="10" stroke-linecap="butt">
-      <line x1="269.46" y1="302.23" x2="195.86" y2="375.82"/>
-      <line x1="219.23" y1="288.77" x2="118.70" y2="261.83"/>
-      <line x1="205.77" y1="238.54" x2="178.83" y2="138.01"/>
-      <line x1="242.54" y1="201.77" x2="316.14" y2="128.18"/>
-      <line x1="292.77" y1="215.23" x2="393.30" y2="242.17"/>
-      <line x1="306.23" y1="265.46" x2="333.17" y2="365.99"/>
+      <circle cx="256" cy="252" r="155" fill="#ffffff"/>
+      <polygon points="314.92,267.79 271.79,310.92 212.87,295.13 197.08,236.21 240.21,193.08 299.13,208.87" fill="#000000"/>
+      <g stroke="#000000" stroke-width="11.5" stroke-linecap="butt">
+      <line x1="271.79" y1="310.92" x2="185.37" y2="397.34"/>
+      <line x1="212.87" y1="295.13" x2="94.81" y2="263.50"/>
+      <line x1="197.08" y1="236.21" x2="165.45" y2="118.16"/>
+      <line x1="240.21" y1="193.08" x2="326.63" y2="106.66"/>
+      <line x1="299.13" y1="208.87" x2="417.19" y2="240.50"/>
+      <line x1="314.92" y1="267.79" x2="346.55" y2="385.84"/>
       </g>
     </mask>
   </defs>
@@ -33,5 +33,5 @@
 
   <!-- brand signature -->
   <text x="256" y="460" font-family="Segoe Script, cursive" font-size="40"
-        fill="#ffffff" opacity="0.55" text-anchor="middle">Taylor</text>
+        fill="#ffffff" opacity="0.85" text-anchor="middle">Taylor</text>
 </svg>
