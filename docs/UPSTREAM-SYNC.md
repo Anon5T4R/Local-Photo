@@ -41,6 +41,12 @@ Nunca edite `libs/craft-libs/crates/update` à mão.
   vendorizados mantêm o estilo de origem.
 - Links de comunidade: os menus/About apontam só para este repositório (o upstream tinha site e
   Discord próprios).
+- Ícone próprio (v0.1.2): iris de câmera branca em tile fúcsia, SVG desenhado neste repo (o upstream
+  usava um lince gravado, arte herdada que saiu inteira — hicolor, `.ico`, `.icns`,
+  `localphoto-1024.png`, DMG background). Geração: `packaging/icons.sh` + `cargo xtask ico` + packer
+  de `.icns` por chunks PNG (sem macOS).
+- MSI (v0.1.2): atalho na **área de trabalho** além do menu Iniciar (componente próprio, atalho
+  não-advertised, key path no registro `Software\Local Photo\Shortcuts`), padrão do local-paint.
 - `packaging/windows/package.ps1` monta o zip portable com `ZipArchive` e barras `/` (o
   `Compress-Archive` do PS 5.1 grava `\`, que o updater recusa).
 - `crates/ui-egui/src/render.rs` (`request_needed`): `clippy::needless_bool` novo do stable 1.100

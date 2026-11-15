@@ -7,7 +7,7 @@
       -d Version=1.2.3 -d BinDir=... -d IconPath=... -d UiDialogBmp=... -d UiBannerBmp=... -o out.msi
 
   Per-machine install into Program Files (or the folder chosen in the installer, or
-  `INSTALLFOLDER=...` on the msiexec command line; upgrades keep it), a Start Menu shortcut, and
+  `INSTALLFOLDER=...` on the msiexec command line; upgrades keep it), a Start Menu shortcut and a desktop shortcut, and
   Local Photo offered under "Open with" for the formats it reads (without taking over the user's
   default app for them).
 -->
@@ -65,6 +65,7 @@
         After="SetINSTALLFOLDER" Sequence="both"
         Condition="LEGACYINSTALLFOLDER AND LEGACYINSTALLEXE AND NOT PREVIOUSINSTALLFOLDER AND NOT INSTALLFOLDER" />
     <StandardDirectory Id="ProgramMenuFolder" />
+    <StandardDirectory Id="DesktopFolder" />
 
     <Feature Id="Main" Title="Local Photo" Level="1">
       <ComponentGroupRef Id="LocalPhotoFiles" />
@@ -208,6 +209,14 @@
 
       <Component Id="LocalPhotoCli">
         <File Id="LocalPhotoCliExe" Source="$(var.BinDir)\localphoto-cli.exe" KeyPath="yes" />
+      </Component>
+      <!-- Desktop shortcut, the suite's standard: a plain shortcut (not advertised, so it works
+           from the desktop without fetching the MSI on first launch) with its own component and
+           registry key path, so an uninstall removes it. -->
+      <Component Id="LocalPhotoDesktopShortcut" Directory="DesktopFolder" Guid="4A2EC395-DB77-4B75-BDAB-2FA4861E26C8">
+        <Shortcut Id="DesktopShortcut" Name="Local Photo" Description="Local Photo photo library and raw developer"
+            Target="[#LocalPhotoExe]" WorkingDirectory="INSTALLFOLDER" Icon="LocalPhotoIcon.ico" IconIndex="0" />
+        <RegistryValue Root="HKLM" Key="Software\Local Photo\Shortcuts" Name="Desktop" Type="integer" Value="1" KeyPath="yes" />
       </Component>
       <Component Id="LocalPhotoNotice">
         <File Id="LocalPhotoNoticeFile" Source="$(var.BinDir)\NOTICE" KeyPath="yes" />

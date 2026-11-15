@@ -15,7 +15,7 @@ trap 'rm -rf "$TMP"' EXIT
 
 command -v resvg >/dev/null || { echo "error: resvg not found (brew install resvg)" >&2; exit 1; }
 
-# The SVG is the full-bleed 512 tile (rx=112). Windows and Linux use it as is, so the lynx reads at
+# The SVG is the full-bleed 512 tile (rx=100). Windows and Linux use it as is, so the iris reads at
 # 16-48 px. macOS icons follow Apple's grid: an 824/1024 body with a transparent margin, made by
 # widening the viewBox (512 / 0.805 = 636, so 62 units each side).
 MAC="$TMP/macos.svg"

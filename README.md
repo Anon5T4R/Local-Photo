@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/app-icon/hicolor/256x256/apps/com.localphoto.app.png" width="128" height="128" alt="Local Photo icon: an engraved lynx on an amber tile">
+  <img src="assets/app-icon/hicolor/256x256/apps/com.localphoto.app.png" width="128" height="128" alt="Local Photo icon: a white camera iris on a fuchsia tile">
 </p>
 
 <h1 align="center">Local Photo</h1>

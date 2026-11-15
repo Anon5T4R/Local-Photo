@@ -1,5 +1,5 @@
 //! Windows only: embed the app icon and version info (VERSIONINFO) into `localphoto.exe`, so
-//! Explorer, the taskbar, the Start menu and Alt-Tab show the lynx.
+//! Explorer, the taskbar, the Start menu and Alt-Tab show the iris.
 //!
 //! On every other target this does nothing. A missing resource compiler is a warning, so a
 //! cross-compile from macOS or Linux still links, unless `LOCALPHOTO_REQUIRE_WINRES=1` turns it
