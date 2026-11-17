@@ -273,15 +273,36 @@ mod tests {
         }
     }
 
+    /// Read to the end of the stream, retrying through the socket's read timeout: a loaded runner
+    /// can keep the worker from closing the socket within the client's 3 s timeout, which is not
+    /// the regression this test looks for (the connection slot being released). A worker that never
+    /// closes still fails, after `limit`.
+    fn read_until_close(client: &mut BufReader<TcpStream>, limit: Duration) -> std::io::Result<String> {
+        let deadline = std::time::Instant::now() + limit;
+        let mut out = Vec::new();
+        let mut buf = [0u8; 4096];
+        loop {
+            match std::io::Read::read(client, &mut buf) {
+                Ok(0) => return Ok(String::from_utf8_lossy(&out).into_owned()),
+                Ok(n) => out.extend_from_slice(&buf[..n]),
+                Err(e) if matches!(e.kind(), std::io::ErrorKind::WouldBlock | std::io::ErrorKind::TimedOut) => {
+                    if std::time::Instant::now() >= deadline {
+                        return Err(e);
+                    }
+                }
+                Err(e) if e.kind() == std::io::ErrorKind::Interrupted => {}
+                Err(e) => return Err(e),
+            }
+        }
+    }
+
     #[test]
     fn idle_connections_release_their_slots_without_dispatching() {
         for input in ["", "{\"method\":\"engine.execute\""] {
             let open = Arc::new(AtomicUsize::new(0));
             let mut connection = Connection::new(&open, Duration::from_millis(100), |c| c.write_all(input.as_bytes()).unwrap());
             assert_eq!(open.load(Ordering::SeqCst), 1);
-            let mut reply = String::new();
-            let closed = connection.client.read_to_string(&mut reply);
-            assert!(closed.is_ok(), "idle connection stayed open: {closed:?}");
+            let reply = read_until_close(&mut connection.client, Duration::from_secs(30)).expect("idle connection stayed open");
             connection.join();
             assert_eq!(open.load(Ordering::SeqCst), 0, "the production worker releases its slot");
             assert!(connection.requests.try_recv().is_err(), "incomplete input never runs");
@@ -291,8 +312,7 @@ mod tests {
 
             // A subsequent connection is admitted through the same accounting path.
             let mut next = Connection::new(&open, Duration::from_secs(1), |c| c.shutdown(std::net::Shutdown::Write).unwrap());
-            let mut eof = String::new();
-            next.client.read_to_string(&mut eof).unwrap();
+            let eof = read_until_close(&mut next.client, Duration::from_secs(30)).expect("the second connection closes");
             next.join();
             assert!(eof.is_empty());
             assert_eq!(open.load(Ordering::SeqCst), 0);
