@@ -27,6 +27,14 @@ Biblioteca de fotos + revelação RAW não destrutiva; o Lightroom é a referên
 - `docs/` — arquitetura, formatos, paridade, release (`docs/releasing.md`)
 - `xtask/` — tarefas de build/CI (`cargo xtask ci`, `layers`, `assets`, `parity`, `wasm`, `web`)
 
+## Agent-native (MCP)
+`crates/mcp` (servidor stdio + headless/`Remote` do control channel loopback) e
+`localphoto-cli mcp` (headless ou `--connect [ADDR]`). A crate compartilhada da suíte é
+**`craft-mcp`** (fonte `local-libs`, espelho em `libs/craft-libs/crates/mcp`), usada no `--connect`
+(porta nua = loopback; host público recusado). `run --script` aceita JSON Lines ou um array de
+passos; `commands --search TEXT` filtra o catálogo. **Dívida**: as flags
+`--automation-read-root`/`--automation-write-root` ainda não existem neste app. Docs: `docs/mcp.md`.
+
 ## Build
 ```
 cargo build --locked          # debug

@@ -2,3 +2,4 @@
 
 mod cli;
 mod mcp_shutdown;
+mod mold;

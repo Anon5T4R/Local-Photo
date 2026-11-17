@@ -13,6 +13,16 @@ It runs in one of two modes:
 | **Headless** (default) | `localphoto-cli mcp [--demo] [FILES/FOLDERS…]` | An in-process engine `Session`. Develop, render and export without a window. |
 | **Connect** | `localphoto-cli mcp --connect [127.0.0.1:7980]` | A running desktop app started with `localphoto --control 7980`, through its loopback JSON-lines control channel ([control-protocol.md](control-protocol.md)). Adds the UI tools (screenshot, clicks, keys, pointer gestures). |
 
+A bare port means `127.0.0.1` (where the app listens); a host that isn't loopback is refused before
+anything connects.
+
+## File confinement
+
+This app does **not** accept the suite's `--automation-read-root` / `--automation-write-root` yet:
+the tools open and write the paths they are given. The flags are the suite contract and are tracked
+as debt here; until they land, confine the process with the operating system or point the agent at a
+folder it owns.
+
 Options: `--library DIR` opens (or creates) a persistent Local Photo library — the same crash-safe
 format the desktop app uses (`~/Pictures/Local Photo Library` by default there) — so ratings, edits and albums
 survive between sessions (with `--demo`, a new library is seeded with the demo photos). A library

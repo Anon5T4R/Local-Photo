@@ -41,13 +41,16 @@ USAGE:
         --demo            headless, the procedural demo library
         --library DIR     headless, open (or create) a Local Photo library; edits are saved
         --import PATH     headless, import a file or folder first (repeatable)
-        --connect [ADDR]  drive the running app (`localphoto --control 7980`; default 127.0.0.1:7980)
-        --script FILE|-   also run JSON lines {\"command\": id, \"params\": {…}} (or {\"method\": …})
+        --connect [ADDR]  drive the running app (`localphoto --control 7980`; default 127.0.0.1:7980;
+                          loopback only, a bare port means 127.0.0.1)
+        --script FILE|-   also run a JSON array of steps, or JSON lines {\"command\": id, \"params\": {…}}
+                          (or {\"method\": …})
         --keep-going      continue after a failed command
   localphoto-cli mcp [OPTIONS] [FILES/FOLDERS…]
       MCP server (JSON-RPC 2.0 over stdio). Headless by default: an in-process session with the
       given files imported. Options:
-        --connect [ADDR]  drive a running app instead (`localphoto --control 7980`; default 127.0.0.1:7980)
+        --connect [ADDR]  drive a running app instead (`localphoto --control 7980`; default 127.0.0.1:7980;
+                          loopback only, a bare port means 127.0.0.1)
         --demo            headless: start with the procedurally generated demo library
         --library DIR     headless: open (or create) a persistent Local Photo library; edits are saved
         --compact         list only the helper tools (every command stays reachable via run_command)
@@ -102,7 +105,7 @@ USAGE:
                           (default LOCALPHOTO_DENOISE_TOKEN)
         --run-on WHERE    auto (default), gpu or cpu
         --max-connections N   concurrent clients (default 8)
-  localphoto-cli commands [--json]   list every command id with its parameters
+  localphoto-cli commands [--json] [--search TEXT]   list every command id with its parameters
   localphoto-cli controls [--json]   list every develop control id with its range
   localphoto-cli calibrate [--max N] [--out DIR] FOLDERS/FILES…
       Fit a colour profile per camera model from raw files and their embedded camera JPEGs
@@ -333,6 +336,9 @@ fn mcp(args: &[String]) -> Result<(), String> {
             if !files.is_empty() || demo || library.is_some() {
                 return Err("FILES, --demo and --library apply to headless mode only (import through the `import` tool instead)".into());
             }
+            // The suite's `--connect`: a bare port means loopback (`127.0.0.1`), and a host that
+            // isn't loopback is refused before any connection.
+            let addr = craft_mcp::remote::normalize_addr(&addr).map_err(|e| format!("mcp: {e}"))?;
             match Remote::connect(&addr) {
                 Ok(r) => {
                     eprintln!("localphoto-cli mcp: connected to Local Photo at {addr}");
@@ -510,6 +516,13 @@ fn parse_steps(tokens: &[String]) -> Result<Vec<Step>, String> {
     Ok(steps)
 }
 
+/// One script step from `{"command": id, "params": …}` or `{"method": m, "params": …}`.
+fn script_step(v: &Value, at: &str) -> Result<Step, String> {
+    let id = v.get("command").or(v.get("method")).and_then(Value::as_str).ok_or_else(|| format!("{at}: needs `command` or `method`"))?;
+    let params = v.get("params").cloned().filter(|p| p.is_object()).unwrap_or_else(|| json!({}));
+    Ok(Step { id: id.to_string(), params })
+}
+
 /// Run one step: control-protocol methods (`ui.*`, `engine.*`) directly, everything else as a
 /// command through `engine.execute`.
 fn run_step(b: &mut dyn Backend, s: &Step) -> Result<Value, String> {
@@ -557,16 +570,25 @@ fn run(args: &[String]) -> Result<(), String> {
         } else {
             std::fs::read_to_string(path).map_err(|e| format!("{path}: {e}"))?
         };
-        for (n, line) in text.lines().enumerate().filter(|(_, l)| !l.trim().is_empty() && !l.trim_start().starts_with('#')) {
-            let v: Value = serde_json::from_str(line).map_err(|e| format!("{path}:{}: {e}", n + 1))?;
-            // `{"command": id, "params": …}` or a control request `{"method": m, "params": …}`
-            let id = v
-                .get("command")
-                .or(v.get("method"))
-                .and_then(Value::as_str)
-                .ok_or_else(|| format!("{path}:{}: needs `command` or `method`", n + 1))?;
-            let params = v.get("params").cloned().filter(|p| p.is_object()).unwrap_or_else(|| json!({}));
-            steps.push(Step { id: id.to_string(), params });
+        let text = text.strip_prefix('\u{feff}').unwrap_or(&text);
+        // A JSON array of steps, or one step per line (JSON Lines), as the rest of the suite takes
+        // its job files. A step is `{"command": id, "params": …}` or a control request
+        // `{"method": m, "params": …}`; a bare string is a command id.
+        if text.trim_start().starts_with('[') {
+            let list: Value = serde_json::from_str(text).map_err(|e| format!("{path}: {e}"))?;
+            let entries = list.as_array().ok_or_else(|| format!("{path}: not a JSON array"))?;
+            for (n, v) in entries.iter().enumerate() {
+                let v = match v {
+                    Value::String(id) => json!({ "command": id }),
+                    other => other.clone(),
+                };
+                steps.push(script_step(&v, &format!("{path}[{n}]"))?);
+            }
+        } else {
+            for (n, line) in text.lines().enumerate().filter(|(_, l)| !l.trim().is_empty() && !l.trim_start().starts_with('#')) {
+                let v: Value = serde_json::from_str(line).map_err(|e| format!("{path}:{}: {e}", n + 1))?;
+                steps.push(script_step(&v, &format!("{path}:{}", n + 1))?);
+            }
         }
     }
     if steps.is_empty() {
@@ -578,6 +600,9 @@ fn run(args: &[String]) -> Result<(), String> {
                 if demo || library.is_some() || !imports.is_empty() {
                     return Err("--demo, --library and --import apply to headless mode only".into());
                 }
+                // The suite's `--connect`: a bare port means loopback, and a host that isn't loopback
+                // is refused before any connection.
+                let addr = craft_mcp::remote::normalize_addr(&addr)?;
                 Box::new(Remote::connect(&addr).map_err(|e| {
                     format!("Local Photo is not reachable at {addr} ({e}); start it with `localphoto --control {}`", connect_port(&addr))
                 })?)
@@ -935,14 +960,28 @@ fn snapshot(args: &[String]) -> Result<(), String> {
 }
 
 fn commands(args: &[String]) -> Result<(), String> {
+    let mut search: Option<String> = None;
+    let mut json = false;
+    let mut it = args.iter();
+    while let Some(a) = it.next() {
+        match a.as_str() {
+            "--json" => json = true,
+            "--search" => search = Some(it.next().ok_or("--search needs text")?.to_lowercase()),
+            other => return Err(format!("unknown option `{other}`")),
+        }
+    }
     let mut h = Headless::demo();
     let mut cmds = h.call("engine.commands", json!({}))?;
     // Listed by id so each family (`photo.*`, `mask.*`, …) reads together; the registry keeps its own order.
     if let Some(list) = cmds.as_array_mut() {
         list.sort_by(|a, b| a["id"].as_str().unwrap_or("").cmp(b["id"].as_str().unwrap_or("")));
+        // `--search` keeps the commands whose id or label contains the text, as the suite does.
+        if let Some(needle) = search.as_deref() {
+            list.retain(|c| ["id", "label"].iter().any(|k| c.get(*k).and_then(Value::as_str).is_some_and(|v| v.to_lowercase().contains(needle))));
+        }
     }
     let mut out = std::io::stdout().lock();
-    if args.iter().any(|a| a == "--json") {
+    if json {
         writeln!(out, "{}", serde_json::to_string_pretty(&cmds).unwrap_or_default()).map_err(|e| e.to_string())?;
         return Ok(());
     }
