@@ -25,7 +25,6 @@
 #![deny(clippy::unwrap_used, clippy::expect_used, clippy::panic, clippy::unimplemented, clippy::todo, clippy::unreachable)]
 
 mod alloc_release;
-mod appearance;
 #[cfg(target_os = "linux")]
 mod colord;
 mod control_server;
@@ -749,7 +748,8 @@ fn services(cc: &eframe::CreationContext<'_>, log_file: Option<&std::path::Path>
         // the library is a folder on disk: backed up with the user's other files
         backup_library: None,
         restore_library: None,
-        system_theme: appearance::service(),
+        // The desktop's answer reaches `ctx.system_theme()` through `craft_desktop_theme`.
+        system_theme: None,
     }
 }
 
@@ -1049,6 +1049,8 @@ fn main() -> eframe::Result {
                     app.ui.settings.gpu = false;
                     app.notices.push(notice);
                 }
+                // Linux: the desktop's light/dark choice, which winit does not report.
+                craft_desktop_theme::follow(&cc.egui_ctx);
                 if let Some(port) = control_port {
                     let rx = control_server::start(port, cc.egui_ctx.clone());
                     app = app.with_control(rx);

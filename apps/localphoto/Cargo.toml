@@ -32,6 +32,8 @@ chrono = { workspace = true }
 # probing the window's renderer before it opens (`window_gpu`)
 pollster = { workspace = true }
 log = { workspace = true }
+# Linux: the desktop's light/dark choice for the System theme (inert elsewhere).
+craft-desktop-theme = { workspace = true }
 
 [build-dependencies]
 # Icon + VERSIONINFO for localphoto.exe; build.rs only uses it when targeting Windows.
