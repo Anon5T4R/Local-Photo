@@ -205,6 +205,72 @@
         <!-- Suite convention (craft-update's `install_dir`): `InstallDir` under the app's own key. -->
         <RegistryValue Root="HKLM" Key="Software\Local Photo" Name="InstallDir" Value="[INSTALLFOLDER]" Type="string" />
         <RegistryValue Root="HKLM" Key="Software\Anon5T4R\LocalPhoto" Name="InstallDir" Value="[INSTALLFOLDER]" Type="string" />
+
+        <!-- "Open with" and Settings > Default apps, through the Default Programs registration (ProgID,
+             OpenWithProgids, Capabilities, RegisteredApplications). Same extensions as the Linux desktop entry's MimeType.
+             Never takes over an extension: the default value is left alone and the user chooses. -->
+        <ProgId Id="LocalPhoto.Image" Description="Photo" Icon="LocalPhotoExe" IconIndex="0" />
+        <RegistryValue Root="HKLM" Key="Software\Classes\LocalPhoto.Image\shell\open\command" Value="&quot;[#LocalPhotoExe]&quot; &quot;%1&quot;" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\Classes\.heic\OpenWithProgids" Name="LocalPhoto.Image" Value="" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\Classes\.heif\OpenWithProgids" Name="LocalPhoto.Image" Value="" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\Classes\.jpg\OpenWithProgids" Name="LocalPhoto.Image" Value="" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\Classes\.jpeg\OpenWithProgids" Name="LocalPhoto.Image" Value="" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\Classes\.png\OpenWithProgids" Name="LocalPhoto.Image" Value="" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\Classes\.tif\OpenWithProgids" Name="LocalPhoto.Image" Value="" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\Classes\.tiff\OpenWithProgids" Name="LocalPhoto.Image" Value="" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\Classes\.webp\OpenWithProgids" Name="LocalPhoto.Image" Value="" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\Classes\.dng\OpenWithProgids" Name="LocalPhoto.Image" Value="" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\Classes\.arw\OpenWithProgids" Name="LocalPhoto.Image" Value="" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\Classes\.cr2\OpenWithProgids" Name="LocalPhoto.Image" Value="" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\Classes\.cr3\OpenWithProgids" Name="LocalPhoto.Image" Value="" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\Classes\.nef\OpenWithProgids" Name="LocalPhoto.Image" Value="" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\Classes\.raf\OpenWithProgids" Name="LocalPhoto.Image" Value="" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\Classes\.orf\OpenWithProgids" Name="LocalPhoto.Image" Value="" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\Classes\.rw2\OpenWithProgids" Name="LocalPhoto.Image" Value="" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\Classes.rawOpenWithProgids" Name="LocalPhoto.Image" Value="" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\Classes\.pef\OpenWithProgids" Name="LocalPhoto.Image" Value="" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\Classes\Applications\localphoto.exe" Name="FriendlyAppName" Value="Local Photo" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\Classes\Applications\localphoto.exe\shell\open\command" Value="&quot;[#LocalPhotoExe]&quot; &quot;%1&quot;" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\Classes\Applications\localphoto.exe\SupportedTypes" Name=".heic" Value="" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\Classes\Applications\localphoto.exe\SupportedTypes" Name=".heif" Value="" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\Classes\Applications\localphoto.exe\SupportedTypes" Name=".jpg" Value="" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\Classes\Applications\localphoto.exe\SupportedTypes" Name=".jpeg" Value="" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\Classes\Applications\localphoto.exe\SupportedTypes" Name=".png" Value="" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\Classes\Applications\localphoto.exe\SupportedTypes" Name=".tif" Value="" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\Classes\Applications\localphoto.exe\SupportedTypes" Name=".tiff" Value="" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\Classes\Applications\localphoto.exe\SupportedTypes" Name=".webp" Value="" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\Classes\Applications\localphoto.exe\SupportedTypes" Name=".dng" Value="" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\Classes\Applications\localphoto.exe\SupportedTypes" Name=".arw" Value="" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\Classes\Applications\localphoto.exe\SupportedTypes" Name=".cr2" Value="" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\Classes\Applications\localphoto.exe\SupportedTypes" Name=".cr3" Value="" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\Classes\Applications\localphoto.exe\SupportedTypes" Name=".nef" Value="" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\Classes\Applications\localphoto.exe\SupportedTypes" Name=".raf" Value="" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\Classes\Applications\localphoto.exe\SupportedTypes" Name=".orf" Value="" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\Classes\Applications\localphoto.exe\SupportedTypes" Name=".rw2" Value="" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\Classes\Applications\localphoto.exe\SupportedTypes" Name=".raw" Value="" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\Classes\Applications\localphoto.exe\SupportedTypes" Name=".pef" Value="" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\LocalPhoto\Capabilities" Name="ApplicationName" Value="Local Photo" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\LocalPhoto\Capabilities" Name="ApplicationDescription" Value="Photo library and raw developer" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\LocalPhoto\Capabilities" Name="ApplicationIcon" Value="[#LocalPhotoExe],0" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\LocalPhoto\Capabilities\FileAssociations" Name=".heic" Value="LocalPhoto.Image" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\LocalPhoto\Capabilities\FileAssociations" Name=".heif" Value="LocalPhoto.Image" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\LocalPhoto\Capabilities\FileAssociations" Name=".jpg" Value="LocalPhoto.Image" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\LocalPhoto\Capabilities\FileAssociations" Name=".jpeg" Value="LocalPhoto.Image" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\LocalPhoto\Capabilities\FileAssociations" Name=".png" Value="LocalPhoto.Image" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\LocalPhoto\Capabilities\FileAssociations" Name=".tif" Value="LocalPhoto.Image" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\LocalPhoto\Capabilities\FileAssociations" Name=".tiff" Value="LocalPhoto.Image" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\LocalPhoto\Capabilities\FileAssociations" Name=".webp" Value="LocalPhoto.Image" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\LocalPhoto\Capabilities\FileAssociations" Name=".dng" Value="LocalPhoto.Image" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\LocalPhoto\Capabilities\FileAssociations" Name=".arw" Value="LocalPhoto.Image" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\LocalPhoto\Capabilities\FileAssociations" Name=".cr2" Value="LocalPhoto.Image" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\LocalPhoto\Capabilities\FileAssociations" Name=".cr3" Value="LocalPhoto.Image" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\LocalPhoto\Capabilities\FileAssociations" Name=".nef" Value="LocalPhoto.Image" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\LocalPhoto\Capabilities\FileAssociations" Name=".raf" Value="LocalPhoto.Image" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\LocalPhoto\Capabilities\FileAssociations" Name=".orf" Value="LocalPhoto.Image" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\LocalPhoto\Capabilities\FileAssociations" Name=".rw2" Value="LocalPhoto.Image" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\LocalPhoto\Capabilities\FileAssociations" Name=".raw" Value="LocalPhoto.Image" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\LocalPhoto\Capabilities\FileAssociations" Name=".pef" Value="LocalPhoto.Image" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\RegisteredApplications" Name="LocalPhoto" Value="Software\LocalPhoto\Capabilities" Type="string" />
       </Component>
 
       <Component Id="LocalPhotoCli">
