@@ -227,7 +227,7 @@
         <RegistryValue Root="HKLM" Key="Software\Classes\.raf\OpenWithProgids" Name="LocalPhoto.Image" Value="" Type="string" />
         <RegistryValue Root="HKLM" Key="Software\Classes\.orf\OpenWithProgids" Name="LocalPhoto.Image" Value="" Type="string" />
         <RegistryValue Root="HKLM" Key="Software\Classes\.rw2\OpenWithProgids" Name="LocalPhoto.Image" Value="" Type="string" />
-        <RegistryValue Root="HKLM" Key="Software\Classes.rawOpenWithProgids" Name="LocalPhoto.Image" Value="" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\Classes\.raw\OpenWithProgids" Name="LocalPhoto.Image" Value="" Type="string" />
         <RegistryValue Root="HKLM" Key="Software\Classes\.pef\OpenWithProgids" Name="LocalPhoto.Image" Value="" Type="string" />
         <RegistryValue Root="HKLM" Key="Software\Classes\Applications\localphoto.exe" Name="FriendlyAppName" Value="Local Photo" Type="string" />
         <RegistryValue Root="HKLM" Key="Software\Classes\Applications\localphoto.exe\shell\open\command" Value="&quot;[#LocalPhotoExe]&quot; &quot;%1&quot;" Type="string" />
