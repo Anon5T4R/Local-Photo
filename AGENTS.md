@@ -13,8 +13,8 @@ Biblioteca de fotos + revelação RAW não destrutiva; o Lightroom é a referên
   `libs/` (vendored).
 - **Commits:** português, sem Co-Authored-By.
 - **Release:** tag `vX.Y.Z` → o Actions builda Windows + Linux + Arch e publica. Mínimo local.
-- **Disco local:** nunca deixe `target/` para trás — `cargo clean` após uso local;
-  builds pesados são do CI.
+- **Disco:** no workspace do João vale a política de `target/` do dev-notes (`MEMORY.md` §4 — limpa o que
+  está frio ou feito, mantém durante iteração ativa); fora dele, `cargo clean` ao terminar. Builds pesados são do CI.
 
 ## Estrutura
 - `crates/` — engine e módulos (`localphoto-*`), em camadas L0–L6 (`cargo xtask layers`)
