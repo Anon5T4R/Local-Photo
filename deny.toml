@@ -35,6 +35,23 @@ allow = ["OFL-1.1", "Ubuntu-font-1.0"]
 crate = "webpki-root-certs"
 allow = ["CDLA-Permissive-2.0"]
 
+# Idem: webpki-roots (raízes de CA do rustls usadas pelo BYOK/local-ai), dado CDLA-Permissive-2.0.
+[[licenses.exceptions]]
+crate = "webpki-roots"
+allow = ["CDLA-Permissive-2.0"]
+
+# IJG (a licença do libjpeg) é permissiva, no estilo BSD com atribuição; jpeg-encoder é a codificação JPEG
+# em Rust puro do app, sem código copyleft.
+[[licenses.exceptions]]
+crate = "jpeg-encoder"
+allow = ["IJG"]
+
+# NCSA (University of Illinois/NCSA) é permissiva, no estilo BSD/MIT; libfuzzer-sys vem de dependência
+# transitiva do rav1e (AVIF) e não roda em produção.
+[[licenses.exceptions]]
+crate = "libfuzzer-sys"
+allow = ["NCSA"]
+
 [bans]
 multiple-versions = "allow"
 wildcards = "deny"
@@ -59,4 +76,16 @@ ignore = [
     { id = "RUSTSEC-2026-0370", reason = "zvariant unmaintained; pilha D-Bus do Linux (portal/acessibilidade)" },
     { id = "RUSTSEC-2026-0371", reason = "zbus_names unmaintained; pilha D-Bus do Linux (portal/acessibilidade)" },
     { id = "RUSTSEC-2026-0372", reason = "zvariant_derive unmaintained; pilha D-Bus do Linux (portal/acessibilidade)" },
+    # zip 7.2.0 vem só do candle-core (leitura de pesos .pth/.npz do modelo de segmentação): o código nunca
+    # chama `extract()` nem lê zip de origem não confiável (os modelos são os que o app baixa). Sair exige
+    # atualizar o candle (7.x -> 9.x do zip), que é decisão de dependência separada.
+    { id = "RUSTSEC-2026-0367", reason = "zip 7.2 (candle-core): ZipArchive::extract nunca é chamado" },
+    { id = "RUSTSEC-2026-0368", reason = "zip 7.2 (candle-core): ZipArchive::extract nunca é chamado" },
+    { id = "RUSTSEC-2026-0369", reason = "zip 7.2 (candle-core): ZipArchive::extract nunca é chamado" },
+    { id = "RUSTSEC-2026-0429", reason = "zip 7.2 (candle-core): só lê pesos de modelo que o próprio app baixa" },
+    { id = "RUSTSEC-2026-0545", reason = "zip 7.2 (candle-core): ZipArchive::extract nunca é chamado" },
+    { id = "RUSTSEC-2026-0546", reason = "zip 7.2 (candle-core): ZipStreamReader não é usado" },
+    { id = "RUSTSEC-2026-0547", reason = "zip 7.2 (candle-core): só lê pesos de modelo que o próprio app baixa" },
+    { id = "RUSTSEC-2026-0548", reason = "zip 7.2 (candle-core): ZipArchive::extract nunca é chamado" },
+    { id = "RUSTSEC-2026-0192", reason = "ttf-parser unmaintained (ab_glyph, texto do engine); sem versão segura e sem vulnerabilidade, só abandono" },
 ]
