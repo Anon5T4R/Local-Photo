@@ -3333,7 +3333,7 @@ checksum = "11d3d7f243d5c5a8b9bb5d6dd2b1602c0cb0b9db1621bafc7ed66e35ff9fe092"
 
 [[package]]
 name = "localphoto"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "chrono",
  "craft-desktop-theme",
@@ -3361,7 +3361,7 @@ dependencies = [
 
 [[package]]
 name = "localphoto-catalog"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "chrono",
  "crc32fast",
@@ -3379,7 +3379,7 @@ dependencies = [
 
 [[package]]
 name = "localphoto-cli"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "craft-mcp",
  "dhat",
@@ -3396,7 +3396,7 @@ dependencies = [
 
 [[package]]
 name = "localphoto-codecs"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "avif-serialize",
  "bytemuck",
@@ -3427,7 +3427,7 @@ dependencies = [
 
 [[package]]
 name = "localphoto-color"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "localphoto-geom",
  "proptest",
@@ -3436,7 +3436,7 @@ dependencies = [
 
 [[package]]
 name = "localphoto-denoise"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "faer-core",
  "localphoto-denoise-core",
@@ -3453,7 +3453,7 @@ dependencies = [
 
 [[package]]
 name = "localphoto-denoise-core"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "dhat",
  "localphoto-raster",
@@ -3469,7 +3469,7 @@ dependencies = [
 
 [[package]]
 name = "localphoto-develop"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "localphoto-color",
  "localphoto-geom",
@@ -3481,7 +3481,7 @@ dependencies = [
 
 [[package]]
 name = "localphoto-engine"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "ab_glyph",
  "chrono",
@@ -3525,7 +3525,7 @@ dependencies = [
 
 [[package]]
 name = "localphoto-faces"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "localphoto-testkit",
  "matrixmultiply",
@@ -3540,7 +3540,7 @@ dependencies = [
 
 [[package]]
 name = "localphoto-fetch"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "log",
  "rustls",
@@ -3551,7 +3551,7 @@ dependencies = [
 
 [[package]]
 name = "localphoto-geocode"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "miniz_oxide 0.9.1",
  "serde",
@@ -3559,7 +3559,7 @@ dependencies = [
 
 [[package]]
 name = "localphoto-geom"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "proptest",
  "serde",
@@ -3567,7 +3567,7 @@ dependencies = [
 
 [[package]]
 name = "localphoto-gpu"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "bytemuck",
  "localphoto-color",
@@ -3587,7 +3587,7 @@ dependencies = [
 
 [[package]]
 name = "localphoto-heif"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "heic-rs",
  "rayon",
@@ -3595,14 +3595,14 @@ dependencies = [
 
 [[package]]
 name = "localphoto-inpaint"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "rayon",
 ]
 
 [[package]]
 name = "localphoto-lensdb"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "localphoto-develop",
  "localphoto-geom",
@@ -3611,7 +3611,7 @@ dependencies = [
 
 [[package]]
 name = "localphoto-mcp"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "localphoto-codecs",
  "localphoto-engine",
@@ -3622,7 +3622,7 @@ dependencies = [
 
 [[package]]
 name = "localphoto-merge"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "localphoto-codecs",
  "localphoto-color",
@@ -3638,7 +3638,7 @@ dependencies = [
 
 [[package]]
 name = "localphoto-meta"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "chrono",
  "localphoto-geom",
@@ -3651,7 +3651,7 @@ dependencies = [
 
 [[package]]
 name = "localphoto-pipeline"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "dhat",
  "image",
@@ -3670,7 +3670,7 @@ dependencies = [
 
 [[package]]
 name = "localphoto-preview"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "jpeg-encoder",
  "localphoto-raster",
@@ -3682,7 +3682,7 @@ dependencies = [
 
 [[package]]
 name = "localphoto-raster"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "libc",
  "localphoto-color",
@@ -3694,7 +3694,7 @@ dependencies = [
 
 [[package]]
 name = "localphoto-raw"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "dhat",
  "jpeg-encoder",
@@ -3718,7 +3718,7 @@ dependencies = [
 
 [[package]]
 name = "localphoto-scenes"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "image",
  "localphoto-color",
@@ -3729,7 +3729,7 @@ dependencies = [
 
 [[package]]
 name = "localphoto-segment"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "candle-core",
  "candle-nn",
@@ -3743,7 +3743,7 @@ dependencies = [
 
 [[package]]
 name = "localphoto-slideshow"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "localphoto-raster",
  "serde",
@@ -3752,15 +3752,15 @@ dependencies = [
 
 [[package]]
 name = "localphoto-sysmem"
-version = "0.1.5"
+version = "0.1.6"
 
 [[package]]
 name = "localphoto-testkit"
-version = "0.1.5"
+version = "0.1.6"
 
 [[package]]
 name = "localphoto-tiff"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "proptest",
  "serde",
@@ -3769,7 +3769,7 @@ dependencies = [
 
 [[package]]
 name = "localphoto-ui-egui"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "craft-ui",
  "craft-update",
@@ -3800,7 +3800,7 @@ dependencies = [
 
 [[package]]
 name = "localphoto-web"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "crc32fast",
  "eframe",
@@ -7492,7 +7492,7 @@ checksum = "e450f9b2ed1dff33c94c12589a87338689467b9c4f5d8a5710bd09a847d2c8a7"
 
 [[package]]
 name = "xtask"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "brotli",
  "flate2",
