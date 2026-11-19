@@ -26,6 +26,7 @@ Biblioteca de fotos + revelação RAW não destrutiva; o Lightroom é a referên
 - `packaging/` — Windows (WiX/MSI), Linux (AppImage/deb/rpm/tar), Arch (PKGBUILD), macOS, FreeBSD, web
 - `docs/` — arquitetura, formatos, paridade, release (`docs/releasing.md`)
 - `xtask/` — tarefas de build/CI (`cargo xtask ci`, `layers`, `assets`, `parity`, `wasm`, `web`)
+- `scripts/check-mirror.sh` — confere as crates e os assets (`craft-fonts`) espelhados do `local-libs` contra a fonte (CI e `xtask ci`)
 
 ## Agent-native (MCP)
 `crates/mcp` (servidor stdio + headless/`Remote` do control channel loopback) e
@@ -38,10 +39,8 @@ passos; `commands --search TEXT` filtra o catálogo. **Dívida**: as flags
 ## Build
 ```
 cargo build --locked          # debug
-CRAFT_FONTS_DIR=assets/craft-fonts cargo test --locked   # testes (o set completo de fontes,
-                                                         # como no CI; sem ele os testes de
-                                                         # glifos/acessibilidade pulam ou falham)
-cargo xtask ci                # gate completo (fmt, clippy, testes, camadas, assets, wasm)
+cargo test --locked           # as fontes vendored entram sempre (.cargo/config.toml), igual ao CI
+cargo xtask ci                # gate completo (fmt, clippy, testes, camadas, assets, cargo-deny, espelhos do local-libs, wasm)
 packaging/windows/package.ps1 # MSI + portable (Windows)
 packaging/linux/package.sh    # AppImage/deb/rpm/tar (Linux)
 ```

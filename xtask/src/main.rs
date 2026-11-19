@@ -38,7 +38,7 @@ commands:
                   build the browser app (apps/localphoto-web) into <target>/web-site/;
                   --serve serves it on http://127.0.0.1:<port> (default 8080)
   ci [--hardware] [--summary-md] [--quick [--base REF]]
-                  fmt --check, clippy -D warnings, heif, test, GPU probe, parity refs, layers, assets, wasm
+                  fmt --check, clippy -D warnings, heif, test, GPU probe, parity refs, layers, assets, cargo-deny, local-libs mirrors, wasm
                   (stops at first failure). Tests run under cargo test (cargo nextest with
                   LOCALPHOTO_NEXTEST=1), without examples, then doctests with cargo test --doc; after
                   them it prints the translation gaps report (never a failure). Writes
@@ -600,6 +600,8 @@ fn cmd_ci(args: &[&str]) -> Result<(), String> {
     }
     steps.push(("layers", Box::new(cmd_layers)));
     steps.push(("assets", Box::new(|| assets::run(&root))));
+    steps.push(("deny", Box::new(cmd_deny)));
+    steps.push(("mirror", Box::new(cmd_mirror)));
     if wants("wasm") {
         match plan.as_ref().filter(|p| !p.workspace_wide) {
             Some(p) => steps.push(("wasm", Box::new(|| cmd_wasm_for(Some(&p.packages))))),
@@ -3061,6 +3063,36 @@ mod corpus_tests {
         assert_eq!(names.len(), RAW_SAMPLES.len(), "duplicate file name");
         for (name, _, sha256) in RAW_SAMPLES {
             assert!(sha256.len() == 64 && sha256.bytes().all(|b| matches!(b, b'0'..=b'9' | b'a'..=b'f')), "{name}: not a lowercase sha256");
+        }
+    }
+}
+
+/// cargo-deny (licenses, bans, sources, advisories) as the CI runs it; skipped with a note when the
+/// tool is not installed (`cargo install cargo-deny --locked`).
+fn cmd_deny() -> Result<(), String> {
+    let mut c = cargo();
+    c.args(["deny", "--version"]);
+    if c.output().is_ok_and(|o| o.status.success()) {
+        let mut c = cargo();
+        c.args(["deny", "--log-level", "error", "check", "bans", "licenses", "sources", "advisories"]);
+        run(c, "cargo deny check")
+    } else {
+        eprintln!("note: cargo-deny not installed (cargo install cargo-deny --locked): skipped, the CI runs it");
+        Ok(())
+    }
+}
+
+/// The crates and assets mirrored from the local-libs against their source (`scripts/check-mirror.sh`);
+/// skipped with a note when bash is unavailable.
+fn cmd_mirror() -> Result<(), String> {
+    let mut c = Command::new("bash");
+    c.current_dir(root()).arg("scripts/check-mirror.sh");
+    match c.status() {
+        Ok(status) if status.success() => Ok(()),
+        Ok(status) => Err(format!("scripts/check-mirror.sh: exited with {status}")),
+        Err(e) => {
+            eprintln!("note: bash unavailable ({e}): mirror check skipped, the CI runs it");
+            Ok(())
         }
     }
 }
