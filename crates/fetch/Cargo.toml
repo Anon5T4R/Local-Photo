@@ -3,6 +3,7 @@ name = "localphoto-fetch"
 version.workspace = true
 edition.workspace = true
 publish.workspace = true
+repository.workspace = true
 license = "Apache-2.0"
 description = "Local Photo model downloads: mirrors, resume, pinned SHA-256, over HTTPS in pure Rust (L0)"
 

@@ -5,6 +5,7 @@ edition.workspace = true
 license.workspace = true
 description = "Local Photo test tooling (dev-dependency only): a test that can't run here records why, so `cargo xtask ci` reports it"
 publish.workspace = true
+repository.workspace = true
 
 [lints]
 workspace = true

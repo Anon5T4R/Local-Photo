@@ -4,6 +4,7 @@ version.workspace = true
 edition.workspace = true
 license.workspace = true
 publish.workspace = true
+repository.workspace = true
 description = "Local Photo sysmem (L0): returns freed allocator memory to the OS. The workspace's only crate allowed `unsafe` (one FFI call)."
 
 # Opts out of the workspace lints only to keep `unsafe_code = "deny"` overridable for the single FFI

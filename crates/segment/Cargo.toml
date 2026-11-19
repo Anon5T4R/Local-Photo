@@ -3,6 +3,7 @@ name = "localphoto-segment"
 version.workspace = true
 edition.workspace = true
 publish.workspace = true
+repository.workspace = true
 license = "Apache-2.0"
 description = "Local Photo segmentation: SAM 3 (Segment Anything with Concepts) inference in pure Rust (L3)"
 

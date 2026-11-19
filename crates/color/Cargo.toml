@@ -4,6 +4,7 @@ version.workspace = true
 edition.workspace = true
 license.workspace = true
 publish.workspace = true
+repository.workspace = true
 description = "Local Photo color (L0)"
 
 [lints]
@@ -11,7 +12,6 @@ workspace = true
 
 [dependencies]
 serde = { workspace = true }
-localphoto-geom = { workspace = true }
 
 [dev-dependencies]
 proptest = { workspace = true }

@@ -3408,7 +3408,6 @@ dependencies = [
  "jpeg-encoder",
  "jxl-oxide",
  "localphoto-color",
- "localphoto-geom",
  "localphoto-heif",
  "localphoto-raster",
  "localphoto-testkit",
@@ -3429,7 +3428,6 @@ dependencies = [
 name = "localphoto-color"
 version = "0.1.6"
 dependencies = [
- "localphoto-geom",
  "proptest",
  "serde",
 ]
@@ -3471,7 +3469,6 @@ dependencies = [
 name = "localphoto-develop"
 version = "0.1.6"
 dependencies = [
- "localphoto-color",
  "localphoto-geom",
  "miniz_oxide 0.9.1",
  "proptest",

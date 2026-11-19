@@ -4,6 +4,7 @@ version.workspace = true
 edition.workspace = true
 license.workspace = true
 publish.workspace = true
+repository.workspace = true
 description = "Local Photo MCP server (L5): JSON-RPC 2.0 over stdio, driving a running app or a headless session"
 
 [lints]

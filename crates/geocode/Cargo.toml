@@ -4,6 +4,7 @@ version.workspace = true
 edition.workspace = true
 license.workspace = true
 publish.workspace = true
+repository.workspace = true
 description = "Local Photo offline reverse geocoding: GPS position to sublocation / city / state / country from a GeoNames dump (L1)"
 
 [lints]

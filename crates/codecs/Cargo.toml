@@ -4,13 +4,13 @@ version.workspace = true
 edition.workspace = true
 license.workspace = true
 publish.workspace = true
+repository.workspace = true
 description = "Local Photo standard image codecs: sniffing, decode to linear light, ICC, encoders (L1)"
 
 [lints]
 workspace = true
 
 [dependencies]
-localphoto-geom = { workspace = true }
 localphoto-color = { workspace = true }
 localphoto-raster = { workspace = true }
 localphoto-heif = { workspace = true, optional = true }

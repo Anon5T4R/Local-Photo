@@ -4,6 +4,7 @@ version.workspace = true
 edition.workspace = true
 license.workspace = true
 publish.workspace = true
+repository.workspace = true
 description = "Local Photo develop pipeline: scene-referred, float, resolution independent (CPU reference) (L2)"
 
 [lints]
