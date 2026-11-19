@@ -1,5 +1,9 @@
 //! Our own vector icons, drawn in code on a 20×20 design grid (1.5 px strokes, rounded caps).
 //! Original work (see assets/ATTRIBUTION.md) — not derived from any third-party icon set.
+//!
+//! The concepts every app of the suite shares (search, help, export, add, delete, close, check, info, warning,
+//! more) are drawn from the suite's `craft-icons` instead ([`suite`]); the drawings here stay as the fallback
+//! where those cannot load (a context without the SVG loader).
 
 use egui::{Color32, Painter, Pos2, Rect, Shape, Stroke, pos2, vec2};
 
@@ -100,12 +104,8 @@ pub enum Icon {
     GradeMidtones,
     /// Colour grading, highlights wheel: an open circle with rays.
     GradeHighlights,
-    /// Appearance Mode ▸ Auto (follow the system): a monitor on its stand.
-    Monitor,
-    /// Appearance Mode ▸ Light: a sun (a disc with eight rays).
-    Sun,
-    /// Appearance Mode ▸ Dark: a crescent moon.
-    Moon,
+    /// A notice: the suite's warning triangle (drawn like [`Icon::Info`] where the suite's icons cannot load).
+    Warning,
 }
 
 struct Pen<'a> {
@@ -182,7 +182,47 @@ pub fn paint_turned(p: &Painter, rect: Rect, icon: Icon, color: Color32, radians
     paint_with(p, rect, icon, color, Some((radians.cos(), radians.sin())));
 }
 
+/// The suite's icon for a concept this app draws too (the same idea looks the same in every app). Tool and
+/// panel icons, and the copy/paste-settings gear, stay Local Photo's own.
+fn suite(icon: Icon) -> Option<craft_icons::Icon> {
+    use craft_icons::Icon as Suite;
+    Some(match icon {
+        Icon::Search => Suite::Search,
+        Icon::Help => Suite::Help,
+        Icon::Share => Suite::Export,
+        Icon::Plus => Suite::Add,
+        Icon::Trash => Suite::Delete,
+        Icon::Close => Suite::Close,
+        Icon::Check => Suite::Check,
+        Icon::Info => Suite::Info,
+        Icon::Warning => Suite::Warning,
+        Icon::More => Suite::More,
+        _ => return None,
+    })
+}
+
+/// Paints the suite's icon tinted with `color`; false when it is not available yet (then the drawing is used).
+fn paint_suite(p: &Painter, rect: Rect, icon: craft_icons::Icon, color: Color32) -> bool {
+    let side = rect.width().min(rect.height());
+    if side.is_nan() || side < 1.0 {
+        return true;
+    }
+    let size = vec2(side, side);
+    let image = egui::Image::new(craft_icons::ui::source(icon)).fit_to_exact_size(size);
+    match image.load_for_size(p.ctx(), size) {
+        Ok(egui::load::TexturePoll::Ready { texture }) => {
+            let uv = Rect::from_min_max(pos2(0.0, 0.0), pos2(1.0, 1.0));
+            p.image(texture.id, Rect::from_center_size(rect.center(), size), uv, color);
+            true
+        }
+        _ => false,
+    }
+}
+
 fn paint_with(p: &Painter, rect: Rect, icon: Icon, color: Color32, turn: Option<(f32, f32)>) {
+    if turn.is_none() && suite(icon).is_some_and(|suite| paint_suite(p, rect, suite, color)) {
+        return;
+    }
     let side = rect.width().min(rect.height());
     // All disclosure and navigation chevrons share a 16-point size and stroke.
     let side = if matches!(
@@ -208,24 +248,6 @@ fn paint_with(p: &Painter, rect: Rect, icon: Icon, color: Color32, turn: Option<
         Sidebar => {
             pen.rect(3.0, 4.0, 17.0, 16.0, 1.5);
             pen.line(&[(8.0, 4.0), (8.0, 16.0)]);
-        }
-        Monitor => {
-            pen.rect(2.5, 3.5, 17.5, 13.5, 1.5);
-            pen.line(&[(10.0, 13.5), (10.0, 16.5)]);
-            pen.line(&[(6.5, 16.5), (13.5, 16.5)]);
-        }
-        Sun => {
-            pen.circle(10.0, 10.0, 3.2);
-            for i in 0..8 {
-                let a = (i as f32 * 45.0).to_radians();
-                let (c, s) = (a.cos(), a.sin());
-                pen.line(&[(10.0 + 5.4 * c, 10.0 + 5.4 * s), (10.0 + 7.4 * c, 10.0 + 7.4 * s)]);
-            }
-        }
-        Moon => {
-            // outer arc of the disc, then the inner arc of the bite, meeting at the horns
-            pen.arc(10.0, 10.0, 6.5, 2.9, 263.8);
-            pen.arc(13.4, 6.4, 5.0, 214.9, 51.8);
         }
         Search => {
             pen.circle(8.5, 8.5, 5.0);
@@ -342,7 +364,7 @@ fn paint_with(p: &Painter, rect: Rect, icon: Icon, color: Color32, turn: Option<
             pen.closed(&[(3.0, 3.5), (10.0, 3.5), (17.0, 10.5), (10.5, 17.0), (3.0, 10.0)]);
             pen.dot(7.0, 7.5, 1.2);
         }
-        Info => {
+        Info | Warning => {
             pen.circle(10.0, 10.0, 7.5);
             pen.line(&[(10.0, 9.0), (10.0, 14.0)]);
             pen.dot(10.0, 6.3, 0.9);

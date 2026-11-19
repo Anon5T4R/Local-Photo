@@ -224,7 +224,7 @@ pub fn preview_only_notice(ui: &mut Ui, key: &str, reason: &str) -> bool {
             ui.set_width(ui.available_width());
             ui.horizontal(|ui| {
                 let (ir, _) = ui.allocate_exact_size(vec2(16.0, 16.0), Sense::hover());
-                paint(ui.painter(), ir, Icon::Info, t.caution);
+                paint(ui.painter(), ir, Icon::Warning, t.caution);
                 ui.label(egui::RichText::new(crate::i18n::tr("Preview only")).font(t.semibold(12.5)).color(t.text));
             });
             ui.add_space(2.0);
