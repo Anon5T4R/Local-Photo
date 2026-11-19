@@ -3,6 +3,7 @@ name = "localphoto-raw"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
+publish.workspace = true
 description = "Local Photo RAW decoding, demosaicing and DNG colour model (L1)"
 
 [lints]

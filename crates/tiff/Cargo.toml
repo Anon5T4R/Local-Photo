@@ -3,6 +3,7 @@ name = "localphoto-tiff"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
+publish.workspace = true
 description = "Local Photo TIFF/IFD reader and writer (L0)"
 
 [lints]

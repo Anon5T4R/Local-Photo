@@ -3,6 +3,7 @@ name = "localphoto-slideshow"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
+publish.workspace = true
 description = "Local Photo slideshow slides: layout, options and backdrop settings and the CPU slide composer (L1)"
 
 [lints]

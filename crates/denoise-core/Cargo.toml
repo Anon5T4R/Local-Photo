@@ -3,6 +3,7 @@ name = "localphoto-denoise-core"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
+publish.workspace = true
 description = "Local Photo denoise model metadata, Bayer tiling and cache formats (L1; no inference backend)"
 
 [lints]

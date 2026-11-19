@@ -3,7 +3,7 @@ name = "localphoto-cli"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
-publish = false
+publish.workspace = true
 description = "Local Photo command-line tool: headless render, command listing and the MCP server"
 
 [[bin]]

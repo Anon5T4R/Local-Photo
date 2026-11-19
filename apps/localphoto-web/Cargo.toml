@@ -3,7 +3,7 @@ name = "localphoto-web"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
-publish = false
+publish.workspace = true
 description = "Local Photo in the browser: the egui UI compiled to WASM (build with `cargo xtask web`)"
 
 [lints]
