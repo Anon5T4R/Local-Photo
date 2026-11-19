@@ -142,7 +142,8 @@ pub fn show(app: &mut LocalPhotoApp, ui: &mut egui::Ui) {
             let suite_left = crate::shell::buttons(app, ui, full.right(), full.center().y);
             // right icons
             let mut x = suite_left - 6.0 - 14.0;
-            // saving is failing: the cloud icon turns into a warning until a save succeeds
+            // Saving is failing: a warning shows until a save succeeds. When everything is written there is
+            // nothing to say, so there is no icon (the library is local; a cloud badge suggested a sync it never had).
             let unsaved = app.session.unsaved().map(|(n, e)| {
                 crate::i18n::tr_format!(
                     "{n} change{} saved in memory but not written to disk: {e}\nLocal Photo retries automatically; quitting now would lose {}.",
@@ -152,25 +153,28 @@ pub fn show(app: &mut LocalPhotoApp, ui: &mut egui::Ui) {
                     n = n
                 )
             });
-            let cloud_tip = unsaved.as_deref().unwrap_or("Local library — no cloud account needed");
             // Import Photos… beside Export, always one click away, with the key it is bound to now
             let mac = ui.ctx().os() == egui::os::OperatingSystem::Mac;
             let import_tip = match crate::shortcuts::shortcut_of(&app.ui.settings.keymap, "file.addPhotos") {
                 Some(sc) => format!("{} ({})", crate::i18n::tr("Import Photos…"), crate::menubar::shortcut_text(sc, mac)),
                 None => crate::i18n::tr("Import Photos…").to_string(),
             };
-            for (id, icon, tip, cmd) in [
-                ("cloud", Icon::Cloud, cloud_tip, ""),
+            let mut icons: Vec<(&str, Icon, &str, &str)> = Vec::with_capacity(5);
+            if let Some(tip) = unsaved.as_deref() {
+                icons.push(("unsaved", Icon::Warning, tip, ""));
+            }
+            icons.extend([
                 ("help", Icon::Help, "Keyboard shortcuts", "app.shortcuts"),
                 ("share", Icon::Share, "Export", "dialog.export"),
                 ("import", Icon::Plus, import_tip.as_str(), "file.addPhotos"),
                 ("bell", Icon::Bell, "Activity", "panel.activity"),
-            ] {
+            ]);
+            for (id, icon, tip, cmd) in icons {
                 let r = Rect::from_center_size(pos2(x, full.center().y), vec2(28.0, 28.0));
                 let resp = ui.interact(r, egui::Id::unique(("top", id)), Sense::click()).on_hover_text(crate::i18n::tr(tip));
                 crate::widgets::announce(&resp, crate::i18n::tr(tip));
                 register(ui, format!("icon:{id}"), r);
-                let warn = id == "cloud" && unsaved.is_some();
+                let warn = id == "unsaved";
                 let colour = if warn {
                     t.caution
                 } else if resp.hovered() {

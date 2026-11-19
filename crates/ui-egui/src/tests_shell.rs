@@ -67,7 +67,7 @@ fn the_bar_orders_gear_theme_search_from_the_right_edge() {
     let h = headless();
     let (gear, theme, search) = (widget(&h, "icon:gear"), widget(&h, "icon:appearance"), widget(&h, "icon:palette"));
     assert!(gear.left() > theme.right() && theme.left() > search.right(), "{gear:?} {theme:?} {search:?}");
-    for other in ["icon:cloud", "icon:help", "icon:share", "icon:import", "icon:bell"] {
+    for other in ["icon:help", "icon:share", "icon:import", "icon:bell"] {
         assert!(widget(&h, other).right() <= search.left(), "{other} stays left of the suite's buttons");
     }
 }

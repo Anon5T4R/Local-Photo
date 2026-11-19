@@ -52,7 +52,9 @@ fn failed_save_is_reported_and_shown_until_a_save_succeeds() {
     let mut h = Headless::new(app, [1200.0, 800.0], 1.0);
     h.step();
     let has_indicator = |h: &Headless| h.app.widgets.iter().any(|(w, _)| w == "indicator:unsaved");
-    assert!(!has_indicator(&h));
+    let has_icon = |h: &Headless| h.app.widgets.iter().any(|(w, _)| w == "icon:unsaved");
+    // Everything written: the bar says nothing (no cloud, no warning).
+    assert!(!has_indicator(&h) && !has_icon(&h));
 
     store.fail.store(true, Ordering::SeqCst);
     let r = h.request("engine.execute", json!({"command": "album.create", "params": {"name": "Kept"}}), T);
@@ -66,7 +68,7 @@ fn failed_save_is_reported_and_shown_until_a_save_succeeds() {
     h.step();
     let toast = h.app.ui.toast.clone().map(|t| t.0).unwrap_or_default();
     assert!(toast.contains("not written to disk"), "{toast}");
-    assert!(has_indicator(&h));
+    assert!(has_indicator(&h) && has_icon(&h), "a failing save shows the warning in the bar");
     let inspect = h.request("ui.inspect", json!({}), T);
     assert_eq!(inspect["result"]["unsaved"]["ops"], 1, "{inspect}");
 
