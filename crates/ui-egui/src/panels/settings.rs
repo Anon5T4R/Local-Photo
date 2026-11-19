@@ -1068,7 +1068,7 @@ fn appearance(ui: &mut egui::Ui, t: &Tokens, s: &mut crate::state::AppSettings, 
     heading(ui, t, crate::i18n::tr("Appearance"));
     ui.label(RichText::new(crate::i18n::tr("Appearance Mode")).color(t.text_label));
     ui.horizontal_wrapped(|ui| {
-        choices(ui, "settingsAppearance", &[(M::Auto, "Sync with System"), (M::Dark, "Dark Mode"), (M::Light, "Light Mode")], &mut s.appearance_mode);
+        choices(ui, "settingsAppearance", &[(M::Auto, "Automatic"), (M::Dark, "Dark Mode"), (M::Light, "Light Mode")], &mut s.appearance_mode);
     });
     ui.add_space(4.0);
     let light_active = s.theme(system) == s.light_theme.kind();

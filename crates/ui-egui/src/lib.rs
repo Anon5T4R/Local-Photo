@@ -40,6 +40,7 @@ pub mod recheck;
 pub mod region;
 pub mod reload;
 pub mod render;
+pub mod shell;
 pub mod shortcuts;
 pub mod sidebar;
 pub mod slideshow_export;
@@ -189,6 +190,8 @@ mod tests_rules_editor;
 mod tests_sam_setup;
 #[cfg(test)]
 mod tests_scroll;
+#[cfg(test)]
+mod tests_shell;
 #[cfg(test)]
 mod tests_slider_reset;
 #[cfg(test)]
@@ -404,6 +407,8 @@ pub struct LocalPhotoApp {
     /// The keyboard shortcuts editor is waiting for a key press for this command: no shortcut
     /// fires (the native menu bar drops its accelerators too) until it gets one or is cancelled.
     pub recording_shortcut: Option<String>,
+    /// The command palette (the search icon of the top bar; Ctrl+K is Add Keywords here, so there is no key).
+    pub palette: craft_palette::Palette,
     /// A text field had the keyboard at the end of the last frame. egui drops the focus as Esc
     /// arrives, before the shortcuts are read, so this is how Esc there stays the field's own.
     pub text_focus: bool,
@@ -616,6 +621,7 @@ impl LocalPhotoApp {
             native_menu: false,
             native_shortcuts: Default::default(),
             recording_shortcut: None,
+            palette: shell::new_palette(),
             text_focus: false,
             headless_host: false,
             notices: vec![],
@@ -2664,6 +2670,7 @@ impl LocalPhotoApp {
         }
         panels::dialogs::show(self, &ctx, notice_blocks);
         updates_ui::show(self, &ctx);
+        shell::palette(self, &ctx);
         panels::library_problem::show(self, &ctx, notice_blocks);
         export_task::poll(self, &ctx);
         slideshow_export::poll(self, &ctx);

@@ -11,29 +11,29 @@ use crate::state::{BeforeAfter, Dialog, RightPanel, ViewMode, Zoom};
 /// (id, label, shortcut, menu path)
 pub type UiCommand = (&'static str, &'static str, Option<&'static str>, &'static str);
 
-/// The "Edit → Language" entries, one per language in [`crate::i18n::Locale::ALL`], so a language
-/// has a matching menu command (also listed through the control channel). Tests check coverage.
+/// One command per language in [`crate::i18n::Locale::ALL`], so a language can be chosen through the control
+/// channel. They have no menu item: the language is chosen in Settings ▸ General. Tests check coverage.
 pub const LANGUAGE_COMMANDS: &[UiCommand] = &[
-    ("app.language.english", crate::i18n::Locale::En.name(), None, "Edit>Language"),
+    ("app.language.english", crate::i18n::Locale::En.name(), None, ""),
     // The picker order (`Locale::for_picker`): alphabetical by the language's own name after
     // English; Cyrillic, Georgian, then CJK names follow the Latin ones. A test keeps them equal.
-    ("app.language.indonesian", crate::i18n::Locale::Id.name(), None, "Edit>Language"),
-    ("app.language.czech", crate::i18n::Locale::Cs.name(), None, "Edit>Language"),
-    ("app.language.german", crate::i18n::Locale::De.name(), None, "Edit>Language"),
-    ("app.language.spanish", crate::i18n::Locale::Es.name(), None, "Edit>Language"),
-    ("app.language.french", crate::i18n::Locale::Fr.name(), None, "Edit>Language"),
-    ("app.language.italian", crate::i18n::Locale::It.name(), None, "Edit>Language"),
-    ("app.language.polish", crate::i18n::Locale::Pl.name(), None, "Edit>Language"),
-    ("app.language.portuguese", crate::i18n::Locale::PtBr.name(), None, "Edit>Language"),
-    ("app.language.finnish", crate::i18n::Locale::Fi.name(), None, "Edit>Language"),
-    ("app.language.swedish", crate::i18n::Locale::Sv.name(), None, "Edit>Language"),
-    ("app.language.vietnamese", crate::i18n::Locale::Vi.name(), None, "Edit>Language"),
-    ("app.language.russian", crate::i18n::Locale::Ru.name(), None, "Edit>Language"),
-    ("app.language.ukrainian", crate::i18n::Locale::Uk.name(), None, "Edit>Language"),
-    ("app.language.georgian", crate::i18n::Locale::Ka.name(), None, "Edit>Language"),
-    ("app.language.japanese", crate::i18n::Locale::Ja.name(), None, "Edit>Language"),
-    ("app.language.simplifiedChinese", crate::i18n::Locale::ZhHans.name(), None, "Edit>Language"),
-    ("app.language.traditionalChinese", crate::i18n::Locale::ZhHant.name(), None, "Edit>Language"),
+    ("app.language.indonesian", crate::i18n::Locale::Id.name(), None, ""),
+    ("app.language.czech", crate::i18n::Locale::Cs.name(), None, ""),
+    ("app.language.german", crate::i18n::Locale::De.name(), None, ""),
+    ("app.language.spanish", crate::i18n::Locale::Es.name(), None, ""),
+    ("app.language.french", crate::i18n::Locale::Fr.name(), None, ""),
+    ("app.language.italian", crate::i18n::Locale::It.name(), None, ""),
+    ("app.language.polish", crate::i18n::Locale::Pl.name(), None, ""),
+    ("app.language.portuguese", crate::i18n::Locale::PtBr.name(), None, ""),
+    ("app.language.finnish", crate::i18n::Locale::Fi.name(), None, ""),
+    ("app.language.swedish", crate::i18n::Locale::Sv.name(), None, ""),
+    ("app.language.vietnamese", crate::i18n::Locale::Vi.name(), None, ""),
+    ("app.language.russian", crate::i18n::Locale::Ru.name(), None, ""),
+    ("app.language.ukrainian", crate::i18n::Locale::Uk.name(), None, ""),
+    ("app.language.georgian", crate::i18n::Locale::Ka.name(), None, ""),
+    ("app.language.japanese", crate::i18n::Locale::Ja.name(), None, ""),
+    ("app.language.simplifiedChinese", crate::i18n::Locale::ZhHans.name(), None, ""),
+    ("app.language.traditionalChinese", crate::i18n::Locale::ZhHant.name(), None, ""),
 ];
 
 /// Every UI command: the languages, then everything else. `xtask parity` reads both tables from
@@ -243,7 +243,7 @@ pub const UI_COMMANDS: &[UiCommand] = &[
     ("file.restoreLibrary", "Restore Library from Backup…", None, "File"),
     ("photo.locate", "Locate Missing File…", None, ""),
     ("dialog.saveMetadataPreset", "Save Metadata Preset…", None, ""),
-    ("app.quit", "Quit Local Photo", Some("Cmd+Q"), "File"),
+    ("app.quit", "Exit", Some("Cmd+Q"), "File"),
     ("file.importPresets", "Import Profiles & Presets…", None, "File"),
     ("file.exportPresets", "Export Presets…", None, "File"),
     // Masking panel ▸ Effect menu

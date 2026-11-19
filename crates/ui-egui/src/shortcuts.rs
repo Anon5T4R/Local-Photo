@@ -376,7 +376,12 @@ pub fn handle(app: &mut LocalPhotoApp, ctx: &egui::Context) {
     // blocking library window (error or launch list) owns all app shortcuts for every settled
     // frame, not only its shield pass; its own list keys are consumed earlier by
     // `library_problem::logic`, and its buttons remain reachable through the control channel.
-    if app.ui.dialog.is_some() || crate::panels::notices::blocks_input(app) || crate::panels::library_problem::blocks_dialog_input(app) {
+    // The command palette owns its keys (arrows, Enter, Esc) while it is open.
+    if app.ui.dialog.is_some()
+        || app.palette.is_open()
+        || crate::panels::notices::blocks_input(app)
+        || crate::panels::library_problem::blocks_dialog_input(app)
+    {
         return;
     }
     if app.recording_shortcut.is_none() && app.ui.name_edit.is_none() && crate::panels::person::handle_bulk_key(app, ctx) {

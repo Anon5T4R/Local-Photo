@@ -92,12 +92,13 @@ fn the_button_cycles_auto_light_dark_without_losing_theme_choices() {
         frame(&mut a, &ctx);
         assert_eq!(crate::theme::current(&ctx), Some(shown));
         assert_eq!(crate::theme::Tokens::get(&ctx).chrome, crate::theme::Tokens::for_kind(shown).chrome);
+        // the button shows the suite's icon of the mode
         let icon = match mode {
-            AppearanceMode::Auto => crate::icons::Icon::Monitor,
-            AppearanceMode::Light => crate::icons::Icon::Sun,
-            AppearanceMode::Dark => crate::icons::Icon::Moon,
+            AppearanceMode::Auto => craft_icons::Icon::ThemeSystem,
+            AppearanceMode::Light => craft_icons::Icon::ThemeLight,
+            AppearanceMode::Dark => craft_icons::Icon::ThemeDark,
         };
-        assert_eq!(crate::panels::topbar::appearance_icon(mode).0, icon);
+        assert_eq!(crate::shell::theme_mode(mode).icon(), icon);
     }
     // a light theme from the menu fixes Light
     a.run("view.theme", json!({"theme": "silver"})).unwrap();
@@ -156,7 +157,7 @@ fn view_menu_lists_modes_and_themes_with_checks() {
     a.run("view.theme", json!({"theme": "paper"})).unwrap();
     let menus = crate::menubar::menu_bar(&a);
     let text = serde_json::to_string(&menus).unwrap();
-    for label in ["Appearance", "Sync with System", "Light Mode", "Dark Mode", "Next Appearance Mode", "Charcoal", "Midnight", "Silver", "Paper"] {
+    for label in ["Appearance", "Automatic", "Light Mode", "Dark Mode", "Next Appearance Mode", "Charcoal", "Midnight", "Silver", "Paper"] {
         assert!(text.contains(&format!("\"{label}\"")), "{label} missing from the menus");
     }
     assert!(text.contains(r#""params":{"theme":"paper"}"#));

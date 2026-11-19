@@ -38,9 +38,9 @@ pub fn show(app: &mut LocalPhotoApp, ui: &mut egui::Ui) {
             // traffic lights' room, and full screen gives that room back. Centring on `full` moved
             // the field, and changed its width, every time that room changed (issue #2365).
             let bar = Rect::from_min_max(pos2(full.left() - left as f32, full.top()), pos2(full.right() + 12.0, full.bottom()));
-            // The field stops short of the filter icon and the seven icons on the right; centred,
+            // The field stops short of the filter icon and the eight icons on the right; centred,
             // it is twice the room between the window's centre and them.
-            let mut sw = 640.0f32.min(2.0 * (full.right() - 310.0 - bar.center().x)).max(190.0);
+            let mut sw = 640.0f32.min(2.0 * (full.right() - (310.0 + crate::shell::REACH - 40.0) - bar.center().x)).max(190.0);
             if !app.native_menu {
                 // leave room for the in-window menus left of the (centred) search field
                 let menus_right = full.left() + 140.0 + crate::menubar::bar_width(ui) + 24.0;
@@ -138,8 +138,10 @@ pub fn show(app: &mut LocalPhotoApp, ui: &mut egui::Ui) {
             if fresp.clicked() {
                 let _ = app.run("view.filterBar", json!({}));
             }
+            // the suite's buttons at the right edge: Settings, theme, search commands
+            let suite_left = crate::shell::buttons(app, ui, full.right(), full.center().y);
             // right icons
-            let mut x = full.right() - 18.0;
+            let mut x = suite_left - 6.0 - 14.0;
             // saving is failing: the cloud icon turns into a warning until a save succeeds
             let unsaved = app.session.unsaved().map(|(n, e)| {
                 crate::i18n::tr_format!(
@@ -192,51 +194,6 @@ pub fn show(app: &mut LocalPhotoApp, ui: &mut egui::Ui) {
                 }
                 x -= 40.0;
             }
-            // Appearance Mode: a click steps Auto → Light → Dark → Auto; the icon shows the mode
-            let (icon, mode) = appearance_icon(app.ui.settings.appearance_mode);
-            let r = Rect::from_center_size(pos2(x, full.center().y), vec2(28.0, 28.0));
-            let tip = format!("{}: {}", crate::i18n::tr("Appearance Mode"), crate::i18n::tr(mode));
-            let resp = ui.interact(r, egui::Id::unique(("top", "appearance")), Sense::click()).on_hover_text(tip.clone());
-            crate::widgets::announce(&resp, tip.clone());
-            register(ui, "icon:appearance", r);
-            paint(ui.painter(), r.shrink(5.0), icon, if resp.hovered() { t.text } else { t.icon });
-            if resp.clicked() {
-                let _ = app.run("view.appearance", json!({}));
-            }
-            crate::widgets::context_menu(&resp, |ui| {
-                let settings = ui.button(crate::i18n::tr("Appearance Settings…"));
-                register(ui, "menu:appearanceSettings", settings.rect);
-                if settings.clicked() {
-                    let _ = app.run("app.settings", json!({"tab": "interface"}));
-                    ui.close();
-                }
-                let favorites = app.ui.settings.favorite_themes.clone();
-                for dark in [false, true] {
-                    let group: Vec<_> =
-                        crate::theme::ThemeKind::ALL.iter().filter(|k| k.is_dark() == dark && favorites.iter().any(|id| id == k.id())).collect();
-                    if !group.is_empty() {
-                        ui.separator();
-                    }
-                    for kind in group {
-                        let r = ui.selectable_label(app.ui.settings.theme(app.system_theme(ui.ctx())) == *kind, crate::i18n::tr(kind.label()));
-                        register(ui, format!("menu:themeFavorite-{}", kind.id()), r.rect);
-                        if r.clicked() {
-                            let _ = app.run("view.theme", json!({"theme": kind.id()}));
-                            ui.close();
-                        }
-                    }
-                }
-            });
             let _ = Align2::CENTER_CENTER;
         });
-}
-
-/// The appearance button's icon and the mode's name for its tooltip.
-pub fn appearance_icon(mode: crate::state::AppearanceMode) -> (Icon, &'static str) {
-    use crate::state::AppearanceMode;
-    match mode {
-        AppearanceMode::Auto => (Icon::Monitor, "Sync with System"),
-        AppearanceMode::Light => (Icon::Sun, "Light Mode"),
-        AppearanceMode::Dark => (Icon::Moon, "Dark Mode"),
-    }
 }

@@ -164,7 +164,7 @@ fn full_screen_moves_the_left_buttons_into_the_traffic_lights_space() {
     assert!(h.app.window_is_fullscreen);
     // The last icon on the right is whichever the bar lays out first right-to-left; take the
     // rightmost of the bar's action icons instead of naming one.
-    let bar_icons = ["icon:cloud", "icon:help", "icon:share", "icon:import", "icon:bell"];
+    let bar_icons = ["icon:gear", "icon:appearance", "icon:palette", "icon:cloud", "icon:help", "icon:share", "icon:import", "icon:bell"];
     let rightmost = bar_icons.iter().map(|id| widget(&h, id).right()).fold(f32::MIN, f32::max);
     let right_padding = window_right - rightmost;
     assert_eq!(widget(&h, "icon:sidebar").left(), right_padding, "My Photos as far from the left edge as the last bar icon is from the right");

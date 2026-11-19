@@ -581,9 +581,9 @@ pub(crate) fn expanded(app: &LocalPhotoApp, name: &str) -> Option<Vec<MenuNode>>
             use crate::theme::ThemeKind;
             let s = &app.ui.settings;
             let mut v: Vec<MenuNode> = [
-                ("auto", "Sync with System", AppearanceMode::Auto),
-                ("light", "Light Mode", AppearanceMode::Light),
-                ("dark", "Dark Mode", AppearanceMode::Dark),
+                ("auto", crate::shell::mode_label(craft_icons::ThemeMode::System), AppearanceMode::Auto),
+                ("light", crate::shell::mode_label(craft_icons::ThemeMode::Light), AppearanceMode::Light),
+                ("dark", crate::shell::mode_label(craft_icons::ThemeMode::Dark), AppearanceMode::Dark),
             ]
             .into_iter()
             .map(|(mode, label, m)| item("view.appearance", json!({"mode": mode}), label, None, true, Some(s.appearance_mode == m)))
