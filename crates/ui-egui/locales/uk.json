@@ -2354,5 +2354,12 @@
   "Import dropped files without review": "Імпортувати перетягнуті файли без перегляду",
   "An import is running": "Імпорт уже виконується",
   "An import is running. Drop photos when it has finished": "Імпорт уже виконується. Перетягніть фото, коли він завершиться",
-  "Finish Lightroom catalog import before adding photos": "Завершіть імпорт каталогу Lightroom, перш ніж додавати фото"
+  "Finish Lightroom catalog import before adding photos": "Завершіть імпорт каталогу Lightroom, перш ніж додавати фото",
+  "Search commands": "Пошук команд",
+  "No command matches.": "Жодна команда не підійшла.",
+  "Check for Updates…": "Перевірити оновлення…",
+  "Local Photo Updates": "Оновлення Local Photo",
+  "Checking for updates…": "Перевірка оновлень…",
+  "Local Photo {version} is currently the newest version available.": "Local Photo {version} — остання доступна версія.",
+  "Could not check for updates:\n{error}": "Не вдалося перевірити оновлення:\n{error}"
 }

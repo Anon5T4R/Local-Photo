@@ -2390,5 +2390,12 @@
   "Checking recent libraries": "Vérification des bibliothèques récentes",
   "The photos are imported once a library is open": "Les photos seront importées dès qu'une bibliothèque sera ouverte",
   "Open a library first, then drop the presets again": "Ouvrez d'abord une bibliothèque, puis déposez à nouveau les préréglages",
-  "This library couldn't be checked:": "Impossible de vérifier cette bibliothèque :"
+  "This library couldn't be checked:": "Impossible de vérifier cette bibliothèque :",
+  "Search commands": "Rechercher des commandes",
+  "No command matches.": "Aucune commande ne correspond.",
+  "Check for Updates…": "Rechercher des mises à jour…",
+  "Local Photo Updates": "Mises à jour de Local Photo",
+  "Checking for updates…": "Recherche de mises à jour…",
+  "Local Photo {version} is currently the newest version available.": "Local Photo {version} est la version la plus récente disponible.",
+  "Could not check for updates:\n{error}": "Impossible de rechercher les mises à jour :\n{error}"
 }

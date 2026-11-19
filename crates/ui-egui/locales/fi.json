@@ -2327,5 +2327,12 @@
   "Drop to open the face model": "Pudota avataksesi kasvomallin",
   "Dropped Files": "Pudotetut tiedostot",
   "Finish Lightroom catalog import before adding photos": "Viimeistele Lightroom-luettelon tuonti ennen kuvien lisäämistä",
-  "Import dropped files without review": "Tuo pudotetut tiedostot ilman tarkistusta"
+  "Import dropped files without review": "Tuo pudotetut tiedostot ilman tarkistusta",
+  "Search commands": "Hae komentoja",
+  "No command matches.": "Mikään komento ei täsmää.",
+  "Check for Updates…": "Tarkista päivitykset…",
+  "Local Photo Updates": "Local Photon päivitykset",
+  "Checking for updates…": "Tarkistetaan päivityksiä…",
+  "Local Photo {version} is currently the newest version available.": "Local Photo {version} on uusin saatavilla oleva versio.",
+  "Could not check for updates:\n{error}": "Päivitysten tarkistus epäonnistui:\n{error}"
 }

@@ -2349,5 +2349,12 @@
   "Import dropped files without review": "Импортировать перетащенные файлы без проверки",
   "An import is running": "Импорт уже выполняется",
   "An import is running. Drop photos when it has finished": "Импорт уже выполняется. Перетащите фото, когда он закончится",
-  "Finish Lightroom catalog import before adding photos": "Завершите импорт каталога Lightroom, прежде чем добавлять фото"
+  "Finish Lightroom catalog import before adding photos": "Завершите импорт каталога Lightroom, прежде чем добавлять фото",
+  "Search commands": "Поиск команд",
+  "No command matches.": "Нет подходящих команд.",
+  "Check for Updates…": "Проверить обновления…",
+  "Local Photo Updates": "Обновления Local Photo",
+  "Checking for updates…": "Проверка обновлений…",
+  "Local Photo {version} is currently the newest version available.": "Local Photo {version} — последняя доступная версия.",
+  "Could not check for updates:\n{error}": "Не удалось проверить обновления:\n{error}"
 }

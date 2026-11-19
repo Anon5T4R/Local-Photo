@@ -2429,5 +2429,12 @@
   "Drop to open the face model": "Släpp för att öppna ansiktsmodellen",
   "Dropped Files": "Släppta filer",
   "Finish Lightroom catalog import before adding photos": "Slutför importen av Lightroom-katalogen innan du lägger till foton",
-  "Import dropped files without review": "Importera släppta filer utan granskning"
+  "Import dropped files without review": "Importera släppta filer utan granskning",
+  "Search commands": "Sök kommandon",
+  "No command matches.": "Inget kommando matchar.",
+  "Check for Updates…": "Sök efter uppdateringar…",
+  "Local Photo Updates": "Uppdateringar för Local Photo",
+  "Checking for updates…": "Söker efter uppdateringar…",
+  "Local Photo {version} is currently the newest version available.": "Local Photo {version} är den senaste tillgängliga versionen.",
+  "Could not check for updates:\n{error}": "Det gick inte att söka efter uppdateringar:\n{error}"
 }

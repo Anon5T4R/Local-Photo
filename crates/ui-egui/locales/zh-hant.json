@@ -2157,5 +2157,12 @@
   "Import dropped files without review": "不經檢查直接匯入拖放的檔案",
   "An import is running": "正在匯入",
   "An import is running. Drop photos when it has finished": "正在匯入。匯入完成後再拖放照片",
-  "Finish Lightroom catalog import before adding photos": "新增照片前，請先完成 Lightroom 目錄的匯入"
+  "Finish Lightroom catalog import before adding photos": "新增照片前，請先完成 Lightroom 目錄的匯入",
+  "Search commands": "搜尋命令",
+  "No command matches.": "沒有相符的命令。",
+  "Check for Updates…": "檢查更新…",
+  "Local Photo Updates": "Local Photo 更新",
+  "Checking for updates…": "正在檢查更新…",
+  "Local Photo {version} is currently the newest version available.": "Local Photo {version} 是目前可用的最新版本。",
+  "Could not check for updates:\n{error}": "無法檢查更新:\n{error}"
 }

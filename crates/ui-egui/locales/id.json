@@ -2339,5 +2339,12 @@
   "Drop to open the face model": "Jatuhkan untuk membuka model wajah",
   "Dropped Files": "File yang dijatuhkan",
   "Finish Lightroom catalog import before adding photos": "Selesaikan impor katalog Lightroom sebelum menambahkan foto",
-  "Import dropped files without review": "Impor file yang dijatuhkan tanpa tinjauan"
+  "Import dropped files without review": "Impor file yang dijatuhkan tanpa tinjauan",
+  "Search commands": "Cari perintah",
+  "No command matches.": "Tidak ada perintah yang cocok.",
+  "Check for Updates…": "Periksa Pembaruan…",
+  "Local Photo Updates": "Pembaruan Local Photo",
+  "Checking for updates…": "Memeriksa pembaruan…",
+  "Local Photo {version} is currently the newest version available.": "Local Photo {version} adalah versi terbaru yang tersedia.",
+  "Could not check for updates:\n{error}": "Tidak dapat memeriksa pembaruan:\n{error}"
 }

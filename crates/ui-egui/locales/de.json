@@ -3440,5 +3440,12 @@
   "Import dropped files without review": "Abgelegte Dateien ohne Prüfung importieren",
   "An import is running": "Ein Import läuft",
   "An import is running. Drop photos when it has finished": "Ein Import läuft. Lege die Fotos ab, wenn er fertig ist",
-  "Finish Lightroom catalog import before adding photos": "Schließe den Import des Lightroom-Katalogs ab, bevor du Fotos hinzufügst"
+  "Finish Lightroom catalog import before adding photos": "Schließe den Import des Lightroom-Katalogs ab, bevor du Fotos hinzufügst",
+  "Search commands": "Befehle suchen",
+  "No command matches.": "Kein Befehl passt.",
+  "Check for Updates…": "Nach Updates suchen…",
+  "Local Photo Updates": "Local-Photo-Updates",
+  "Checking for updates…": "Suche nach Updates…",
+  "Local Photo {version} is currently the newest version available.": "Local Photo {version} ist die neueste verfügbare Version.",
+  "Could not check for updates:\n{error}": "Die Suche nach Updates ist fehlgeschlagen:\n{error}"
 }

@@ -2283,5 +2283,12 @@
   "Import dropped files without review": "Importuj upuszczone pliki bez przeglądu",
   "An import is running": "Import jest w toku",
   "An import is running. Drop photos when it has finished": "Import jest w toku. Upuść zdjęcia, gdy się zakończy",
-  "Finish Lightroom catalog import before adding photos": "Zakończ import katalogu Lightrooma, zanim dodasz zdjęcia"
+  "Finish Lightroom catalog import before adding photos": "Zakończ import katalogu Lightrooma, zanim dodasz zdjęcia",
+  "Search commands": "Szukaj poleceń",
+  "No command matches.": "Żadne polecenie nie pasuje.",
+  "Check for Updates…": "Sprawdź aktualizacje…",
+  "Local Photo Updates": "Aktualizacje Local Photo",
+  "Checking for updates…": "Sprawdzanie aktualizacji…",
+  "Local Photo {version} is currently the newest version available.": "Local Photo {version} to najnowsza dostępna wersja.",
+  "Could not check for updates:\n{error}": "Nie udało się sprawdzić aktualizacji:\n{error}"
 }

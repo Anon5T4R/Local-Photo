@@ -2734,5 +2734,12 @@
   "Import dropped files without review": "ჩაგდებული ფაილების იმპორტი გადახედვის გარეშე",
   "An import is running": "იმპორტი მიმდინარეობს",
   "An import is running. Drop photos when it has finished": "იმპორტი მიმდინარეობს. ფოტოები ჩააგდეთ, როცა დასრულდება",
-  "Finish Lightroom catalog import before adding photos": "ფოტოების დამატებამდე დაასრულეთ Lightroom-ის კატალოგის იმპორტი"
+  "Finish Lightroom catalog import before adding photos": "ფოტოების დამატებამდე დაასრულეთ Lightroom-ის კატალოგის იმპორტი",
+  "Search commands": "ბრძანებების ძებნა",
+  "No command matches.": "არცერთი ბრძანება არ ემთხვევა.",
+  "Check for Updates…": "განახლებების შემოწმება…",
+  "Local Photo Updates": "Local Photo-ს განახლებები",
+  "Checking for updates…": "განახლებების შემოწმება…",
+  "Local Photo {version} is currently the newest version available.": "Local Photo {version} ხელმისაწვდომი უახლესი ვერსიაა.",
+  "Could not check for updates:\n{error}": "განახლებების შემოწმება ვერ მოხერხდა:\n{error}"
 }
