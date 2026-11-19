@@ -14,6 +14,8 @@ workspace = true
 [dependencies]
 craft-ui = { workspace = true }
 craft-window = { workspace = true }
+craft-icons = { workspace = true }
+craft-palette = { workspace = true }
 localphoto-geom = { workspace = true }
 localphoto-meta = { workspace = true }
 localphoto-color = { workspace = true }
@@ -26,6 +28,7 @@ localphoto-engine = { workspace = true }
 localphoto-slideshow = { workspace = true }
 localphoto-preview = { workspace = true }
 egui = { workspace = true }
+egui_extras = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 log = { workspace = true }

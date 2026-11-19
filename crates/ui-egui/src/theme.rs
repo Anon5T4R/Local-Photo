@@ -396,6 +396,8 @@ pub fn current(ctx: &egui::Context) -> Option<ThemeKind> {
 
 /// Style `ctx` with the default theme.
 pub fn apply(ctx: &egui::Context) {
+    // The SVG loader the suite's icons (`craft-icons`) are drawn through; a second call is a no-op.
+    egui_extras::install_image_loaders(ctx);
     apply_kind(ctx, ThemeKind::default());
 }
 

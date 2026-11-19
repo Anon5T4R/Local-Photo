@@ -23,6 +23,10 @@ craft-update = { version = "=0.1.0", path = "libs/craft-libs/crates/update/", fe
 # Linux: the desktop's light/dark choice reaches `ctx.system_theme()` (winit reports none there);
 # source of truth in local-libs, vendored here and replicated by its sync.ps1.
 craft-desktop-theme = { path = "libs/craft-libs/crates/desktop-theme/" }
+# The suite's icons for shared concepts (theme, settings, help, search…) and the theme button; the command
+# palette. Source of truth in local-libs, vendored here and replicated by its sync.ps1.
+craft-icons = { path = "libs/craft-libs/crates/icons/", features = ["egui"] }
+craft-palette = { path = "libs/craft-libs/crates/palette/" }
 # Shared MCP plumbing of the suite (stdio server skeleton, script/batch steps and the automation
 # root flags); source of truth in local-libs, vendored here and replicated by its sync.ps1.
 craft-mcp = { path = "libs/craft-libs/crates/mcp/" }
@@ -110,7 +114,8 @@ pollster = "1"
 # `monochrome_emoji_fonts`. Every resolution root (native, CLI/headless, kittest, wasm) needs both:
 # kittest's own dev-dependencies do not propagate to its consumers.
 egui = { version = "0.37", default-features = false, features = ["default_fonts", "monochrome_emoji_fonts"] }
-egui_extras = { version = "0.37", default-features = false }
+# The SVG loader for the suite's icons (craft-icons): resvg, pure Rust. Vendored fork via [patch].
+egui_extras = { version = "0.37", default-features = false, features = ["svg"] }
 eframe = { version = "0.37", default-features = false }
 egui_kittest = "0.37"
 rfd = "0.17"
