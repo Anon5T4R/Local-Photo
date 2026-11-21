@@ -1271,8 +1271,6 @@ pub enum Dialog {
         #[serde(default)]
         parent: Option<u64>,
     },
-    /// Help ▸ What's New.
-    WhatsNew,
     /// Photo ▸ Assisted Culling: reject photos below this focus score (0 = none), pick the best
     /// of each burst; shots at most `burst_gap` seconds apart and at least `similarity` alike are
     /// a burst.

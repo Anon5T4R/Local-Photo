@@ -267,7 +267,6 @@ pub const UI_COMMANDS: &[UiCommand] = &[
     ("app.openLogFolder", "Open Log Folder", None, "Help"),
     // the frame-rate display (`frame_rate`): a debugging aid, never saved
     ("view.frameRate", "Frame Rate", None, "Help>Debug"),
-    ("app.whatsNew", "What's New", None, "Help"),
     ("dialog.cull", "Assisted Culling…", None, "Photo"),
     ("app.help", "Local Photo Help", Some("F1"), "Help"),
     ("app.feedback", "Send Feedback…", None, "Help"),
@@ -1595,10 +1594,6 @@ pub fn run_ui_command(app: &mut LocalPhotoApp, id: &str, p: &Value) -> Option<Re
             let (burst_gap, similarity) = app.ui.cull_burst.unwrap_or((10.0, 0.93));
             app.ui.dialog = Some(Dialog::Cull { reject_below: 0.0, pick_best: true, burst_gap, similarity });
             Ok(Value::Null)
-        }
-        "app.whatsNew" => {
-            app.ui.dialog = Some(Dialog::WhatsNew);
-            Ok(json!({"text": crate::panels::dialogs::WHATS_NEW}))
         }
         "app.systemInfo" => {
             let info = app.session.execute("library.info", &json!({})).unwrap_or_default();

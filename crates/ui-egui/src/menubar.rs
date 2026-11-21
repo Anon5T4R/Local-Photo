@@ -315,7 +315,6 @@ const LAYOUT: &[(&str, &[&str])] = &[
             "app.website",
             "app.github",
             "---",
-            "app.whatsNew",
             "app.shortcuts",
             "app.systemInfo",
             "app.openLogFolder",

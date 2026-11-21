@@ -113,7 +113,6 @@ fn every_dialog_fits_the_narrow_window() {
     for command in [
         "app.settings",
         "app.shortcuts",
-        "app.whatsNew",
         "app.about",
         "app.systemInfo",
         "dialog.export",

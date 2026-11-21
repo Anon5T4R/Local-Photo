@@ -1515,29 +1515,16 @@ mod tests {
     /// the app's source. An empty translation counts as missing.
     #[test]
     fn translation_gaps_report() {
-        let notes = whats_new_lines();
-        let messages: std::collections::BTreeSet<String> = plain_messages().into_iter().filter(|m| !notes.contains(&m.as_str())).collect();
+        let messages: std::collections::BTreeSet<String> = plain_messages().into_iter().collect();
         let formats = format_messages();
         let quoted = |list: &[&str]| list.iter().map(|m| format!("{m:?}")).collect::<Vec<_>>().join(", ");
-        let mut out = format!(
-            "Translation gaps, shown in English ({} messages, {} formats, {} What's New lines):\n",
-            messages.len(),
-            formats.len(),
-            notes.len()
-        );
+        let mut out = format!("Translation gaps, shown in English ({} messages, {} formats):\n", messages.len(), formats.len());
         for language in Locale::ALL.iter().filter(|language| **language != Locale::En) {
             let catalog = language.catalog();
             let own_formats = formats_catalog(language.code());
             let missing: Vec<&str> = messages.iter().map(String::as_str).filter(|m| !catalog.contains_key(*m)).collect();
             let missing_formats: Vec<&str> = formats.iter().map(String::as_str).filter(|m| !own_formats.contains_key(*m)).collect();
-            let missing_notes = notes.iter().filter(|line| !catalog.contains_key(**line)).count();
-            out.push_str(&format!(
-                "{}: {} messages, {} formats, {} What's New lines\n",
-                language.code(),
-                missing.len(),
-                missing_formats.len(),
-                missing_notes
-            ));
+            out.push_str(&format!("{}: {} messages, {} formats\n", language.code(), missing.len(), missing_formats.len()));
             if !missing.is_empty() {
                 out.push_str(&format!("  messages: {}\n", quoted(&missing)));
             }
@@ -1592,16 +1579,6 @@ mod tests {
             .filter(|key| !key.starts_with(&contextual))
             .cloned()
             .chain(labels.into_iter().map(str::to_string))
-            .collect()
-    }
-
-    /// Help ▸ What's New, line by line as the dialog looks each one up.
-    fn whats_new_lines() -> Vec<&'static str> {
-        crate::panels::dialogs::WHATS_NEW
-            .lines()
-            .map(str::trim)
-            .filter(|line| !line.is_empty() && !line.starts_with("# "))
-            .map(|line| line.strip_prefix("### ").or_else(|| line.strip_prefix("## ")).or_else(|| line.strip_prefix("- ")).unwrap_or(line))
             .collect()
     }
 

@@ -113,7 +113,6 @@ fn long_dialogs_fit_a_short_window() {
         "dialog.contactSheet",
         "app.settings",
         "app.shortcuts",
-        "app.whatsNew",
         "app.about",
         "app.systemInfo",
         "dialog.smartAlbum",

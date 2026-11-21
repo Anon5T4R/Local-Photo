@@ -175,9 +175,6 @@ fn watermark_preview(
 /// About dialog tabs: (widget id suffix, label). The credits come from `crate::credits`.
 pub const ABOUT_TABS: &[(&str, &str)] = &[("about", "About"), ("contributors", "Contributors"), ("models", "Models")];
 
-/// Help ▸ What's New (docs/whats-new.md).
-pub const WHATS_NEW: &str = include_str!("../../../../docs/whats-new.md");
-
 /// The import review and Settings keep window ids of their own, so the size each is given
 /// doesn't carry over to the other dialogs.
 fn window_id(dialog: &Dialog) -> egui::Id {
@@ -261,7 +258,6 @@ pub fn show(app: &mut LocalPhotoApp, ctx: &egui::Context, blocked: bool) {
         Dialog::DenoiseModel { .. } => "AI Denoise Model",
         Dialog::FaceModel { info, .. } if info["download"].is_string() => "Download Face Model",
         Dialog::FaceModel { .. } => "Add Face Model",
-        Dialog::WhatsNew => "What's New",
         Dialog::Cull { .. } => "Assisted Culling",
         Dialog::SmartRules { id: None, .. } => "New Smart Album",
         Dialog::SmartRules { .. } => "Edit Smart Album",
@@ -401,25 +397,6 @@ pub fn show(app: &mut LocalPhotoApp, ctx: &egui::Context, blocked: bool) {
                     clamp_cull_burst(burst_gap, similarity);
                     ui.label(egui::RichText::new(crate::i18n::tr("Lower it when a panning or moving burst splits into several groups.")).color(t.text_dim));
                     ui.label(egui::RichText::new(crate::i18n::tr("Scores stay on the photos: filter or make smart albums with Focus and Best of Similar Shots.")).color(t.text_dim));
-                }
-                Dialog::WhatsNew => {
-                    egui::ScrollArea::vertical().max_height(list_height(ui, 460.0)).auto_shrink([false, true]).show(ui, |ui| {
-                        for line in WHATS_NEW.lines() {
-                            let l = line.trim_end();
-                            if let Some(h) = l.strip_prefix("### ") {
-                                ui.add_space(6.0);
-                                ui.label(egui::RichText::new(crate::i18n::tr(h)).font(t.semibold(12.5)).color(t.text));
-                            } else if let Some(h) = l.strip_prefix("## ") {
-                                ui.add_space(8.0);
-                                ui.label(egui::RichText::new(crate::i18n::tr(h)).font(t.semibold(14.0)).color(t.text));
-                            } else if l.starts_with("# ") || l.is_empty() {
-                            } else if let Some(b) = l.strip_prefix("- ") {
-                                ui.label(egui::RichText::new(format!("•  {}", crate::i18n::tr(b).replace('`', ""))).color(t.text_label));
-                            } else {
-                                ui.label(egui::RichText::new(crate::i18n::tr(l.trim()).replace('`', "")).color(t.text_label));
-                            }
-                        }
-                    });
                 }
                 Dialog::DenoiseModel { info, accepted } => crate::panels::denoise::model_dialog(app, ui, &t, info, accepted),
                 Dialog::FaceModel { info, accepted, .. } => crate::panels::faces::model_dialog(app, ui, &t, info, accepted),
@@ -2052,7 +2029,7 @@ pub fn confirm_dialog(app: &mut LocalPhotoApp, dlg: &Dialog) -> Result<serde_jso
         Dialog::AutoStack { gap } => app.run("stack.auto", json!({"gap": gap})),
         Dialog::DenoiseModel { info, accepted } => crate::panels::denoise::install(app, info, *accepted),
         Dialog::FaceModel { path, info, accepted } => crate::panels::faces::install(app, path, info, *accepted),
-        Dialog::AllMetadata { .. } | Dialog::SystemInfo { .. } | Dialog::WhatsNew => Ok(serde_json::Value::Null),
+        Dialog::AllMetadata { .. } | Dialog::SystemInfo { .. } => Ok(serde_json::Value::Null),
         Dialog::Cull { reject_below, pick_best, burst_gap, similarity } => {
             app.ui.cull_burst = Some((*burst_gap, *similarity));
             app.run("photo.analyze", cull_params(*reject_below, *pick_best, *burst_gap, *similarity))
@@ -2503,7 +2480,6 @@ fn only_shows(dlg: &Dialog) -> bool {
             | Dialog::Settings { .. }
             | Dialog::SystemInfo { .. }
             | Dialog::AllMetadata { .. }
-            | Dialog::WhatsNew
             | Dialog::ManageEffects { .. }
             | Dialog::ViewOptions
     ) || matches!(dlg, Dialog::SynchronizeFolder { counts: Some(c), .. } if c.up_to_date())

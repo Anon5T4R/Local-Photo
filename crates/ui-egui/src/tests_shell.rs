@@ -224,7 +224,6 @@ fn guardas_shots() {
         "palette",
         "app.settings",
         "app.shortcuts",
-        "app.whatsNew",
         "app.about",
         "app.systemInfo",
         "dialog.export",

@@ -113,10 +113,3 @@ in code without invalidating anyone's saved preference. `LOCALPHOTO_LANGUAGE` ac
 locale looks like (`zh_Hans`, `zh-CN`, `en_US`, `ja_JP.UTF-8`) and falls back to the base language
 when a region has no dedicated entry.
 
-## Release notes
-
-Help ▸ What's New shows `docs/whats-new.md`, and each of its lines (a heading, or one wrapped line of a
-bullet, without the `- ` or `### `) is looked up like any message, so a catalog can translate the notes
-line by line (German does). A line that is re-wrapped or edited no longer matches its translation and
-shows in English until the catalog is updated; the translation gaps report counts the untranslated
-lines.

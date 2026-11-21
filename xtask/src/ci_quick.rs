@@ -9,8 +9,8 @@
 //! - the tests of the changed packages only (not their dependents);
 //! - heif when `localphoto-codecs` / `localphoto-heif` changed.
 //!
-//! A file outside any package that a crate compiles in (`include_str!` of `docs/whats-new.md`,
-//! fonts and camera profiles under `assets/`, ...) counts as a change to that crate (`EMBEDDED`).
+//! A file outside any package that a crate compiles in (`include_str!` /
+//! `include_bytes!` of fonts and camera profiles under `assets/`, ...) counts as a change to that crate (`EMBEDDED`).
 //! A change to a workspace-wide file (root `Cargo.toml`, `Cargo.lock`, lint or toolchain config)
 //! tests everything. The full `ci` (GitHub's CI on every PR) stays the merge gate.
 
@@ -32,7 +32,6 @@ const EMBEDDED: &[(&str, &[&str])] = &[
     ("assets/camera-tone/", &["localphoto-engine"]),
     ("assets/fonts/", &["localphoto-engine", "localphoto-ui-egui"]),
     ("contributors/", &["localphoto-ui-egui"]),
-    ("docs/whats-new.md", &["localphoto-ui-egui"]),
     ("docs/raw/coverage-sweep.tsv", &["localphoto-raw"]),
     ("docs/raf-corpus.sha256", &["localphoto-raw"]),
     ("xtask/src/main.rs", &["localphoto-raw"]),

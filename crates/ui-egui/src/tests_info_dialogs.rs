@@ -27,7 +27,7 @@ fn information_dialogs_end_with_one_close() {
     let app = LocalPhotoApp::new(localphoto_engine::Session::with_demo(), Services { png: None, ..Default::default() });
     let mut h = Headless::new(app, [1300.0, 900.0], 1.0);
     h.settle(SETTLE);
-    for id in ["app.systemInfo", "dialog.allMetadata", "app.whatsNew"] {
+    for id in ["app.systemInfo", "dialog.allMetadata"] {
         open(&mut h, id);
         assert!(!has(&h, "button:dialogCancel"), "{id}: a Cancel button, though there is nothing to confirm");
         assert!(has(&h, "button:dialogOk"), "{id}: no Close button");

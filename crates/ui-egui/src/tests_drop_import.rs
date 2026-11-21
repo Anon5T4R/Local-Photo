@@ -133,7 +133,7 @@ fn dropping_imports_directly_when_settings_say_so() {
 fn a_drop_while_a_dialog_is_open_leaves_the_dialog_and_imports_nothing() {
     let dir = Scratch::new("dialog");
     let mut h = app(&dir);
-    h.app.ui.dialog = Some(Dialog::WhatsNew);
+    h.app.ui.dialog = Some(Dialog::About);
     drop_files(&mut h, &[dir.path("trip/a.png")], true);
     assert!(overlay(&h), "the window still answers the hover");
     assert!(said(&h, "Close the open dialog"), "{:?}", h.painted_text());
@@ -141,7 +141,7 @@ fn a_drop_while_a_dialog_is_open_leaves_the_dialog_and_imports_nothing() {
     for _ in 0..30 {
         h.step();
     }
-    assert!(matches!(h.app.ui.dialog, Some(Dialog::WhatsNew)), "the open dialog stays");
+    assert!(matches!(h.app.ui.dialog, Some(Dialog::About)), "the open dialog stays");
     assert!(h.app.scan.is_none() && h.app.import.is_none(), "no scan or import started");
     assert_eq!(photos(&h), 0);
     assert!(h.app.ui.toast.is_some(), "the person is told why");
@@ -179,12 +179,12 @@ fn a_finished_scan_waits_for_the_open_dialog_before_opening_the_review() {
     let dir = Scratch::new("waits");
     let mut h = app(&dir);
     crate::import::open(&mut h.app, vec![dir.path("trip")]).unwrap();
-    h.app.ui.dialog = Some(Dialog::WhatsNew);
+    h.app.ui.dialog = Some(Dialog::About);
     assert!(h.step_until(SETTLE, |h| h.app.scan.is_none()), "the scan ends");
     for _ in 0..10 {
         h.step();
     }
-    assert!(matches!(h.app.ui.dialog, Some(Dialog::WhatsNew)), "the dialog the person had open stays");
+    assert!(matches!(h.app.ui.dialog, Some(Dialog::About)), "the dialog the person had open stays");
     h.app.ui.dialog = None;
     assert!(h.step_until(T, |h| matches!(h.app.ui.dialog, Some(Dialog::Import { .. }))), "the review opens once the dialog is closed");
     let Some(Dialog::Import { opts }) = &h.app.ui.dialog else { panic!("no import review") };
@@ -227,7 +227,7 @@ fn a_waiting_review_never_replaces_a_running_import() {
     h.app.ui.settings.import_dropped_directly = true;
     write_png(&dir.path("more/c.png"), 3);
     crate::import::open(&mut h.app, vec![dir.path("trip")]).unwrap();
-    h.app.ui.dialog = Some(Dialog::WhatsNew);
+    h.app.ui.dialog = Some(Dialog::About);
     assert!(h.step_until(SETTLE, |h| h.app.scan.is_none()), "the scan ends");
     h.step();
     assert!(h.app.review_pending.is_some(), "the review waits behind the dialog");
