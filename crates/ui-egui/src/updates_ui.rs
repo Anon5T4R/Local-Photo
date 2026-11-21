@@ -45,6 +45,18 @@ impl LocalPhotoApp {
     pub fn set_startup_update_check(&mut self, on: bool) {
         self.updates_rt.startup_check = on;
     }
+
+    /// Test only: a newer release is on offer, so the update prompt is up.
+    #[cfg(all(test, not(target_arch = "wasm32")))]
+    pub(crate) fn offer_update_for_test(&mut self, name: &str) {
+        self.updates_rt.updater.offer(craft_update::Release {
+            tag: "v99.0.0".into(),
+            version: craft_update::parse_version("99.0.0"),
+            name: name.into(),
+            html_url: "https://github.com/Anon5T4R/Local-Photo/releases/tag/v99.0.0".into(),
+            ..Default::default()
+        });
+    }
 }
 
 /// The update prompt owns the keyboard while it is open: shortcuts must not reach the library behind it.
