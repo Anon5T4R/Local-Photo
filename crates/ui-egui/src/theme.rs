@@ -483,7 +483,15 @@ mod tests {
         for kind in ThemeKind::ALL {
             let t = Tokens::for_kind(kind);
             let text = t.accent_text();
-            for (name, surface) in [("chrome", t.chrome), ("canvas", t.canvas), ("inset", t.inset), ("field", t.field), ("cell", t.cell), ("selected cell", t.cell_selected), ("button", t.button)] {
+            for (name, surface) in [
+                ("chrome", t.chrome),
+                ("canvas", t.canvas),
+                ("inset", t.inset),
+                ("field", t.field),
+                ("cell", t.cell),
+                ("selected cell", t.cell_selected),
+                ("button", t.button),
+            ] {
                 let c = contrast(text, surface);
                 assert!(c >= 4.5, "{kind:?}: accent text on {name} is {c:.2}:1");
             }

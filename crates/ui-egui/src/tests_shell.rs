@@ -220,9 +220,28 @@ fn guardas_shots() {
     let model = model_dir.join("Mine.onnx");
     std::fs::write(&model, localphoto_faces::synthetic::tiny_embedder_model(512)).unwrap();
     let scenes = [
-        "main", "palette", "app.settings", "app.shortcuts", "app.whatsNew", "app.about", "app.systemInfo", "dialog.export", "dialog.copySettings",
-        "dialog.createPreset", "dialog.rename", "dialog.newAlbum", "dialog.newSmartAlbum", "dialog.captureTime", "dialog.labelNames",
-        "dialog.allMetadata", "dialog.autoStack", "dialog.contactSheet", "dialog.slideshowExport", "dialog.cull", "dialog.faceModel", "update",
+        "main",
+        "palette",
+        "app.settings",
+        "app.shortcuts",
+        "app.whatsNew",
+        "app.about",
+        "app.systemInfo",
+        "dialog.export",
+        "dialog.copySettings",
+        "dialog.createPreset",
+        "dialog.rename",
+        "dialog.newAlbum",
+        "dialog.newSmartAlbum",
+        "dialog.captureTime",
+        "dialog.labelNames",
+        "dialog.allMetadata",
+        "dialog.autoStack",
+        "dialog.contactSheet",
+        "dialog.slideshowExport",
+        "dialog.cull",
+        "dialog.faceModel",
+        "update",
     ];
     for (wname, size) in [("min", crate::window_place::MIN_SIZE), ("1100", [1100.0, 700.0])] {
         for mode in ["light", "dark"] {
