@@ -59,7 +59,7 @@ dispatch by id, and headless snapshots render the UI without a window.
 ## Quality gates
 
 `cargo xtask ci`: fmt, clippy `-D warnings` with the never-crash lints, the HEIF build, tests,
-`parity` (every id and path cited in [parity-checklist.md](parity-checklist.md) exists), `layers`,
+`layers`,
 `assets` (every asset attributed, no Adobe formats) and the WASM build. Other workflows build and
 test FreeBSD and Windows ARM64, lint packaging, and build releases.
 

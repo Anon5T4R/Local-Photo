@@ -40,7 +40,7 @@ neutral settings; edited curves keep the shoulder and their V1 look.
    passing: settings saved without the field must stay V1, not become the new latest. That is the
    field's `#[serde(default = "ProcessVersion::legacy")]`; the struct-level `Default` gives new
    settings the latest instead.
-4. Render a few procedural scenes on both processes and compare, and update `docs/parity-checklist.md`.
+4. Render a few procedural scenes on both processes and compare.
 
 ## What gets which process
 

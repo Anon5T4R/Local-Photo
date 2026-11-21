@@ -51,7 +51,7 @@ are in [`localization-zh-hans.md`](localization-zh-hans.md), [`localization-zh-h
    missing face is added there, not worked around in this repository. Sentence-cased messages go
    through `i18n::upper_first`, which leaves Georgian lowercase (upper-casing Mkhedruli would make
    Mtavruli).
-4. Run `cargo xtask ci` (it includes `fmt`, `clippy`, the tests, `parity` and the wasm check).
+4. Run `cargo xtask ci` (it includes `fmt`, `clippy`, the tests and the wasm check).
 
 ## How a message is found
 

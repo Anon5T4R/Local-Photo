@@ -4,8 +4,7 @@
 
 Raw processing is the deepest single dimension of Lightroom parity: a photographer whose camera
 does not decode, or decodes with the wrong colour, cannot switch. This document measures it model by
-model. The numbers feed [target-app-parity.md](target-app-parity.md); individual shortfalls are
-ranked in [gaps.md](gaps.md). Details per format: [cr3.md](cr3.md),
+model. Details per format: [cr3.md](cr3.md),
 [raf-compression.md](raf-compression.md), [sony-lens-corrections.md](sony-lens-corrections.md),
 [sony-ilce7rm6-lens-corrections.md](sony-ilce7rm6-lens-corrections.md), [nikon-lens-corrections.md](nikon-lens-corrections.md),
 [camera-preview-colour.md](camera-preview-colour.md), [denoise.md](denoise.md).

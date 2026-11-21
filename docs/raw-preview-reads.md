@@ -87,7 +87,7 @@ sparse_corpus -- --nocapture` prints these numbers. `LOCALPHOTO_PROFILE=1` says 
 ```
 
 A Canon CR3's preview is a JPEG track instead (issue #832 measured 3 MB of one R5 Mark II file,
-~15 %), and Canon is the largest bucket in [gaps.md](gaps.md)'s ranking (33 % of photographers), so
+~15 %), and Canon is the largest bucket (33 % of photographers), so
 before this change every unedited CR3 thumbnail paid for the whole file.
 
 ## The grid thumbnail is the embedded JPEG too

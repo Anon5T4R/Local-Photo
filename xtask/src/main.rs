@@ -10,7 +10,6 @@ mod ci_quick;
 mod ci_report;
 mod ico;
 mod layers;
-mod parity;
 mod stats;
 mod version;
 mod web;
@@ -30,15 +29,12 @@ commands:
   ico <out.ico> <in.png>...
                   pack square PNGs (<= 256 px) into a Windows .ico (see packaging/icons.sh)
   layers          enforce the crate dependency layering (plan/architecture.md §3)
-  parity [--write]
-                  check docs/parity-checklist.md (every cmd:/ctl: id and path it cites exists) and print the
-                  Lightroom parity summary; --write refreshes the summary table in the document
   wasm            cargo check --target wasm32-unknown-unknown for the wasm-safe crates (+ the web app), in one call
   web [--serve [port]] [--dev]
                   build the browser app (apps/localphoto-web) into <target>/web-site/;
                   --serve serves it on http://127.0.0.1:<port> (default 8080)
   ci [--hardware] [--summary-md] [--quick [--base REF]]
-                  fmt --check, clippy -D warnings, heif, test, GPU probe, parity refs, layers, assets, cargo-deny, local-libs mirrors, wasm
+                  fmt --check, clippy -D warnings, heif, test, GPU probe, layers, assets, cargo-deny, local-libs mirrors, wasm
                   (stops at first failure). Tests run under cargo test (cargo nextest with
                   LOCALPHOTO_NEXTEST=1), without examples, then doctests with cargo test --doc; after
                   them it prints the translation gaps report (never a failure). Writes
@@ -46,7 +42,7 @@ commands:
                   steps, skipped tests) and target/ci/summary.md; --hardware also runs the GPU tests on
                   every backend with a hardware adapter; --summary-md prints the Markdown summary.
                   --quick: only what the changes since the merge base with origin/main (or REF) can
-                  break: clippy, the changed packages' tests, and heif / parity / wasm when they apply.
+                  break: clippy, the changed packages' tests, and heif / wasm when they apply.
                   One ci runs at a time per machine; others wait (LOCALPHOTO_CI_SLOTS=N for N at once,
                   LOCALPHOTO_CI_LOCK=off to skip the lock)
   corpus [--download]
@@ -69,7 +65,6 @@ fn main() -> ExitCode {
         Some("assets") => assets::run(&root()),
         Some("fmt") => cmd_fmt(),
         Some("bench") => bench::run(&root(), &rest),
-        Some("parity") => parity::run(&root(), rest.contains(&"--write")),
         Some("wasm") => cmd_wasm(),
         Some("web") => web::run(&rest),
         Some("ci") => cmd_ci(&rest),
@@ -118,7 +113,7 @@ pub fn cargo() -> Command {
     let mut c = Command::new(std::env::var("CARGO").unwrap_or_else(|_| "cargo".into()));
     c.current_dir(root());
     // Full Windows debuginfo plus one linker per CPU can exhaust RAM before any
-    // tests run. Scope these overridable defaults to CI, including parity/WASM
+    // tests run. Scope these overridable defaults to CI, including WASM
     // subprocesses, without changing ordinary developer builds or GPU coverage.
     if std::env::args().nth(1).as_deref() == Some("ci") {
         static JOBS: std::sync::OnceLock<(String, String)> = std::sync::OnceLock::new();
@@ -517,7 +512,6 @@ fn cmd_ci(args: &[&str]) -> Result<(), String> {
         Some(p) => match step {
             "clippy" | "test" | "wasm" => p.rust(),
             "heif" => p.heif,
-            "parity" => p.parity,
             _ => true,
         },
     };
@@ -595,9 +589,6 @@ fn cmd_ci(args: &[&str]) -> Result<(), String> {
             }),
         ));
     }
-    if wants("parity") {
-        steps.push(("parity", Box::new(|| parity::run(&root, false))));
-    }
     steps.push(("layers", Box::new(cmd_layers)));
     steps.push(("assets", Box::new(|| assets::run(&root))));
     steps.push(("deny", Box::new(cmd_deny)));
@@ -618,7 +609,7 @@ fn cmd_ci(args: &[&str]) -> Result<(), String> {
         let status = if r.is_ok() { "ok" } else { "fail" };
         results.push(serde_json::json!({"name": name, "status": status, "seconds": t.elapsed().as_secs_f64()}));
         if *name == "test" && plan.is_none() {
-            // right after the workspace tests, before parity and wasm build other feature sets
+            // right after the workspace tests, before wasm builds other feature sets
             probe();
             translation_gaps();
         }

@@ -1,7 +1,6 @@
 # Add to Apple Photos (macOS)
 
-An export can hand the files it wrote to Apple Photos, optionally into an album (issue #236, parity row
-`LR-EXP-PHOTOS`). macOS only: on other platforms the option is hidden in the Export dialog and refused by
+An export can hand the files it wrote to Apple Photos, optionally into an album (issue #236). macOS only: on other platforms the option is hidden in the Export dialog and refused by
 `app.export`. The web build doesn't include it.
 
 > **Tested end to end** on macOS 26.6.2 with Photos 11.0, using the ad-hoc-signed packaged app and a new, empty

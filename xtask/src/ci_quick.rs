@@ -1,15 +1,12 @@
 //! `cargo xtask ci --quick`: the checks a branch's own changes can break, for a pre-push check.
 //!
-//! The full `ci` builds the workspace four ways (clippy, heif, tests, wasm) plus the CLI for the
-//! parity check, ~23 minutes cold. `--quick` looks at what changed since the merge base with
+//! The full `ci` builds the workspace several ways (clippy, heif, tests, wasm), ~23 minutes cold. `--quick` looks at what changed since the merge base with
 //! `origin/main` (or `--base REF`), committed or not, and runs:
 //!
 //! - fmt, layers, assets: always (seconds);
 //! - clippy on the whole workspace (check builds only; catches callers broken by an API change);
 //! - the tests of the changed packages only (not their dependents);
 //! - heif when `localphoto-codecs` / `localphoto-heif` changed;
-//! - parity when the tracker docs, a command/control crate, or a file's path changed (renames and
-//!   deletions: the tracker cites paths);
 //! - the wasm check of the changed packages that must build for wasm32.
 //!
 //! A file outside any package that a crate compiles in (`include_str!` of `docs/whats-new.md`,
@@ -25,9 +22,6 @@ use std::process::Command;
 const WORKSPACE_WIDE: &[&str] =
     &["Cargo.toml", "Cargo.lock", "clippy.toml", "rustfmt.toml", ".rustfmt.toml", "rust-toolchain", "rust-toolchain.toml"];
 const WORKSPACE_WIDE_DIRS: &[&str] = &[".cargo/"];
-/// Packages whose ids or paths the parity tracker cites (commands, develop controls, UI menus).
-const PARITY_PACKAGES: &[&str] = &["localphoto-engine", "localphoto-develop", "localphoto-ui-egui", "localphoto-cli"];
-const PARITY_DOCS: &[&str] = &["docs/parity-checklist.md", "docs/gaps.md"];
 const HEIF_PACKAGES: &[&str] = &["localphoto-codecs", "localphoto-heif"];
 /// Files outside a package's directory that it compiles in (`include_str!` / `include_bytes!`,
 /// a build script's `rerun-if-changed`): a change to one counts as a change to those packages.
@@ -42,7 +36,6 @@ const EMBEDDED: &[(&str, &[&str])] = &[
     ("docs/raw/coverage-sweep.tsv", &["localphoto-raw"]),
     ("docs/raf-corpus.sha256", &["localphoto-raw"]),
     ("xtask/src/main.rs", &["localphoto-raw"]),
-    ("crates/ui-egui/src/menus.rs", &["xtask"]),
 ];
 
 /// The packages that compile in `path` from outside their own directory.
@@ -64,7 +57,6 @@ pub struct Plan {
     /// A workspace-wide file changed: test everything.
     pub workspace_wide: bool,
     pub heif: bool,
-    pub parity: bool,
     /// What the changes were measured against, for the log and the report.
     pub base: String,
     pub files: usize,
@@ -85,9 +77,6 @@ pub fn plan(changed: &[Changed], packages: &[(String, String)], base: String) ->
         if WORKSPACE_WIDE.contains(&path) || WORKSPACE_WIDE_DIRS.iter().any(|d| path.starts_with(d)) {
             p.workspace_wide = true;
         }
-        if PARITY_DOCS.contains(&path) || c.gone {
-            p.parity = true;
-        }
         // the innermost package directory containing the file
         let owner = packages
             .iter()
@@ -103,7 +92,6 @@ pub fn plan(changed: &[Changed], packages: &[(String, String)], base: String) ->
         }
     }
     p.heif = p.workspace_wide || HEIF_PACKAGES.iter().any(|h| p.packages.contains(*h));
-    p.parity |= p.workspace_wide || PARITY_PACKAGES.iter().any(|h| p.packages.contains(*h));
     p
 }
 
@@ -204,27 +192,25 @@ mod tests {
     fn changed_files_pick_their_innermost_package() {
         let p = plan(&[ch("crates/raw/src/lib.rs"), ch("crates/raw/nested/src/x.rs"), ch("crates/rawx/y.rs")], &pkgs(), "b".into());
         assert_eq!(p.packages.iter().map(String::as_str).collect::<Vec<_>>(), ["localphoto-raw", "localphoto-raw-nested"]);
-        assert!(p.rust() && !p.workspace_wide && !p.heif && !p.parity);
+        assert!(p.rust() && !p.workspace_wide && !p.heif);
     }
 
     #[test]
-    fn docs_only_skip_the_builds_but_tracker_docs_run_parity() {
+    fn docs_only_skip_the_builds() {
         let p = plan(&[ch("README.md"), ch("docs/raw-parity.md")], &pkgs(), "b".into());
-        assert!(!p.rust() && !p.parity);
-        let p = plan(&[ch("docs/gaps.md")], &pkgs(), "b".into());
-        assert!(!p.rust() && p.parity);
+        assert!(!p.rust());
+        let p = plan(&[Changed { path: "docs/raw-parity.md".into(), gone: true }], &pkgs(), "b".into());
+        assert!(!p.rust());
     }
 
     #[test]
-    fn workspace_files_heif_and_parity_triggers() {
+    fn workspace_files_and_heif_triggers() {
         let p = plan(&[ch("Cargo.lock")], &pkgs(), "b".into());
-        assert!(p.workspace_wide && p.rust() && p.heif && p.parity);
+        assert!(p.workspace_wide && p.rust() && p.heif);
         let p = plan(&[ch("crates/codecs/src/heif.rs")], &pkgs(), "b".into());
-        assert!(p.heif && !p.parity);
+        assert!(p.heif && p.rust());
         let p = plan(&[ch("crates/engine/src/commands.rs")], &pkgs(), "b".into());
-        assert!(p.parity && !p.heif);
-        let p = plan(&[Changed { path: "crates/raw/src/old.rs".into(), gone: true }], &pkgs(), "b".into());
-        assert!(p.parity, "a removed path may be cited by the tracker");
+        assert!(p.rust() && !p.heif);
     }
 
     #[test]

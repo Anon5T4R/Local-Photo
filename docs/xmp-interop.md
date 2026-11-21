@@ -108,8 +108,8 @@ with the raw or after it (issue #1905).
 
 Local Photo reads face, pet, focus and barcode regions in the Metadata Working Group's region schema
 (`mwg-rs:Regions`, `http://www.metadataworkinggroup.com/schemas/regions/`), as Lightroom, digiKam, Picasa and others
-write them, from sidecars and from XMP embedded in the file. Named faces become people in the People view
-(LR-LIB-PEOPLE in [`parity-checklist.md`](parity-checklist.md)), and every region is drawn as a box in the loupe.
+write them, from sidecars and from XMP embedded in the file. Named faces become people in the People view,
+and every region is drawn as a box in the loupe.
 
 - **Read only.** Local Photo never writes `mwg-rs:Regions`; saving a sidecar keeps another application's regions byte
   for byte. Removing or resizing a box in the loupe changes the library only.

@@ -36,8 +36,7 @@ pub const LANGUAGE_COMMANDS: &[UiCommand] = &[
     ("app.language.traditionalChinese", crate::i18n::Locale::ZhHant.name(), None, ""),
 ];
 
-/// Every UI command: the languages, then everything else. `xtask parity` reads both tables from
-/// this file, so an id listed in `docs/parity-checklist.md` is checked wherever it is declared.
+/// Every UI command: the languages, then everything else.
 pub fn ui_commands() -> impl Iterator<Item = &'static UiCommand> {
     LANGUAGE_COMMANDS.iter().chain(UI_COMMANDS)
 }

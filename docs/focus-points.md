@@ -2,7 +2,7 @@
 
 Most cameras record where they focused. Local Photo reads that point from the file, draws it over the photo and
 zooms to it, so checking whether the subject is sharp takes one key while culling. Lightroom shows no focus points
-(photographers add plug-ins for it); this goes beyond parity (tracker row `LR-VIEW-FOCUSPOINT`).
+(photographers add plug-ins for it); this goes beyond Lightroom.
 
 ## Using it
 

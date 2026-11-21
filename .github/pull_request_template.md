@@ -17,7 +17,6 @@ Baseie o PR em `main`, a única branch de integração. Apague as seções que n
 - [ ] clippy com `-D warnings` nos crates que mudei
 - [ ] testes passam nos crates que mudei
 - [ ] `cargo xtask layers` (se mexi em fronteira de crate) e `cargo xtask assets` (se adicionei asset)
-- [ ] `cargo xtask parity` e `docs/parity-checklist.md` regerado (se adicionei ou mudei comandos)
 
 **Testes.** Comportamento novo precisa de teste na escala certa — unitário, de integração do crate
 ou ponta a ponta. Para correção de bug, **confirme que o teste falha antes da correção**.

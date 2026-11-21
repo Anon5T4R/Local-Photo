@@ -25,7 +25,7 @@ Biblioteca de fotos + revelação RAW não destrutiva; o Lightroom é a referên
 - `assets/craft-fonts/` — o craft-fonts inteiro vendored (build input `CRAFT_FONTS_DIR`)
 - `packaging/` — Windows (WiX/MSI), Linux (AppImage/deb/rpm/tar), Arch (PKGBUILD), macOS, FreeBSD, web
 - `docs/` — arquitetura, formatos, paridade, release (`docs/releasing.md`)
-- `xtask/` — tarefas de build/CI (`cargo xtask ci`, `layers`, `assets`, `parity`, `wasm`, `web`)
+- `xtask/` — tarefas de build/CI (`cargo xtask ci`, `layers`, `assets`, `wasm`, `web`)
 - `scripts/check-mirror.sh` — confere as crates e os assets (`craft-fonts`) espelhados do `local-libs` contra a fonte (CI e `xtask ci`)
 
 ## Agent-native (MCP)

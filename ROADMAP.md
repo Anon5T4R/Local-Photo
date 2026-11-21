@@ -4,15 +4,13 @@
 
 > **Last reviewed:** 2026-10-10 · **Last updated:** 2026-10-22 · **Change:** minor (Print: Japanese photo and postcard paper sizes — L判, 2L判, KG判, はがき, 往復はがき, 六切, 四切, 名刺; Minolta MRW decoded, 6 bodies verified; RAW: 83% of Adobe's models decode, 38% verified after the camera-coverage sweep #1327; German catalog 91% → 97%: interface strings and What's New lines translated) · **Target:** Adobe Lightroom Classic 15.5 / Lightroom 9.6
 
-One-page summary of how close Local Photo is to Adobe Lightroom. Agents: read this, then pick work
-from [docs/gaps.md](docs/gaps.md). The full assessment, method and evidence are in
-[docs/target-app-parity.md](docs/target-app-parity.md).
+One-page summary of how close Local Photo is to Adobe Lightroom.
 
 ## Headline numbers
 
 | | Value | Kind |
 |---|---:|---|
-| **Feature breadth** (checklist) | **81.6%** of 532 rows (P0 98.0%, P1 95.2%, P2 50.0%) | measured: [parity-checklist.md](docs/parity-checklist.md) recount |
+| **Feature breadth** (checklist) | **81.6%** of 532 rows (P0 98.0%, P1 95.2%, P2 50.0%) | measured: checklist recount |
 | **Feature breadth** (weighted by use) | **~77%** | estimated |
 | **Ready for real work** (full target) | **~61%** (56–66%) | estimated: weighted sum over the dimensions |
 | **Mainstream practitioner** | **~51%** (46–56%) | estimated |
@@ -34,27 +32,23 @@ open as previews, rendering is tuned by eye, AI masks are heuristics, there is n
 tests run in CI on FreeBSD only. **Why alpha:** core workflows run end to end, but readiness is below
 the ~75% beta bar (it is above the ~40% alpha bar) and Lightroom's main inputs, raw files, still have blocking gaps (compressed ORF and HE NEF open as previews; Canon,
 ~30% of raw users, decodes CR3 on 26 verified bodies). It passes the alpha gate: all six core workflows
-(import, cull, develop, save and reopen, batch looks, export) work end to end on macOS
-([docs/roadmap.md](docs/roadmap.md#alpha-gate)). The three readiness numbers and their weights and discounts are in
-[target-app-parity.md](docs/target-app-parity.md#ready-for-real-work-mainstream-practitioner-and-essentials-user).
-Hours are calibrated on this repo's PR history; see
-[target-app-parity.md](docs/target-app-parity.md#how-hours-are-calibrated).
+(import, cull, develop, save and reopen, batch looks, export) work end to end on macOS. Hours are calibrated on this repo's PR history.
 
 ## By dimension
 
 | Dimension | Ready | Breadth | Remaining | Doc |
 |---|---:|---:|---:|---|
-| Features | ~61% | ~77% (checklist 81.1%) | 600–1,100 h | [target-app-parity](docs/target-app-parity.md#features) |
+| Features | ~61% | ~77% (checklist 81.1%) | 600–1,100 h  | — |
 | ↳ RAW cameras, colour, lens profiles | ~60% | 83% of 1,446 Adobe models decode, 38% verified | 255–480 h | [raw-parity](docs/raw-parity.md) |
-| UI/UX fidelity | ~70% | ~85% | 32–54 h | [ui-parity](docs/ui-parity.md) |
-| File formats (non-raw) | ~70% | ~85% | 30–55 h | [file-format-parity](docs/file-format-parity.md) |
+| UI/UX fidelity | ~70% | ~85% | 32–54 h  | — |
+| File formats (non-raw) | ~70% | ~85% | 30–55 h  | — |
 | Hardware | ~40% | ~50% | 40–80 h | [hardware-parity](docs/hardware-parity.md) |
-| Localization | ~64% of the 12 key languages | 8 of 12 present | 130–210 h (+135–239 h new scripts) | [localization-parity](docs/localization-parity.md) |
-| Performance | ~70% | ~80% | 30–50 h | [target-app-parity](docs/target-app-parity.md#by-dimension) |
-| Stability | ~60% | — | 30–60 h | [target-app-parity](docs/target-app-parity.md#by-dimension) |
-| Platforms | ~60% | macOS, Windows, Linux, FreeBSD, web | 25–45 h | [target-app-parity](docs/target-app-parity.md#by-dimension) |
-| Ecosystem / plug-ins | ~15% | ~25% | 40–80 h | [target-app-parity](docs/target-app-parity.md#by-dimension) |
-| AI features | ~20% | ~30% | 120–220 h (overlaps features) | [target-app-parity](docs/target-app-parity.md#ai) |
+| Localization | ~64% of the 12 key languages | 8 of 12 present | 130–210 h (+135–239 h new scripts)  | — |
+| Performance | ~70% | ~80% | 30–50 h  | — |
+| Stability | ~60% | — | 30–60 h  | — |
+| Platforms | ~60% | macOS, Windows, Linux, FreeBSD, web | 25–45 h  | — |
+| Ecosystem / plug-ins | ~15% | ~25% | 40–80 h  | — |
+| AI features | ~20% | ~30% | 120–220 h (overlaps features)  | — |
 
 ## Features
 
@@ -74,12 +68,10 @@ Hours are calibrated on this repo's PR history; see
 | Classic output modules (Map, Book, Slideshow, Print, publish, tethering) | 10% | 15% | 90–150 h |
 | Video | 0% | 0% | 25–45 h |
 
-Weights and evidence: [target-app-parity.md](docs/target-app-parity.md#features).
-
 ## Languages
 
 Measured from `crates/ui-egui/locales` (share of 2,304 catalog messages translated; German counts 3,644 of 3,754, because its What's New lines add keys); none is `full`
-while lower-layer errors stay English. Detail: [localization-parity.md](docs/localization-parity.md).
+while lower-layer errors stay English.
 
 | Language | Code | Translated | Status |
 |---|---|---:|---|
@@ -100,7 +92,7 @@ Also shipped: Traditional Chinese (87%), Russian (74%), Ukrainian (99%), Italian
 
 ## Upcoming
 
-Ranked toward beta; detail in [docs/roadmap.md](docs/roadmap.md), gaps in [docs/gaps.md](docs/gaps.md).
+Ranked toward beta.
 
 1. Camera colour of our own: measured calibration for the popular models (50–90 h)
 2. CR3 for every Canon body (25–45 h)
@@ -154,8 +146,7 @@ Ranked toward beta; detail in [docs/roadmap.md](docs/roadmap.md), gaps in [docs/
   the standard); mainstream practitioner ~51% (450–840 h), essentials user ~63% (160–300 h);
   alpha gate passes.
 - 2026-10-10: full re-measure for the progress-docs standard: stage alpha, ready ~55%, checklist
-  81.1%; new docs (target-app-parity, gaps, roadmap, architecture, raw / file-format / hardware / UI
-  / localization parity); `docs/parity.md` renamed `docs/parity-checklist.md`. Landed today: Nikon
+  81.1%. Landed today: Nikon
   lossy-after-split NEF (#633), ORF 12.8 bpp (#651), HDR gain map JPEG / PQ AVIF / float TIFF export
   (#646), Lightroom-like Auto (#628), activity stack.
 - 2026-10-11: Sony ILCA-99M2 (α99 II) camera colour: bundled profile from 144 photos; on 30 withheld photos
@@ -177,8 +168,7 @@ Ranked toward beta; detail in [docs/roadmap.md](docs/roadmap.md), gaps in [docs/
   folder templates, Local roots and cleanup, 85k-photo grid and catalog performance, background
   compaction, failed-save errors, GPU export hardening. Added the honest *Where we stand* assessment
   and tracker rows for camera colour, camera coverage and render fidelity.
-- 2026-10-02: parity estimate added (`cargo xtask parity` prints weighted completion); milestones
-  refreshed.
+- 2026-10-02: parity estimate added; milestones refreshed.
 - 2026-10-01: RAW II formats: RAF (uncompressed Bayer + X-Trans), RW2 (packed), PEF (incl. Huffman),
   ORF (uncompressed); embedded previews for every container incl. CR3; raw corpus test with 37 CC0
   samples.
@@ -215,7 +205,7 @@ Ranked toward beta; detail in [docs/roadmap.md](docs/roadmap.md), gaps in [docs/
 | 2026-10-10 | minor | Full ready restored to the additive weighted sum (~59%; method aligned with the standard, no new evidence); hours per audience; beta ~16 points away |
 | 2026-10-10 | minor | Mainstream practitioner and essentials user numbers; full ready 55% → 46% (method written down); beta 340–600 h |
 | 2026-10-10 | minor | Alpha gate added (core-workflow check): passes, stays alpha |
-| 2026-10-10 | major | Restructured to the progress-docs standard; re-measured; *Where we stand*, *Parity estimate* and *Totals* moved to docs/target-app-parity.md, milestones and risks to docs/roadmap.md, raw coverage to docs/raw-parity.md, catalog migration to docs/file-format-parity.md, CJK notes to docs/localization-parity.md |
+| 2026-10-10 | major | Restructured to the progress-docs standard; re-measured |
 | 2026-10-08 | minor | *Where we stand* by dimension and by kind of user |
 | 2026-10-02 | major | Parity estimate and effort table |
 | 2026-09-30 | major | Created |
