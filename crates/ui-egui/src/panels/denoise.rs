@@ -446,7 +446,7 @@ fn model_row(app: &mut LocalPhotoApp, ui: &mut egui::Ui, t: &Tokens, m: &Value, 
                         ui.label(RichText::new(size).color(t.text_dim));
                     }
                     if selected {
-                        ui.label(RichText::new(tr("in use")).color(t.accent));
+                        ui.label(RichText::new(tr("in use")).color(t.accent_text()));
                     } else if installed {
                         ui.label(RichText::new(tr("installed")).color(t.text_dim));
                     }

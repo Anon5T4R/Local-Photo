@@ -335,7 +335,7 @@ fn model_row(app: &mut LocalPhotoApp, ui: &mut egui::Ui, t: &Tokens, m: &Value, 
                         ui.label(RichText::new(size).color(t.text_dim));
                     }
                     if selected {
-                        ui.label(RichText::new(crate::i18n::tr("in use")).color(t.accent));
+                        ui.label(RichText::new(crate::i18n::tr("in use")).color(t.accent_text()));
                     } else if installed {
                         ui.label(RichText::new(crate::i18n::tr("installed")).color(t.text_dim));
                     }
@@ -683,7 +683,7 @@ pub fn name_editor(
                 }
             }
             if let Some(label) = setup.short() {
-                let b = ui.add(egui::Button::new(RichText::new(label).font(t.font(12.0)).color(t.accent)).frame(false));
+                let b = ui.add(egui::Button::new(RichText::new(label).font(t.font(12.0)).color(t.accent_text())).frame(false));
                 register(ui, "faces:setup", b.rect);
                 if b.clicked() {
                     outcome = Editor::Setup;

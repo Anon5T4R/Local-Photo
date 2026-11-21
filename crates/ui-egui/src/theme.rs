@@ -164,6 +164,23 @@ impl Default for Tokens {
 }
 
 impl Tokens {
+    /// The accent as a text colour: the accent itself nudged toward white (dark themes) or black (light
+    /// ones) until it reads at 4.5:1 on every surface text sits on. The plain accent is for fills and strokes.
+    pub fn accent_text(&self) -> Color32 {
+        use crate::button::contrast;
+        let surfaces = [self.chrome, self.canvas, self.inset, self.field, self.cell, self.cell_selected, self.button];
+        let dark = contrast(self.chrome, Color32::BLACK) < contrast(self.chrome, Color32::WHITE);
+        let to = if dark { Color32::WHITE } else { Color32::BLACK };
+        let mut c = self.accent;
+        for step in 0..=40 {
+            c = crate::widgets::lerp(self.accent, to, step as f32 * 0.02);
+            if surfaces.iter().all(|s| contrast(c, *s) >= 4.5) {
+                break;
+            }
+        }
+        c
+    }
+
     /// The tokens of `kind`. Metrics are shared; only colours change.
     pub fn for_kind(kind: ThemeKind) -> Tokens {
         let rgb = |v: u32| Color32::from_rgb((v >> 16) as u8, (v >> 8) as u8, v as u8);
@@ -459,6 +476,22 @@ pub fn apply_kind(ctx: &egui::Context, kind: ThemeKind) {
 
 #[cfg(test)]
 mod tests {
+    /// The accent as text and the white on an accent fill both read at 4.5:1 in every theme.
+    #[test]
+    fn the_accent_reads_at_aa_as_text_and_under_white_text() {
+        use crate::button::contrast;
+        for kind in ThemeKind::ALL {
+            let t = Tokens::for_kind(kind);
+            let text = t.accent_text();
+            for (name, surface) in [("chrome", t.chrome), ("canvas", t.canvas), ("inset", t.inset), ("field", t.field), ("cell", t.cell), ("selected cell", t.cell_selected), ("button", t.button)] {
+                let c = contrast(text, surface);
+                assert!(c >= 4.5, "{kind:?}: accent text on {name} is {c:.2}:1");
+            }
+            let fill = contrast(Color32::WHITE, t.accent);
+            assert!(fill >= 4.5, "{kind:?}: white on the accent is {fill:.2}:1");
+        }
+    }
+
     use super::*;
     use crate::i18n::{Locale, set_language};
 

@@ -832,7 +832,7 @@ fn info(app: &mut LocalPhotoApp, ui: &mut egui::Ui, id: PhotoId) {
                     _ => "Smart preview available",
                 };
                 ui.add_space(6.0);
-                ui.label(egui::RichText::new(crate::i18n::tr(text)).color(if online { t.text_dim } else { t.accent }));
+                ui.label(egui::RichText::new(crate::i18n::tr(text)).color(if online { t.text_dim } else { t.accent_text() }));
             }
         }
         ui.add_space(10.0);

@@ -230,7 +230,7 @@ fn menu(app: &mut LocalPhotoApp, ui: &mut egui::Ui, mask: &Mask, current: Option
                 ui.painter().rect_filled(rect, 3.0, t.hover);
             }
             if current == Some(name.as_str()) {
-                ui.painter().text(rect.left_center() + vec2(4.0, 0.0), egui::Align2::LEFT_CENTER, "✓", t.font(12.0), t.accent);
+                ui.painter().text(rect.left_center() + vec2(4.0, 0.0), egui::Align2::LEFT_CENTER, "✓", t.font(12.0), t.accent_text());
             }
             let room = rect.width() - 22.0 - if fav { 16.0 } else { 0.0 };
             let g = crate::widgets::one_line(ui.painter(), &display_name(name), t.font(12.5), t.text, room);
