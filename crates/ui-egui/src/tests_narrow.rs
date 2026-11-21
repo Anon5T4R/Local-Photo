@@ -40,13 +40,12 @@ fn outside(h: &Harness<'_, LocalPhotoApp>, place: &str, base: &std::collections:
         let mut up = n.parent();
         let mut hidden = false;
         while let Some(p) = up {
-            if p.role() == Role::ScrollView {
-                if let Some(pb) = p.bounding_box() {
-                    if b.x1 <= pb.x0 || b.x0 >= pb.x1 || b.y1 <= pb.y0 || b.y0 >= pb.y1 {
-                        hidden = true;
-                        break;
-                    }
-                }
+            if p.role() == Role::ScrollView
+                && let Some(pb) = p.bounding_box()
+                && (b.x1 <= pb.x0 || b.x0 >= pb.x1 || b.y1 <= pb.y0 || b.y0 >= pb.y1)
+            {
+                hidden = true;
+                break;
             }
             up = p.parent();
         }
