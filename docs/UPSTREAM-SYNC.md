@@ -54,6 +54,14 @@ Nunca edite `libs/craft-libs/crates/update` à mão.
   lint), sem mudança de comportamento — divergência local mínima até o upstream acompanhar.
 - `.github/`, README, AGENTS/CLAUDE e `docs/releasing.md` reescritos para a suíte.
 
+## Registro de sync
+
+A base continua `bb08a69`: só pontos escolhidos entram (skill `sync-upstream`), não um bump.
+
+| Data | Alvo (lightcraft) | Pegos | Descartados relevantes |
+|---|---|---|---|
+| 2026-11-21 | `origin/main` do dia | série #2589 `de9b0a89` `7c74ae0a` `a31a4367` `5b8b9b52` → `8682269` (duplicata por conteúdo no catálogo do Lightroom); `8ffe73cc` → `89fbbc7` (lente X-S20, sensores X-S10/X-S20/X-M5) | `2d905e0a` `89d11ab1` (backup ZIP do .lrcat: não temos), `5c598189` `d7372407` `e689453e` `19985a3f` `690f6cfb` (log do catálogo: não temos), `6c3083eb` `5a242898` (dependem do `craft-raw`), `cb91d69e` (hot-pixel: não temos), `a57bd69d` (perf menor, depende do job novo) |
+
 ## Pendências/gaps conhecidos desta porta
 
 - Assinatura minisign dos assets: fail-open até os secrets `MINISIGN_KEY`/`MINISIGN_PASSPHRASE`
