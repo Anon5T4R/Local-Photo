@@ -866,7 +866,8 @@ pub(crate) fn apply_prepared(s: &mut crate::Session, mut data: CatalogImport, co
     refuse_non_media(&mut data);
     validate(&data).map_err(error)?;
     let mut warnings = data.warnings.clone();
-    let duplicates: HashMap<_, _> = files.duplicates.iter().filter_map(|d| d.existing.map(|id| (key(&d.path), PhotoId(id)))).collect();
+    let duplicates: HashMap<_, _> =
+        files.duplicates.iter().filter_map(|d| d.existing.map(|id| (key(&d.path), (PhotoId(id), d.file_meta.as_deref())))).collect();
     let mut by_path: HashMap<_, _> =
         s.catalog.photos().filter(|p| p.copy_of.is_none()).filter_map(|p| source_path(p).map(|path| (key(path), p.id))).collect();
     let mut ids = HashMap::new();
@@ -879,6 +880,9 @@ pub(crate) fn apply_prepared(s: &mut crate::Session, mut data: CatalogImport, co
     let mut promoted = HashSet::new();
     let mut unmapped = BTreeMap::new();
     let mut preserved = 0;
+    // Library photos in Recently Deleted that a catalog photo matched: they stay there (only an
+    // import of the files themselves brings a photo back, see `OnDeleted`), and the report says so.
+    let mut in_trash = HashSet::new();
     // Masters precede their virtual copies.
     let mut photos: Vec<_> = data.photos.iter().collect();
     photos.sort_by_key(|p| number(&p.image, "masterImage") != 0);
@@ -903,6 +907,9 @@ pub(crate) fn apply_prepared(s: &mut crate::Session, mut data: CatalogImport, co
             .filter(|id| s.catalog.photo(*id).is_some_and(|p| source_path(p).is_some_and(|path| key(path) == key(&src.path))));
         let existing_id = indexed.or_else(|| if master == 0 { by_path.get(&key(&src.path)).copied() } else { None });
         let mut p = if let Some(id) = existing_id.and_then(|id| s.catalog.photo(id)) {
+            if id.deleted {
+                in_trash.insert(id.id);
+            }
             (**id).clone()
         } else if master != 0 {
             let master_id = ids.get(&master).copied().ok_or_else(|| error(format!("virtual copy {}: missing master", src.source_id)))?;
@@ -914,13 +921,53 @@ pub(crate) fn apply_prepared(s: &mut crate::Session, mut data: CatalogImport, co
             p.id = s.catalog.alloc_photo_id();
             p.copy_of = Some(master_id);
             p.copy_name = Some(text(&src.image, "copyName").to_string());
+            // a new copy of a master in Recently Deleted is imported, not trashed with it
+            p.deleted = false;
             p
-        } else if let Some(duplicate) = duplicates.get(&key(&src.path)).and_then(|id| s.catalog.photo(*id)) {
+        } else if let Some((duplicate, file_meta)) =
+            duplicates.get(&key(&src.path)).and_then(|(id, meta)| s.catalog.photo(*id).map(|p| (Photo::clone(p), *meta)))
+        {
             // Catalogs can contain distinct originals with identical bytes and independent edits.
-            let mut p = (**duplicate).clone();
-            p.id = s.catalog.alloc_photo_id();
-            p.source = Source::File { path: src.path.clone() };
-            p.file_name = Path::new(&src.path).file_name().map(|n| n.to_string_lossy().into()).unwrap_or_else(|| src.path.clone());
+            // The new record takes only what the bytes determine from the photo with the same
+            // bytes, never that photo's own state: not its Recently Deleted (#2589), virtual copy,
+            // edits, history, versions, ratings or the metadata a person writes. Its metadata is
+            // what its own file carries, as a file import reads it (copyright, creator…).
+            let name = Path::new(&src.path).file_name().map(|n| n.to_string_lossy().to_string()).unwrap_or_else(|| src.path.clone());
+            let mut p = Photo::new(
+                s.catalog.alloc_photo_id(),
+                Source::File { path: src.path.clone() },
+                &name,
+                &duplicate.format,
+                duplicate.width,
+                duplicate.height,
+                &now,
+            );
+            p.kind = duplicate.kind;
+            p.file_size = duplicate.file_size;
+            p.captured = duplicate.captured.clone();
+            p.duration = duplicate.duration;
+            p.as_shot_wb = duplicate.as_shot_wb;
+            p.content_hash = duplicate.content_hash.clone();
+            p.embedded_lens = duplicate.embedded_lens;
+            p.preview_only = duplicate.preview_only.clone();
+            p.preview_checked = duplicate.preview_checked.clone();
+            if let Some(meta) = file_meta {
+                p.meta = meta.clone();
+            } else {
+                // (the file wasn't read: only the exposure description, which no command edits;
+                // not GPS, which placing a photo on the map does)
+                let m = &duplicate.meta;
+                p.meta.camera = m.camera.clone();
+                p.meta.lens = m.lens.clone();
+                p.meta.focal_mm = m.focal_mm;
+                p.meta.aperture = m.aperture;
+                p.meta.shutter = m.shutter.clone();
+                p.meta.iso = m.iso;
+                p.meta.focus = m.focus.clone();
+            }
+            // the settings a file import gives it (as-shot white balance, embedded lens
+            // corrections, the default preset); the catalog's settings apply on top
+            crate::import::apply_import_defaults(s, &mut p);
             p
         } else {
             let id = s.catalog.alloc_photo_id();
@@ -1093,7 +1140,7 @@ pub(crate) fn apply_prepared(s: &mut crate::Session, mut data: CatalogImport, co
     }
     s.merge_undo(s.undo.len().saturating_sub(undo0), "Import Lightroom Catalog");
     Ok(AppliedImport {
-        report: json!({"source":data.source,"photos":ids.len(),"imported":imported,"library":s.library.as_ref().filter(|l| l.on_disk).map(|l| l.dir.to_string_lossy()),"collections":albums.len(),"preservedExistingEdits":preserved,"missing":missing,"failed":files.failed,"warnings":warnings,"skipped":data.skipped,"unmapped":unmapped,"archive":archive_path,"mapping":ids}),
+        report: json!({"source":data.source,"photos":ids.len(),"imported":imported,"library":s.library.as_ref().filter(|l| l.on_disk).map(|l| l.dir.to_string_lossy()),"collections":albums.len(),"preservedExistingEdits":preserved,"inRecentlyDeleted":in_trash.len(),"missing":missing,"failed":files.failed,"warnings":warnings,"skipped":data.skipped,"unmapped":unmapped,"archive":archive_path,"mapping":ids}),
         index: index.clone(),
     })
 }
@@ -1912,5 +1959,198 @@ mod tests {
         let rows = reader.optional_table("optional_history", &mut warnings).unwrap();
         assert!(rows.is_empty());
         assert!(warnings.iter().any(|warning| warning.contains("optional_history")));
+    }
+
+    /// A library photo at `path`, already committed.
+    fn library_photo(s: &mut crate::Session, path: &str, edit: impl FnOnce(&mut Photo)) -> PhotoId {
+        let id = s.catalog.alloc_photo_id();
+        let mut p = Photo::new(id, Source::File { path: path.into() }, "a.ARW", "ARW", 20, 10, "before");
+        p.content_hash = Some("same-bytes".into());
+        edit(&mut p);
+        s.commit("Add", Op::AddPhoto { photo: Box::new(p) }).unwrap();
+        id
+    }
+
+    /// `apply_prepared` of `data` with the file import's `files` report, as the Lightroom job runs it.
+    fn apply_with(s: &mut crate::Session, data: CatalogImport, files: crate::import::ImportReport) -> Value {
+        let undo0 = s.undo.len();
+        apply_prepared(
+            s,
+            data,
+            ApplyPrepared {
+                update_existing: false,
+                files,
+                index: &mut ImportIndex::default(),
+                archive_path: None,
+                missing_sources: &HashSet::new(),
+                undo0,
+            },
+        )
+        .unwrap()
+        .report
+    }
+
+    /// The master of `sample()` alone, and a file report saying its file has the same bytes as `other`.
+    fn content_duplicate_of(other: PhotoId, trashed: bool) -> (CatalogImport, crate::import::ImportReport) {
+        let mut data = sample();
+        data.photos.retain(|p| number(&p.image, "masterImage") == 0);
+        let files = crate::import::ImportReport {
+            duplicates: vec![crate::import::Duplicate {
+                path: "/missing/test.ARW".into(),
+                existing: Some(other.0),
+                reason: "content",
+                existing_deleted: trashed,
+                // what the file itself carries
+                file_meta: Some(Box::new(localphoto_catalog::Meta { camera: "Same Camera".into(), ..Default::default() })),
+            }],
+            ..Default::default()
+        };
+        (data, files)
+    }
+
+    /// A catalog photo whose file has the same bytes as a library photo is a new record of its own: not
+    /// in Recently Deleted because that photo is, not a virtual copy because that photo is one, and with
+    /// none of that photo's edits, history, versions or written metadata (#2589, from upstream).
+    #[test]
+    fn a_content_duplicate_is_a_new_live_photo_with_nothing_of_the_other_record() {
+        let trashed: fn(&mut Photo) = |p| p.deleted = true;
+        let virtual_copy: fn(&mut Photo) = |p| {
+            p.copy_of = Some(PhotoId(999));
+            p.copy_name = Some("Copy 1".into());
+        };
+        for (case, edit) in [("trashed", trashed), ("virtual copy", virtual_copy)] {
+            let mut s = crate::Session::new();
+            let other = library_photo(&mut s, "/elsewhere/a.ARW", |p| {
+                edit(p);
+                // the other photo's own state, which the new record must not inherit
+                let mut d = (*p.develop).clone();
+                d.light.shadows = 77.0;
+                p.develop = Arc::new(d);
+                p.edited = Some("earlier".into());
+                p.history.push(localphoto_catalog::HistoryStep { label: "Other photo's edit".into(), settings: p.develop.clone() });
+                p.versions.push(localphoto_catalog::Version {
+                    name: "Other photo's version".into(),
+                    created: "before".into(),
+                    settings: p.develop.clone(),
+                    auto: false,
+                });
+                p.meta.title = "Other photo's title".into();
+                p.meta.keywords = vec!["other-photo".into()];
+                p.local_baseline = Some(7);
+                // what the bytes determine is shared
+                p.file_size = 4096;
+            });
+            let (data, files) = content_duplicate_of(other, case == "trashed");
+            let r = apply_with(&mut s, data, files);
+            assert_eq!(r["imported"], 1, "{case}: {r}");
+            assert_eq!(r["inRecentlyDeleted"], 0, "{case}: {r}");
+            let new = s.catalog.photo(PhotoId(r["mapping"]["1"].as_u64().unwrap())).unwrap();
+            assert_ne!(new.id, other, "{case}");
+            assert!(!new.deleted, "{case}: the new record must not be in Recently Deleted");
+            assert_eq!((new.copy_of, new.copy_name.as_deref()), (None, None), "{case}: the new record is no virtual copy");
+            assert_ne!(new.imported, "before", "{case}: imported now, not when the other photo was");
+            assert_eq!(new.rating, 5, "{case}: the catalog's own metadata applies");
+            assert_ne!(new.develop.light.shadows, 77.0, "{case}: no edits from the other photo");
+            assert!(new.history.iter().all(|h| h.label != "Other photo's edit"), "{case}: no history from the other photo");
+            assert!(new.versions.is_empty(), "{case}: no versions from the other photo");
+            assert_ne!(new.meta.title, "Other photo's title", "{case}");
+            assert!(!new.meta.keywords.iter().any(|k| k == "other-photo"), "{case}");
+            assert_eq!(new.local_baseline, None, "{case}");
+            assert_eq!((new.meta.camera.as_str(), new.file_size), ("Same Camera", 4096), "{case}: what the bytes determine is kept");
+            assert_eq!(new.content_hash.as_deref(), Some("same-bytes"), "{case}");
+            assert_eq!(s.catalog.photo(other).unwrap().deleted, case == "trashed", "{case}: the other photo is left as it was");
+        }
+    }
+
+    /// A catalog photo matched (by path) to a library photo in Recently Deleted leaves it there (a
+    /// Lightroom import doesn't restore, see `OnDeleted`), and the report counts it. A new virtual copy
+    /// of it is imported, not trashed with its master (#2589).
+    #[test]
+    fn a_catalog_photo_matching_a_trashed_record_stays_there_and_is_counted() {
+        let mut s = crate::Session::new();
+        let trashed = library_photo(&mut s, "/missing/test.ARW", |p| p.deleted = true);
+        let r = apply(&mut s, sample(), false).unwrap();
+        assert_eq!(r["mapping"]["1"], trashed.0, "{r}");
+        assert!(s.catalog.photo(trashed).unwrap().deleted, "the photo stays in Recently Deleted");
+        assert_eq!(r["inRecentlyDeleted"], 1, "{r}");
+        let copy = s.catalog.photos().find(|p| p.copy_of == Some(trashed)).unwrap();
+        assert!(!copy.deleted, "the new virtual copy is imported, not trashed");
+        assert_eq!(r["imported"], 1, "only the copy was added: {r}");
+    }
+
+    /// A content duplicate raw starts from the settings a file import gives it (as-shot white balance,
+    /// embedded lens corrections) before the catalog's go on top; not from the generic defaults (#2589).
+    #[test]
+    fn a_content_duplicate_raw_starts_from_its_camera_defaults() {
+        let mut s = crate::Session::new();
+        let other = library_photo(&mut s, "/elsewhere/a.DNG", |p| {
+            p.deleted = true;
+            p.format = "DNG".into();
+            p.kind = localphoto_catalog::MediaKind::Raw;
+            p.as_shot_wb = Some((5200.0, 4.0));
+            p.embedded_lens = Some(localphoto_develop::EmbeddedLens::default());
+        });
+        let (mut data, files) = content_duplicate_of(other, true);
+        // a catalog row with no develop settings of its own
+        data.photos[0].settings.clear();
+        let r = apply_with(&mut s, data, files);
+        let new = s.catalog.photo(PhotoId(r["mapping"]["1"].as_u64().unwrap())).unwrap();
+        assert_eq!(*new.develop, new.camera_defaults(), "{r}");
+        assert_eq!((new.develop.wb.temp, new.develop.wb.tint), (5200.0, 4.0), "the file's as-shot white balance");
+        assert!(new.develop.optics.lens_profile, "the file's embedded lens corrections are on");
+    }
+
+    /// A content duplicate keeps the metadata its file carries (copyright, rights, creator), as a file
+    /// import of it would; it reads the file's, not the other photo's, which a person may have edited
+    /// (#2589).
+    #[test]
+    fn a_content_duplicate_keeps_the_rights_metadata_in_its_file() {
+        let dir = std::env::temp_dir().join(format!("localphoto-lrcat-duplicate-rights-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(dir.join("Photos")).unwrap();
+        let source = dir.join("source.lrcat");
+        std::fs::write(dir.join("Photos/test.ARW"), b"same bytes").unwrap();
+        std::fs::write(&source, native_catalog(&photo_tables((dir.to_str().unwrap(), "")))).unwrap();
+        let mut s = crate::Session::new();
+        let other = library_photo(&mut s, "/elsewhere/a.ARW", |p| {
+            p.deleted = true;
+            // edited on the other record after its import
+            p.meta.copyright = "Other photo's notice".into();
+            p.meta.creator = "Other photo's creator".into();
+            p.meta.gps = Some((1.0, 2.0));
+        });
+        let file_meta = localphoto_catalog::Meta {
+            camera: "Same Camera".into(),
+            copyright: "© Jo Example".into(),
+            copyright_status: localphoto_catalog::CopyrightStatus::Copyrighted,
+            usage_terms: "No reuse".into(),
+            creator: "Jo Example".into(),
+            ..Default::default()
+        };
+        let probed = file_meta.clone();
+        s.media.file_probe = Some(Arc::new(move |_| {
+            Ok(crate::media::ProbeInfo {
+                format: "ARW".into(),
+                width: 20,
+                height: 10,
+                content_hash: Some("same-bytes".into()),
+                meta: probed.clone(),
+                ..Default::default()
+            })
+        }));
+        let mut job = crate::lightroom_job::LightroomJob::new(&mut s, source, false).unwrap();
+        let prepared = job.prepare(&AtomicBool::new(false)).unwrap();
+        let r = crate::lightroom_job::commit_prepared(&mut s, prepared).unwrap().report;
+        let new = s.catalog.photos().find(|p| p.id != other).unwrap_or_else(|| panic!("no new record: {r}"));
+        assert_eq!(new.content_hash.as_deref(), Some("same-bytes"), "{r}");
+        assert_eq!(new.rating, 5, "the catalog's own metadata applies: {r}");
+        let m = &new.meta;
+        assert_eq!(
+            (m.copyright.as_str(), m.copyright_status, m.usage_terms.as_str(), m.creator.as_str(), m.camera.as_str()),
+            ("© Jo Example", file_meta.copyright_status, "No reuse", "Jo Example", "Same Camera"),
+            "the file's own metadata: {r}"
+        );
+        assert_eq!(m.gps, None, "nothing from the other photo's record");
+        std::fs::remove_dir_all(dir).unwrap();
     }
 }

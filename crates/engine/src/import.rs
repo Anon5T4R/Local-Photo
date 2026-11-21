@@ -189,6 +189,12 @@ pub struct Duplicate {
     /// That photo is in Recently Deleted (see [`OnDeleted`]).
     #[serde(rename = "existingDeleted", skip_serializing_if = "std::ops::Not::not")]
     pub existing_deleted: bool,
+    /// The metadata the file itself carries (EXIF, IPTC, embedded XMP), as a file import reads it;
+    /// `None` when the file wasn't read (a path match). A Lightroom import makes a record of its
+    /// own for a duplicate by content and starts it from these, not from the other photo's record,
+    /// whose metadata may have been edited (#2589).
+    #[serde(skip)]
+    pub file_meta: Option<Box<localphoto_catalog::Meta>>,
 }
 
 #[derive(Clone, Debug, Default, Serialize)]
@@ -857,6 +863,8 @@ enum PreparedItem {
         existing: Option<PhotoId>,
         reason: &'static str,
         hash: Option<String>,
+        /// The metadata the file itself carries, when it was read ([`Duplicate::file_meta`]).
+        file_meta: Option<Box<localphoto_catalog::Meta>>,
     },
     Failed(String, String),
     Kept(Kept),
@@ -925,6 +933,7 @@ impl Prepared {
                     existing: Some(existing),
                     reason: if existing_path.is_some() { "path" } else { "content" },
                     hash: info.content_hash,
+                    file_meta: Some(Box::new(info.meta)),
                 });
             } else {
                 items.push(PreparedItem::Ready(Box::new(ReadyFile { path, stored, info, sidecar, placed })));
@@ -1045,7 +1054,7 @@ impl ImportJob {
                     self.done.fetch_add(1, Relaxed);
                 }
                 Some((id, _)) => {
-                    out.items.push(PreparedItem::Duplicate { path: f, existing: Some(id), reason: "path", hash: None });
+                    out.items.push(PreparedItem::Duplicate { path: f, existing: Some(id), reason: "path", hash: None, file_meta: None });
                     self.done.fetch_add(1, Relaxed);
                 }
                 None => todo.push(f),
@@ -1110,7 +1119,13 @@ impl ImportJob {
                 && let Some(existing) = self.by_hash.get(h)
             {
                 self.done.fetch_add(1, Relaxed);
-                plan.slots.push(Slot::Item(PreparedItem::Duplicate { path, existing: *existing, reason: "content", hash: Some(h.clone()) }));
+                plan.slots.push(Slot::Item(PreparedItem::Duplicate {
+                    path,
+                    existing: *existing,
+                    reason: "content",
+                    hash: Some(h.clone()),
+                    file_meta: Some(Box::new(info.meta)),
+                }));
                 continue;
             }
             // the XMP sidecar (or a raw's embedded XMP), read before copying: its capture time files
@@ -1424,7 +1439,7 @@ pub fn commit_prepared(s: &mut Session, opts: &ImportOptions, now: &str, prepare
                 }
                 report.imported.push(id.0);
             }
-            PreparedItem::Duplicate { path, existing, reason, hash } => {
+            PreparedItem::Duplicate { path, existing, reason, hash, file_meta } => {
                 let existing = existing.or_else(|| {
                     let h = hash?;
                     new_hash.get(&h).copied().or_else(|| s.catalog.photos().find(|p| p.content_hash.as_deref() == Some(h.as_str())).map(|p| p.id))
@@ -1443,7 +1458,13 @@ pub fn commit_prepared(s: &mut Session, opts: &ImportOptions, now: &str, prepare
                             report.restored.push(id.0);
                         }
                     }
-                    _ => report.duplicates.push(Duplicate { path, existing: existing.map(|i| i.0), reason, existing_deleted: trashed.is_some() }),
+                    _ => report.duplicates.push(Duplicate {
+                        path,
+                        existing: existing.map(|i| i.0),
+                        reason,
+                        existing_deleted: trashed.is_some(),
+                        file_meta,
+                    }),
                 }
             }
             PreparedItem::Failed(path, e) => report.failed.push((path, e)),
