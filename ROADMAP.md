@@ -46,7 +46,7 @@ the ~75% beta bar (it is above the ~40% alpha bar) and Lightroom's main inputs, 
 | Localization | ~64% of the 12 key languages | 8 of 12 present | 130–210 h (+135–239 h new scripts)  | — |
 | Performance | ~70% | ~80% | 30–50 h  | — |
 | Stability | ~60% | — | 30–60 h  | — |
-| Platforms | ~60% | macOS, Windows, Linux, FreeBSD, web | 25–45 h  | — |
+| Platforms | ~60% | macOS, Windows, Linux, FreeBSD | 25–45 h  | — |
 | Ecosystem / plug-ins | ~15% | ~25% | 40–80 h  | — |
 | AI features | ~20% | ~30% | 120–220 h (overlaps features)  | — |
 

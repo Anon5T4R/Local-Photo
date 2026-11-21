@@ -15,7 +15,7 @@ If no private channel can be established, withhold weaponized material and repor
 A useful report includes:
 
 - affected Local Photo version, commit, or release artifact;
-- operating system, architecture, build profile (desktop or web), and relevant feature flags;
+- operating system, architecture, build profile, and relevant feature flags;
 - the affected component or path;
 - security impact and required attacker access;
 - exact reproduction steps;
@@ -43,7 +43,6 @@ Security reports may cover:
 - downloading, verifying, unpacking and running machine-learning models (denoise, faces, masks);
 - engine command validation and serialization/deserialization;
 - the desktop control channel, the MCP server, and the MCP-to-app connection;
-- the WebAssembly build;
 - GPU resource validation or driver-facing input handling;
 - dependencies, CI, packaging, signing, checksums, and release artifact integrity.
 

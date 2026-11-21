@@ -43,10 +43,6 @@ RISC-V and FreeBSD builds are on the release page too. On a Wayland desktop, Loc
 
 [ArtCraft Launcher](https://getartcraft.com/docs/craft-launcher) lists Local Photo and can install and update it for you. On Windows it installs the release `.msi`.
 
-## In a web browser
-
-The release also has `localphoto-web-<version>.zip`, a static site that runs Local Photo in a modern browser. Host it on any static web server.
-
 ## First run
 
 1. Start Local Photo. It opens your library at `~/Pictures/Local Photo Library`. A new library starts with demo photos.

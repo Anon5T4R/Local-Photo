@@ -24,7 +24,7 @@ re-tag no commit bom + push da tag sozinha); só release **já publicada** exige
 ## O que o workflow builda
 
 Só Windows, Linux e Arch (os mesmos jobs dos irmãos da suíte). Os scripts de `packaging/` para
-macOS, FreeBSD, Flatpak e web continuam no repo para uso manual, mas não são exercitados no CI
+macOS, FreeBSD e Flatpak continuam no repo para uso manual, mas não são exercitados no CI
 deste fork.
 
 - **Windows** (`packaging/windows/package.ps1`): MSI per-machine (WiX 5.0.2 + extensões UI/Util,

@@ -13,7 +13,7 @@ On your computer. Your library lives in a folder you choose, by default `~/Pictu
 
 ## Which systems does it run on?
 
-Local Photo runs on Windows, macOS and Linux, and in a web browser. See [Install Local Photo](../getting-started/install.md).
+Local Photo runs on Windows, macOS and Linux. See [Install Local Photo](../getting-started/install.md).
 
 ## Is it finished?
 

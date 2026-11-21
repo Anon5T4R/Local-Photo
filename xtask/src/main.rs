@@ -1,6 +1,6 @@
 //! Workspace tooling: `cargo xtask <command>`.
 //!
-//! Pure Rust (std + serde_json; flate2/brotli for the web bundle). External tools (`cargo`, `curl`, `tar`) are
+//! Pure Rust (std + serde_json). External tools (`cargo`, `curl`, `tar`) are
 //! invoked through `std::process::Command`.
 
 mod assets;
@@ -12,7 +12,6 @@ mod ico;
 mod layers;
 mod stats;
 mod version;
-mod web;
 
 use std::path::{Path, PathBuf};
 use std::process::{Command, ExitCode};
@@ -29,12 +28,8 @@ commands:
   ico <out.ico> <in.png>...
                   pack square PNGs (<= 256 px) into a Windows .ico (see packaging/icons.sh)
   layers          enforce the crate dependency layering (plan/architecture.md §3)
-  wasm            cargo check --target wasm32-unknown-unknown for the wasm-safe crates (+ the web app), in one call
-  web [--serve [port]] [--dev]
-                  build the browser app (apps/localphoto-web) into <target>/web-site/;
-                  --serve serves it on http://127.0.0.1:<port> (default 8080)
   ci [--hardware] [--summary-md] [--quick [--base REF]]
-                  fmt --check, clippy -D warnings, heif, test, GPU probe, layers, assets, cargo-deny, local-libs mirrors, wasm
+                  fmt --check, clippy -D warnings, heif, test, GPU probe, layers, assets, cargo-deny, local-libs mirrors
                   (stops at first failure). Tests run under cargo test (cargo nextest with
                   LOCALPHOTO_NEXTEST=1), without examples, then doctests with cargo test --doc; after
                   them it prints the translation gaps report (never a failure). Writes
@@ -42,7 +37,7 @@ commands:
                   steps, skipped tests) and target/ci/summary.md; --hardware also runs the GPU tests on
                   every backend with a hardware adapter; --summary-md prints the Markdown summary.
                   --quick: only what the changes since the merge base with origin/main (or REF) can
-                  break: clippy, the changed packages' tests, and heif / wasm when they apply.
+                  break: clippy, the changed packages' tests, and heif when it applies.
                   One ci runs at a time per machine; others wait (LOCALPHOTO_CI_SLOTS=N for N at once,
                   LOCALPHOTO_CI_LOCK=off to skip the lock)
   corpus [--download]
@@ -65,8 +60,6 @@ fn main() -> ExitCode {
         Some("assets") => assets::run(&root()),
         Some("fmt") => cmd_fmt(),
         Some("bench") => bench::run(&root(), &rest),
-        Some("wasm") => cmd_wasm(),
-        Some("web") => web::run(&rest),
         Some("ci") => cmd_ci(&rest),
         Some("corpus") => cmd_corpus(rest.contains(&"--download")),
         Some("stats") => stats::run(&root(), rest.contains(&"--exact")),
@@ -113,7 +106,7 @@ pub fn cargo() -> Command {
     let mut c = Command::new(std::env::var("CARGO").unwrap_or_else(|_| "cargo".into()));
     c.current_dir(root());
     // Full Windows debuginfo plus one linker per CPU can exhaust RAM before any
-    // tests run. Scope these overridable defaults to CI, including WASM
+    // tests run. Scope these overridable defaults to CI, including
     // subprocesses, without changing ordinary developer builds or GPU coverage.
     if std::env::args().nth(1).as_deref() == Some("ci") {
         static JOBS: std::sync::OnceLock<(String, String)> = std::sync::OnceLock::new();
@@ -377,42 +370,6 @@ fn cmd_layers() -> Result<(), String> {
     }
 }
 
-/// Workspace packages that must build for wasm32: all L0–L5 crates plus
-/// the egui shell and the web app.
-fn wasm_set() -> Result<Vec<String>, String> {
-    let crates = layers::from_metadata(&metadata()?)?;
-    Ok(crates
-        .into_iter()
-        .filter(|c| match layers::classify(&c.name) {
-            Some(layers::Class::Layer(l)) => l <= 5,
-            Some(layers::Class::Standalone) => true,
-            _ => false,
-        })
-        .map(|c| c.name)
-        .chain(std::iter::once("localphoto-web".to_string()))
-        .collect())
-}
-
-/// One `cargo check` over the whole set; `--keep-going` reports every crate that fails.
-fn cmd_wasm() -> Result<(), String> {
-    cmd_wasm_for(None)
-}
-
-/// The wasm check of the wasm-safe crates, or only those of them in `only` (`ci --quick`).
-fn cmd_wasm_for(only: Option<&std::collections::BTreeSet<String>>) -> Result<(), String> {
-    let set: Vec<String> = wasm_set()?.into_iter().filter(|p| only.is_none_or(|o| o.contains(p))).collect();
-    if set.is_empty() {
-        println!("wasm32-unknown-unknown check: no changed crate builds for wasm32");
-        return Ok(());
-    }
-    let mut c = cargo();
-    c.args(["check", "--target", "wasm32-unknown-unknown", "--keep-going"]);
-    for pkg in &set {
-        c.args(["-p", pkg]);
-    }
-    run(c, &format!("cargo check --target wasm32-unknown-unknown --keep-going -p {}", set.join(" -p ")))
-}
-
 /// The workspace's own package names, for the `fmt` gate: the vendored trees under `libs/` and
 /// `assets/craft-fonts/` keep their origin formatting style, so they are never formatted here.
 fn workspace_packages() -> Result<Vec<String>, String> {
@@ -510,7 +467,7 @@ fn cmd_ci(args: &[&str]) -> Result<(), String> {
     let wants = |step: &str| match &plan {
         None => true,
         Some(p) => match step {
-            "clippy" | "test" | "wasm" => p.rust(),
+            "clippy" | "test" => p.rust(),
             "heif" => p.heif,
             _ => true,
         },
@@ -593,12 +550,6 @@ fn cmd_ci(args: &[&str]) -> Result<(), String> {
     steps.push(("assets", Box::new(|| assets::run(&root))));
     steps.push(("deny", Box::new(cmd_deny)));
     steps.push(("mirror", Box::new(cmd_mirror)));
-    if wants("wasm") {
-        match plan.as_ref().filter(|p| !p.workspace_wide) {
-            Some(p) => steps.push(("wasm", Box::new(|| cmd_wasm_for(Some(&p.packages))))),
-            None => steps.push(("wasm", Box::new(cmd_wasm))),
-        }
-    }
 
     let mut results = Vec::new();
     let mut failure = None;
@@ -609,7 +560,7 @@ fn cmd_ci(args: &[&str]) -> Result<(), String> {
         let status = if r.is_ok() { "ok" } else { "fail" };
         results.push(serde_json::json!({"name": name, "status": status, "seconds": t.elapsed().as_secs_f64()}));
         if *name == "test" && plan.is_none() {
-            // right after the workspace tests, before wasm builds other feature sets
+            // right after the workspace tests, before the other steps build other feature sets
             probe();
             translation_gaps();
         }

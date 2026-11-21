@@ -1,6 +1,6 @@
 # Architecture
 
-> **Last reviewed:** 2026-10-10 · **Last updated:** 2026-10-23 · **Change:** minor (`cargo xtask ci`: one integration-test binary per crate, doctests apart, one WASM check) · **Target:** Adobe Lightroom Classic 15.5 / Lightroom 9.6
+> **Last reviewed:** 2026-10-10 · **Last updated:** 2026-10-23 · **Change:** minor (`cargo xtask ci`: one integration-test binary per crate, doctests apart) · **Target:** Adobe Lightroom Classic 15.5 / Lightroom 9.6
 
 How Local Photo is built today. The longer design document (`plan/architecture.md`) is local-only
 (`plan/` is gitignored); this page is the committed, current summary. Sizes are Rust lines counted
@@ -19,7 +19,7 @@ L5 depends on egui, eframe, winit or rfd, and that each crate only uses lower la
 | L3 | `catalog` (11.0k), `gpu` (5.1k), `preview` (1.3k), `merge` (3.8k), `segment` (2.3k) | Library model and persistence; wgpu compute twin of the pipeline; thumbnail/preview cache and job pool; HDR and panorama merge; SAM 3 segmentation |
 | L4 | `engine` (53.2k) | Session, command registry (everything is a command), history, render and export jobs, import, Lightroom catalog and preset import, faces index, view-models |
 | L5 | `ui-egui` (46.9k), `mcp` (2.3k) | The Lightroom-style egui interface (swappable); the MCP server |
-| L6 | `apps/localphoto` (2.8k), `apps/localphoto-cli` (1.5k), `apps/localphoto-web` (3.4k), `xtask` (3.4k), `testkit` (0.2k, dev-dependency only) | Desktop app (eframe + wgpu, native menus, control server), CLI (render, commands, calibrate, snapshot, MCP), WASM build, tooling; test helpers (skips the CI report lists) |
+| L6 | `apps/localphoto` (2.8k), `apps/localphoto-cli` (1.5k), `xtask` (3.4k), `testkit` (0.2k, dev-dependency only) | Desktop app (eframe + wgpu, native menus, control server), CLI (render, commands, calibrate, snapshot, MCP), tooling; test helpers (skips the CI report lists) |
 
 ## Data model
 
@@ -48,7 +48,7 @@ L5 depends on egui, eframe, winit or rfd, and that each crate only uses lower la
 3. **GPU** (`gpu`): the same stages in WGSL on Metal / DX12 / Vulkan, checked against the CPU path
    (within 1/255); GPU errors fall back to the CPU (`docs/gpu-pipeline.md`).
 4. **Display and export**: display-profile conversion (`docs/display-profiles.md`); export through
-   one encoder for app, CLI, MCP and web (`localphoto_engine::export`).
+   one encoder for app, CLI and MCP (`localphoto_engine::export`).
 
 ## Agent control
 
@@ -59,8 +59,8 @@ dispatch by id, and headless snapshots render the UI without a window.
 ## Quality gates
 
 `cargo xtask ci`: fmt, clippy `-D warnings` with the never-crash lints, the HEIF build, tests,
-`layers`,
-`assets` (every asset attributed, no Adobe formats) and the WASM build. Other workflows build and
+`layers` and
+`assets` (every asset attributed, no Adobe formats). Other workflows build and
 test FreeBSD and Windows ARM64, lint packaging, and build releases.
 
 The tests run under `cargo test --workspace --lib --bins --tests`, or `cargo nextest run` with the
@@ -70,8 +70,7 @@ generated scenes are cached per process, and nextest's process per test regenera
 Examples are left out of the test build (clippy `--all-targets` still
 checks them). Each crate links its integration tests into one binary, `tests/it/main.rs` with one
 module per file (`cargo test -p <crate> --test it <module>::`); a test that changes state for its
-whole process (a global allocator, closing the GPU) keeps a binary of its own in `tests/`. The WASM
-build is one `cargo check --target wasm32-unknown-unknown --keep-going` over the wasm-safe crates.
+whole process (a global allocator, closing the GPU) keeps a binary of its own in `tests/`.
 
 `ci` also probes the machine: OS, CPUs, RAM, the GPU adapters of each backend (from the ignored
 `gpu_probe` test of `localphoto-gpu`, run after the workspace tests so it reuses their build; xtask
@@ -87,6 +86,6 @@ the `localphoto-gpu` tests once per backend with a hardware adapter (`LOCALPHOTO
 
 | Date | Change | Summary |
 |---|---|---|
-| 2026-10-23 | minor | Quality gates: one integration-test binary per crate, doctests apart, nextest on request, one WASM check |
+| 2026-10-23 | minor | Quality gates: one integration-test binary per crate, doctests apart, nextest on request |
 | 2026-10-11 | minor | Quality gates: the CI machine probe, visible skips (`testkit`) and `target/ci/report.json` |
 | 2026-10-10 | major | Created from the code (crate sizes, layers, data model, rendering, control, gates) |

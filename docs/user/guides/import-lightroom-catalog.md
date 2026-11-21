@@ -38,4 +38,3 @@ Original files stay where they are, and Local Photo refers to them in place. Pho
 - Importing the same catalog again does not duplicate virtual copies or collections. By default, edits you already made in Local Photo are kept.
 - A big catalog can take a long time. In one report on an earlier version, 38,000 photos took about 25 minutes from a USB SSD.
 - To stop the import, click ✕ on its row in the activity stack. This works while Local Photo reads the catalog. Once it starts adding the photos, it finishes.
-- The browser version cannot import a catalog.

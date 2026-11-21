@@ -1,13 +1,13 @@
 //! `cargo xtask ci --quick`: the checks a branch's own changes can break, for a pre-push check.
 //!
-//! The full `ci` builds the workspace several ways (clippy, heif, tests, wasm), ~23 minutes cold. `--quick` looks at what changed since the merge base with
-//! `origin/main` (or `--base REF`), committed or not, and runs:
+//! The full `ci` builds the workspace several ways (clippy, heif, tests), ~23 minutes
+//! cold. `--quick` looks at what changed since the merge base with `origin/main` (or `--base REF`),
+//! committed or not, and runs:
 //!
 //! - fmt, layers, assets: always (seconds);
 //! - clippy on the whole workspace (check builds only; catches callers broken by an API change);
 //! - the tests of the changed packages only (not their dependents);
-//! - heif when `localphoto-codecs` / `localphoto-heif` changed;
-//! - the wasm check of the changed packages that must build for wasm32.
+//! - heif when `localphoto-codecs` / `localphoto-heif` changed.
 //!
 //! A file outside any package that a crate compiles in (`include_str!` of `docs/whats-new.md`,
 //! fonts and camera profiles under `assets/`, ...) counts as a change to that crate (`EMBEDDED`).

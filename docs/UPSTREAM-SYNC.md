@@ -35,7 +35,7 @@ Nunca edite `libs/craft-libs/crates/update` à mão.
   ProgIds/UpgradeCode do MSI, chaves de registro (`Software\Local Photo` +
   `Software\Anon5T4R\LocalPhoto\InstallDir`, App Paths), pasta de configuração `LocalPhoto`.
 - CI próprio: sem `craft-common-actions`, sem sonarcloud, sem nix/flake, sem jobs macOS/FreeBSD/
-  windows-arm64/web. Release por **tag** (o upstream usa a branch `release` + draft).
+  windows-arm64. Release por **tag** (o upstream usa a branch `release` + draft).
 - `libs/` e `assets/craft-fonts/` vendorizados (o upstream busca os dois por git no CI).
 - `cargo xtask fmt` (escopo = membros do workspace) no lugar de `cargo fmt --all`: os caminhos
   vendorizados mantêm o estilo de origem.

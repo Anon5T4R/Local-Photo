@@ -66,7 +66,6 @@ pub const TABLE: &[(&str, Class)] = &[
     // L6 apps and tooling
     ("localphoto", Class::Exempt),
     ("cli", Class::Exempt),
-    ("web", Class::Exempt),
     ("xtask", Class::Exempt),
 ];
 
@@ -309,7 +308,7 @@ mod tests {
 
     #[test]
     fn apps_exempt() {
-        for app in ["localphoto", "localphoto-cli", "localphoto-web", "xtask"] {
+        for app in ["localphoto", "localphoto-cli", "xtask"] {
             assert!(check(&[c(app, &[("egui", Normal, false), ("localphoto-ui-egui", Normal, true)])]).is_empty());
         }
     }

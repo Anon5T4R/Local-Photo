@@ -18,14 +18,13 @@ Biblioteca de fotos + revelação RAW não destrutiva; o Lightroom é a referên
 
 ## Estrutura
 - `crates/` — engine e módulos (`localphoto-*`), em camadas L0–L6 (`cargo xtask layers`)
-- `apps/localphoto` — app desktop + control channel; `apps/localphoto-cli` — CLI/MCP;
-  `apps/localphoto-web` — wasm
+- `apps/localphoto` — app desktop + control channel; `apps/localphoto-cli` — CLI/MCP
 - `libs/` — forks vendored: `craft-libs` (base 1e6f1278; `crates/update` vem do `local-libs`),
   `egui` 6d518fc, `winit` a517b38, `winprint.rs` 417ac3c, `rustls-rustcrypto`
 - `assets/craft-fonts/` — o craft-fonts inteiro vendored (build input `CRAFT_FONTS_DIR`)
-- `packaging/` — Windows (WiX/MSI), Linux (AppImage/deb/rpm/tar), Arch (PKGBUILD), macOS, FreeBSD, web
+- `packaging/` — Windows (WiX/MSI), Linux (AppImage/deb/rpm/tar), Arch (PKGBUILD), macOS, FreeBSD
 - `docs/` — arquitetura, formatos, paridade, release (`docs/releasing.md`)
-- `xtask/` — tarefas de build/CI (`cargo xtask ci`, `layers`, `assets`, `wasm`, `web`)
+- `xtask/` — tarefas de build/CI (`cargo xtask ci`, `layers`, `assets`)
 - `scripts/check-mirror.sh` — confere as crates e os assets (`craft-fonts`) espelhados do `local-libs` contra a fonte (CI e `xtask ci`)
 
 ## Agent-native (MCP)
@@ -40,7 +39,7 @@ passos; `commands --search TEXT` filtra o catálogo. **Dívida**: as flags
 ```
 cargo build --locked          # debug
 cargo test --locked           # as fontes vendored entram sempre (.cargo/config.toml), igual ao CI
-cargo xtask ci                # gate completo (fmt, clippy, testes, camadas, assets, cargo-deny, espelhos do local-libs, wasm)
+cargo xtask ci                # gate completo (fmt, clippy, testes, camadas, assets, cargo-deny, espelhos do local-libs)
 packaging/windows/package.ps1 # MSI + portable (Windows)
 packaging/linux/package.sh    # AppImage/deb/rpm/tar (Linux)
 ```
@@ -49,7 +48,7 @@ Fontes CJK: o craft-fonts vendored em `assets/craft-fonts` é o build input
 (`CRAFT_FONTS_DIR=assets/craft-fonts cargo run -p localphoto`). Sem ele tudo compila e roda, mas
 chinês/japonês ficam sem glifos; os releases sempre buildam com ele.
 
-Regras técnicas do código (never-crash, camadas, tudo é comando, wasm, testes):
+Regras técnicas do código (never-crash, camadas, tudo é comando, testes):
 `AGENTS.md` do upstream equivale a `docs/contributing.md` quando existir; as regras vivas são:
 nada de `unsafe` fora de `crates/sysmem`, nada de `unwrap`/`panic!` em código de produção,
 toda entrada (arquivo, comando, MCP, preferências) é hostil até prova em contrário.

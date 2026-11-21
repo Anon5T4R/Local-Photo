@@ -39,7 +39,7 @@ GitHub (desligável nas preferências).
 | Windows 10+ x64 | `localphoto-<ver>-windows-<arch>.msi` (per-machine, instala em `Program Files\Local Photo`) e `localphoto-<ver>-windows-<arch>-portable.zip` |
 | Linux x86_64 | `.AppImage`, `.deb`, `.rpm` e `.tar.gz` (árvore FHS, `packaging/linux/package.sh`) |
 | Arch Linux | `.pkg.tar.zst` do job Arch e `packaging/arch/PKGBUILD` |
-| macOS, FreeBSD, web (WebAssembly) | pelos scripts de `packaging/` (não são buildados no CI deste fork) |
+| macOS, FreeBSD | pelos scripts de `packaging/` (não são buildados no CI deste fork) |
 
 ## Everything in the box
 
@@ -66,7 +66,7 @@ git clone https://github.com/Anon5T4R/Local-Photo
 cd Local-Photo
 cargo run --release -p localphoto            # o app desktop
 cargo test --workspace                       # a suíte de testes
-cargo xtask ci                               # gate completo (fmt, clippy, testes, camadas, assets, wasm)
+cargo xtask ci                               # gate completo (fmt, clippy, testes, camadas, assets)
 ```
 
 As fontes CJK da UI e das legendas vêm do [craft-fonts](https://github.com/storytold/craft-fonts),
