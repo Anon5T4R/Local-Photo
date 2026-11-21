@@ -205,3 +205,56 @@ fn casca_shots() {
         }
     }
 }
+
+/// Visual QA (ignored): the main screen with a photo open and the Develop panel, the palette, Settings, every dialog
+/// and the update prompt, at the minimum window and at 1100 wide, in both themes. The PNGs land in
+/// `target/qa-guardas/`.
+#[test]
+#[ignore = "visual QA: renders the app at two widths in both themes"]
+fn guardas_shots() {
+    use crate::state::{RightPanel, ViewMode};
+    let directory = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../target/qa-guardas");
+    std::fs::create_dir_all(&directory).unwrap();
+    let model_dir = std::env::temp_dir().join(format!("lp-shots-{}", std::process::id()));
+    std::fs::create_dir_all(&model_dir).unwrap();
+    let model = model_dir.join("Mine.onnx");
+    std::fs::write(&model, localphoto_faces::synthetic::tiny_embedder_model(512)).unwrap();
+    let scenes = [
+        "main", "palette", "app.settings", "app.shortcuts", "app.whatsNew", "app.about", "app.systemInfo", "dialog.export", "dialog.copySettings",
+        "dialog.createPreset", "dialog.rename", "dialog.newAlbum", "dialog.newSmartAlbum", "dialog.captureTime", "dialog.labelNames",
+        "dialog.allMetadata", "dialog.autoStack", "dialog.contactSheet", "dialog.slideshowExport", "dialog.cull", "dialog.faceModel", "update",
+    ];
+    for (wname, size) in [("min", crate::window_place::MIN_SIZE), ("1100", [1100.0, 700.0])] {
+        for mode in ["light", "dark"] {
+            for scene in scenes {
+                let services = Services { png: None, ..Default::default() };
+                let mut app = LocalPhotoApp::new(localphoto_engine::Session::with_demo(), services);
+                app.ui.left_panel = true;
+                app.ui.view = ViewMode::Detail;
+                app.ui.right = RightPanel::Edit;
+                let mut h = Headless::new(app, size, 1.0);
+                h.settle(Duration::from_secs(60));
+                h.app.run("view.appearance", json!({"mode": mode})).unwrap();
+                match scene {
+                    "main" => {}
+                    "palette" => {
+                        h.app.palette.open();
+                        h.step();
+                    }
+                    "update" => h.app.offer_update_for_test("Local Photo 99.0.0 with a release name long enough to need wrapping in a narrow window"),
+                    "dialog.faceModel" => {
+                        h.app.run(scene, json!({"path": model.to_string_lossy()})).unwrap();
+                    }
+                    command => {
+                        h.app.run(command, json!({})).unwrap();
+                    }
+                }
+                for _ in 0..4 {
+                    h.step();
+                }
+                let image = h.snapshot(Duration::from_secs(30));
+                save_png(&image, &directory.join(format!("{wname}-{mode}-{scene}.png")));
+            }
+        }
+    }
+}
