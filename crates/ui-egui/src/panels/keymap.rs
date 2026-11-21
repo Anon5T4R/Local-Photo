@@ -108,7 +108,7 @@ fn row(app: &mut LocalPhotoApp, ui: &mut egui::Ui, t: &Tokens, b: &Bindable, sc:
             None => RichText::new("—").color(t.text_dim),
         }
     };
-    let r = ui.add(egui::Button::new(text).min_size(egui::vec2(110.0, 0.0)).selected(recording));
+    let r = ui.add(egui::Button::new(text).min_size(egui::vec2(130.0, 0.0)).selected(recording));
     register(ui, format!("button:shortcut-{}", b.id), r.rect);
     if r.clicked() {
         app.recording_shortcut = if recording { None } else { Some(b.id.to_string()) };
