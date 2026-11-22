@@ -6,8 +6,10 @@
 //! plus `settings.json` beside them. Model files, archives and manifests are hostile input: sizes are capped, ids are
 //! validated before they become folder names, and nothing outside a model's own folder is ever touched.
 
+use std::io;
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, PoisonError, mpsc};
+use std::time::Duration;
 
 use localphoto_catalog::PhotoId;
 use localphoto_denoise::archive;
@@ -57,6 +59,9 @@ fn host_of(k: &Known) -> Option<String> {
 fn list(s: &mut Session, _: &Value) -> Result<Value> {
     s.denoise_refresh_active(true);
     let dir = s.denoise.models_dir.clone();
+    if let Some(dir) = dir.as_deref() {
+        sweep_orphan_parts(dir);
+    }
     let st = dir.as_deref().map(read_settings).unwrap_or_default();
     let installed = dir.as_deref().map(installed_models).unwrap_or_default();
     let on_disk = |id: &str| installed.iter().find(|i| i.manifest.id == id);
@@ -155,7 +160,7 @@ fn install_file(
     std::fs::create_dir_all(&home).map_err(|e| fail("could not create the model's folder", e))?;
     let mut cleanup = InstallCleanup { home: home.clone(), armed: true };
     let (part, final_path) = (home.join("model.onnx.part"), home.join("model.onnx"));
-    let _ = std::fs::remove_file(&part);
+    let _ = remove_file_retrying(&part);
     let placed: Result<()> = match ident.entry {
         Some(entry) => {
             archive::extract(src, entry, &part, MAX_MODEL_BYTES).map(|_| ()).map_err(|e| fail("could not take the model out of the archive", e))
@@ -170,7 +175,7 @@ fn install_file(
     let sha256 = match sha256 {
         Ok(h) => h,
         Err(e) => {
-            let _ = std::fs::remove_file(&part);
+            let _ = remove_file_retrying(&part);
             return Err(e);
         }
     };
@@ -179,13 +184,13 @@ fn install_file(
     let test = match model.self_test(run_on) {
         Ok(t) => t,
         Err(e) => {
-            let _ = std::fs::remove_file(&part);
+            let _ = remove_file_retrying(&part);
             return Err(bad(c, e));
         }
     };
     // An installed id is immutable: installing again must never destroy a usable model.
     if final_path.exists() {
-        let _ = std::fs::remove_file(&part);
+        let _ = remove_file_retrying(&part);
         return Err(bad(c, "that model is already installed; remove it before installing a replacement"));
     }
     std::fs::rename(&part, &final_path).map_err(|e| fail("could not finish the copy", e))?;
@@ -212,10 +217,57 @@ impl Drop for InstallCleanup {
     fn drop(&mut self) {
         if self.armed {
             for name in ["model.onnx.part", "model.onnx", "denoise-model.json", "installed.json"] {
-                let _ = std::fs::remove_file(self.home.join(name));
+                let _ = remove_file_retrying(&self.home.join(name));
             }
             let _ = std::fs::remove_dir(&self.home);
         }
+    }
+}
+
+/// How long a removal is tried: on Windows the antivirus and the search indexer can hold the file just written for a
+/// moment, and a removal that fails at once would leave a staged file as big as the model behind (A-007).
+const REMOVE_ATTEMPTS: u32 = 5;
+const REMOVE_PAUSE: Duration = Duration::from_millis(50);
+
+/// Runs `remove` until it succeeds or the short retry runs out; a file that is already gone counts as removed. False only
+/// when the file is still there after every attempt, so the caller can leave the rest of the cleanup to the next try.
+fn remove_with_retry(mut remove: impl FnMut() -> io::Result<()>) -> bool {
+    for attempt in 1..=REMOVE_ATTEMPTS {
+        match remove() {
+            Ok(()) => return true,
+            Err(e) if e.kind() == io::ErrorKind::NotFound => return true,
+            Err(_) if attempt < REMOVE_ATTEMPTS => std::thread::sleep(REMOVE_PAUSE),
+            Err(_) => return false,
+        }
+    }
+    false
+}
+
+fn remove_file_retrying(path: &Path) -> bool {
+    remove_with_retry(|| std::fs::remove_file(path))
+}
+
+/// A staged file nobody has touched for this long was left behind by an install that died; one being written now is
+/// recent and left alone.
+const ORPHAN_PART_AGE: Duration = Duration::from_secs(600);
+
+/// Removes the `model.onnx.part` files an aborted install left behind: a model folder without its `model.onnx` holding
+/// a staged file old enough to be nobody's. Called when the models folder is opened; an install in flight is safe, it
+/// keeps writing its own staged file (A-007).
+fn sweep_orphan_parts(dir: &Path) {
+    let Ok(entries) = std::fs::read_dir(dir) else { return };
+    for e in entries.flatten() {
+        let home = e.path();
+        if !home.is_dir() || home.join("model.onnx").exists() {
+            continue;
+        }
+        let part = home.join("model.onnx.part");
+        let stale = std::fs::metadata(&part).and_then(|m| m.modified()).ok().and_then(|t| t.elapsed().ok()).is_some_and(|age| age >= ORPHAN_PART_AGE);
+        if !stale || !remove_file_retrying(&part) {
+            continue;
+        }
+        // A folder that only held the staged file goes with it; anything else in there stays.
+        let _ = std::fs::remove_dir(&home);
     }
 }
 
@@ -664,4 +716,39 @@ pub fn specs() -> Vec<CommandSpec> {
         cmd!(query "denoise.pump", "Denoise Pump", [], None, "{pace?: pause | light | normal | full} → {active, running, queued, ready, generation, downloading} — called every frame by the app: takes in finished work and keeps one photo going", always, pump),
         cmd!(query "denoise.clear", "Clear Denoise Cache", [], None, "{} → {deleted, bytes} — delete every cached denoised picture of this library (they are made again when wanted)", always, clear),
     ]
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn a_removal_held_for_a_moment_is_retried_until_it_goes() {
+        let mut attempts = 0;
+        assert!(remove_with_retry(|| {
+            attempts += 1;
+            if attempts < 3 { Err(io::Error::from(io::ErrorKind::PermissionDenied)) } else { Ok(()) }
+        }));
+        assert_eq!(attempts, 3);
+    }
+
+    #[test]
+    fn a_removal_that_never_goes_gives_up_after_the_short_retry() {
+        let mut attempts = 0;
+        assert!(!remove_with_retry(|| {
+            attempts += 1;
+            Err(io::Error::from(io::ErrorKind::PermissionDenied))
+        }));
+        assert_eq!(attempts, REMOVE_ATTEMPTS);
+    }
+
+    #[test]
+    fn a_file_that_is_already_gone_counts_as_removed() {
+        let mut attempts = 0;
+        assert!(remove_with_retry(|| {
+            attempts += 1;
+            Err(io::Error::from(io::ErrorKind::NotFound))
+        }));
+        assert_eq!(attempts, 1, "there is nothing to wait for");
+    }
 }
