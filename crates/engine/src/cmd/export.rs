@@ -102,7 +102,6 @@ fn delete(s: &mut Session, p: &Value) -> Result<Value> {
 }
 
 /// `export.addToPhotos`: there is a runner (the desktop app and localphoto-cli on macOS).
-#[cfg(not(target_arch = "wasm32"))]
 fn photos_enabled(s: &Session) -> std::result::Result<(), String> {
     match &s.apple_photos {
         Some(_) => Ok(()),
@@ -114,7 +113,6 @@ fn photos_enabled(s: &Session) -> std::result::Result<(), String> {
 /// job: here (the default without a window: localphoto-cli, the MCP server, scripts), or on a
 /// worker thread (the default in the desktop app, which answers control requests on its UI
 /// thread and must not wait minutes for Photos; see [`Session::apple_photos_background`]).
-#[cfg(not(target_arch = "wasm32"))]
 fn add_to_photos(s: &mut Session, p: &Value) -> Result<Value> {
     const ID: &str = "export.addToPhotos";
     let runner = s.apple_photos.clone().ok_or_else(|| bad(ID, crate::apple_photos::unavailable()))?;
@@ -156,7 +154,6 @@ fn add_to_photos(s: &mut Session, p: &Value) -> Result<Value> {
 }
 
 /// `export.photosImports {job?}`: this session's Apple Photos imports, or one of them.
-#[cfg(not(target_arch = "wasm32"))]
 fn photos_imports(s: &mut Session, p: &Value) -> Result<Value> {
     const ID: &str = "export.photosImports";
     match p.get("job") {
@@ -217,7 +214,6 @@ pub fn specs() -> Vec<CommandSpec> {
     ];
     // Apple Events to Photos' import command (macOS); not in the web build. Not journaled: a
     // replay must not import again.
-    #[cfg(not(target_arch = "wasm32"))]
     v.push(cmd!(
         query "export.addToPhotos",
         "Add to Apple Photos",
@@ -227,7 +223,6 @@ pub fn specs() -> Vec<CommandSpec> {
         photos_enabled,
         add_to_photos
     ));
-    #[cfg(not(target_arch = "wasm32"))]
     v.push(cmd!(
         query "export.photosImports",
         "Apple Photos Imports",

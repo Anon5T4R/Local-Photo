@@ -19,7 +19,6 @@ pub enum Platform {
     Windows,
     Wayland,
     X11,
-    Web,
     Other,
 }
 
@@ -30,8 +29,6 @@ impl Platform {
             Self::MacOs
         } else if cfg!(target_os = "windows") {
             Self::Windows
-        } else if cfg!(target_arch = "wasm32") {
-            Self::Web
         } else if std::env::var_os("WAYLAND_DISPLAY").is_some() {
             Self::Wayland
         } else if std::env::var_os("DISPLAY").is_some() {
@@ -152,7 +149,6 @@ mod tests {
         );
         // any missing condition falls back to SDR
         assert!(!choose(Some(F::Rgba16Float), Platform::X11, Some(4.0), false).is_hdr());
-        assert!(!choose(Some(F::Rgba16Float), Platform::Web, Some(4.0), false).is_hdr());
         assert!(!choose(Some(F::Rgba16Float), Platform::MacOs, Some(1.0), false).is_hdr());
         assert!(!choose(Some(F::Rgba16Float), Platform::MacOs, None, false).is_hdr());
         assert!(!choose(Some(F::Rgba16Float), Platform::MacOs, Some(f32::NAN), false).is_hdr());

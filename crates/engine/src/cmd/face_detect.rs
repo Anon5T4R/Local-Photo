@@ -84,7 +84,6 @@ pub(crate) fn detector(s: &Session) -> std::result::Result<Arc<Detector>, NoDete
     let d = Arc::new(
         Detector::new(&bytes).map_err(|e| NoDetector::Unusable(format!("{e}: remove the detector in Settings > Faces and download it again")))?,
     );
-    #[cfg(not(target_arch = "wasm32"))]
     {
         let net = d.clone();
         offer_gpu(s, "detection", move |gpu| net.accelerate(gpu, true));
@@ -128,7 +127,6 @@ pub(crate) fn cpu_only(s: &Session) -> bool {
 /// Check in the background whether the GPU runs a face model faster than the CPU and gives its results; the model
 /// runs on the CPU meanwhile, and stays there when the GPU is off, missing, wrong or slower, or the user chose the CPU.
 /// The check shows in the activity stack while it runs.
-#[cfg(not(target_arch = "wasm32"))]
 pub(crate) fn offer_gpu(
     s: &Session,
     what: &'static str,
@@ -176,10 +174,7 @@ fn gpu(s: &mut Session, p: &Value) -> Result<Value> {
         let dir = s.face_models_dir.clone().ok_or_else(|| bad(C, "this build has nowhere to keep face models (the desktop app does)"))?;
         super::face_models::set_cpu_only(&dir, cpu)?;
         let detector = LOADED.lock().unwrap_or_else(PoisonError::into_inner).as_ref().map(|(_, d)| d.clone());
-        #[cfg(not(target_arch = "wasm32"))]
         let embedder = s.faces.embedder.as_ref().map(|(_, e)| e.clone());
-        #[cfg(target_arch = "wasm32")]
-        let embedder: Option<Arc<localphoto_faces::runtime::Embedder>> = None;
         if cpu {
             for (what, net) in [("detection", detector.as_ref().map(|d| d.net())), ("recognition", embedder.as_ref().map(|e| e.net()))] {
                 if let Some(net) = net {
@@ -188,7 +183,6 @@ fn gpu(s: &mut Session, p: &Value) -> Result<Value> {
                 set_gpu_state(what, GpuState { why: Some("the CPU is chosen in Settings".into()), ..GpuState::default() });
             }
         } else {
-            #[cfg(not(target_arch = "wasm32"))]
             {
                 if let Some(d) = detector {
                     offer_gpu(s, "detection", move |gpu| d.accelerate(gpu, true));

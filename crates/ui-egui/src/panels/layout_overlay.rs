@@ -94,12 +94,9 @@ fn start(ctx: &egui::Context, path: &str) -> Loaded {
         *out.lock().unwrap_or_else(PoisonError::into_inner) = Some(r);
         repaint.request_repaint();
     };
-    #[cfg(not(target_arch = "wasm32"))]
     if let Err(e) = std::thread::Builder::new().name("lc-layout-image".into()).spawn(work) {
         *loaded.lock().unwrap_or_else(PoisonError::into_inner) = Some(Err(format!("can't start reading the layout image: {e}")));
     }
-    #[cfg(target_arch = "wasm32")]
-    work();
     loaded
 }
 

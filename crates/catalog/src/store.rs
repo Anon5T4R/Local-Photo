@@ -187,7 +187,6 @@ impl Store for FsStore {
         self.dir.display().to_string()
     }
 
-    #[cfg(not(target_arch = "wasm32"))]
     fn background_writer(&self) -> Option<Box<dyn Store>> {
         Some(Box::new(FsStore { dir: self.dir.clone(), appender: None }))
     }

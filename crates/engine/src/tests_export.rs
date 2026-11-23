@@ -828,7 +828,6 @@ fn jxl_export_writes_metadata() {
 
 /// Issue #236: Add to Apple Photos after an export. A fake runner stands in for osascript: tests
 /// never start it, nor Photos.
-#[cfg(not(target_arch = "wasm32"))]
 mod apple_photos {
     use std::sync::{Arc, Mutex};
 

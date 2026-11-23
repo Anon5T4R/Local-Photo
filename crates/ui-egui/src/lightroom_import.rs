@@ -46,7 +46,6 @@ pub struct LightroomTask {
 }
 
 impl LightroomTask {
-    #[cfg(not(target_arch = "wasm32"))]
     fn new(
         s: &localphoto_engine::Session,
         kind: Kind,
@@ -93,7 +92,6 @@ impl LightroomTask {
         self.guard.detail(detail);
     }
 
-    #[cfg(not(target_arch = "wasm32"))]
     fn status(&self) -> Value {
         let kind = match self.kind {
             Kind::Inspect => "inspect",
@@ -135,13 +133,8 @@ impl Drop for LightroomTask {
     }
 }
 
-#[cfg(target_arch = "wasm32")]
-fn unsupported_wasm() -> Result<Value, String> {
-    Err("Lightroom catalog import is unavailable in browser builds; open the catalog in the native Local Photo app".into())
-}
-
 /// Tests: a catalog import that never ends while the returned value lives, so a drop meets it pending.
-#[cfg(all(test, not(target_arch = "wasm32")))]
+#[cfg(test)]
 pub(crate) fn stall_import(app: &mut LocalPhotoApp) -> Box<dyn std::any::Any> {
     let (tx, rx) = mpsc::channel::<Message>();
     let task = LightroomTask::new(
@@ -161,7 +154,6 @@ pub fn is_running(app: &LocalPhotoApp) -> bool {
     app.lightroom.is_some()
 }
 
-#[cfg(not(target_arch = "wasm32"))]
 fn busy(app: &LocalPhotoApp) -> Result<(), String> {
     if app.lightroom.is_some() {
         return Err("a Lightroom catalog task is already running".into());
@@ -172,7 +164,6 @@ fn busy(app: &LocalPhotoApp) -> Result<(), String> {
     Ok(())
 }
 
-#[cfg(not(target_arch = "wasm32"))]
 fn spawn_inspect(
     path: PathBuf,
     cancel: Arc<AtomicBool>,
@@ -194,7 +185,6 @@ fn spawn_inspect(
         .map_err(|e| format!("could not start Lightroom inspect: {e}"))
 }
 
-#[cfg(not(target_arch = "wasm32"))]
 fn spawn_prepare(
     mut job: localphoto_engine::lightroom_job::LightroomJob,
     cancel: Arc<AtomicBool>,
@@ -217,7 +207,6 @@ fn spawn_prepare(
         .map_err(|e| format!("could not start Lightroom import: {e}"))
 }
 
-#[cfg(not(target_arch = "wasm32"))]
 fn spawn_finalize(
     finalization: localphoto_engine::lightroom_job::LightroomArchiveFinalization,
     tx: mpsc::Sender<Message>,
@@ -235,18 +224,8 @@ fn spawn_finalize(
         .map_err(|e| format!("could not start Lightroom archive finalization: {e}"))
 }
 
-#[cfg(target_arch = "wasm32")]
-fn spawn_finalize(
-    _finalization: localphoto_engine::lightroom_job::LightroomArchiveFinalization,
-    _tx: mpsc::Sender<Message>,
-    _ctx: egui::Context,
-) -> Result<(), String> {
-    unsupported_wasm().map(|_| ())
-}
-
 /// What `status` and the result window show for an inspected catalog: counts, missing originals,
 /// warnings and skipped images.
-#[cfg(not(target_arch = "wasm32"))]
 fn inspect_report(data: localphoto_engine::lightroom_catalog::CatalogImport) -> Value {
     json!({
         "photos": data.photos.len(),
@@ -368,7 +347,6 @@ fn result_dialog(value: &Value, summary: &str) -> crate::state::Dialog {
     }
 }
 
-#[cfg(not(target_arch = "wasm32"))]
 fn start_inspect(app: &mut LocalPhotoApp, path: PathBuf, ctx: &egui::Context) -> Result<Value, String> {
     busy(app)?;
     let cancel = Arc::new(AtomicBool::new(false));
@@ -380,7 +358,6 @@ fn start_inspect(app: &mut LocalPhotoApp, path: PathBuf, ctx: &egui::Context) ->
     Ok(json!({"running": true, "kind": "inspect", "path": path}))
 }
 
-#[cfg(not(target_arch = "wasm32"))]
 fn start_import(app: &mut LocalPhotoApp, path: PathBuf, update_existing: bool, ctx: &egui::Context) -> Result<Value, String> {
     busy(app)?;
     let job = localphoto_engine::lightroom_job::LightroomJob::new(&mut app.session, path.clone(), update_existing).map_err(|e| e.to_string())?;
@@ -395,12 +372,6 @@ fn start_import(app: &mut LocalPhotoApp, path: PathBuf, update_existing: bool, c
 
 /// Run Lightroom UI commands before the generic engine dispatcher.
 pub fn command(app: &mut LocalPhotoApp, id: &str, p: &Value, ctx: &egui::Context) -> Result<Value, String> {
-    #[cfg(target_arch = "wasm32")]
-    {
-        let _ = (app, id, p, ctx);
-        return unsupported_wasm();
-    }
-    #[cfg(not(target_arch = "wasm32"))]
     {
         let path = p.get("path").and_then(Value::as_str).map(PathBuf::from);
         let wait = p.get("wait").and_then(Value::as_bool).unwrap_or(false);
@@ -534,7 +505,6 @@ pub fn tick(app: &mut LocalPhotoApp, ctx: &egui::Context) {
 }
 
 /// Wait for a task in control/headless mode while still applying owner-thread completion.
-#[cfg(not(target_arch = "wasm32"))]
 pub fn wait_for(app: &mut LocalPhotoApp, ctx: &egui::Context, timeout: std::time::Duration) -> Result<Value, String> {
     let start = std::time::Instant::now();
     while app.lightroom.is_some() {
@@ -545,11 +515,6 @@ pub fn wait_for(app: &mut LocalPhotoApp, ctx: &egui::Context, timeout: std::time
         std::thread::sleep(std::time::Duration::from_millis(2));
     }
     Ok(app.lightroom_last.clone().unwrap_or(Value::Null))
-}
-
-#[cfg(target_arch = "wasm32")]
-pub fn wait_for(_app: &mut LocalPhotoApp, _ctx: &egui::Context, _timeout: std::time::Duration) -> Result<Value, String> {
-    unsupported_wasm()
 }
 
 #[cfg(test)]

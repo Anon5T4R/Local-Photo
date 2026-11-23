@@ -1879,10 +1879,8 @@ impl LocalPhotoApp {
     /// (the host exits anyway). The app renders nothing afterwards.
     pub fn shutdown(&mut self, timeout: std::time::Duration) -> bool {
         localphoto_engine::gpu::begin_shutdown();
-        #[cfg(not(target_arch = "wasm32"))]
         let t0 = std::time::Instant::now();
         let stopped = self.renderer.shutdown(timeout);
-        #[cfg(not(target_arch = "wasm32"))]
         let timeout = timeout.saturating_sub(t0.elapsed());
         let idle = localphoto_engine::gpu::wait_idle(timeout);
         stopped && idle
@@ -1991,7 +1989,6 @@ impl LocalPhotoApp {
         focus_scan::pump(self, ctx, now);
         // auto import: list the watched folder every few seconds (on a worker thread: it may be on
         // a network share), then import what's new like any import (also on a worker thread)
-        #[cfg(not(target_arch = "wasm32"))]
         if let Some(folder) = self.session.import_defaults.auto_folder.clone() {
             const LABEL: &str = "Auto Import";
             if now - self.ui.auto_import_at >= 3.0
@@ -2027,7 +2024,6 @@ impl LocalPhotoApp {
         }
         // automatic XMP writes that failed (a network share offline): tried again every few seconds once their files
         // are reachable, and said once when they start waiting and once when they're written
-        #[cfg(not(target_arch = "wasm32"))]
         {
             if self.session.unsaved_sidecars() > 0 {
                 if now - self.ui.sidecar_retry_at >= 10.0 {
@@ -2052,7 +2048,6 @@ impl LocalPhotoApp {
             self.ui.sidecars_waiting = waiting;
         }
         // Settings → Import: open the import review when a camera or card is connected
-        #[cfg(not(target_arch = "wasm32"))]
         if self.session.import_defaults.show_on_card {
             if let Some(now) = localphoto_engine::devices::devices_scanned() {
                 import::cards_seen(self, now);
@@ -2155,15 +2150,11 @@ impl LocalPhotoApp {
         if dropped.is_empty() {
             return;
         }
-        #[cfg(not(target_arch = "wasm32"))]
         self.handle_dropped_files(ctx, dropped);
-        #[cfg(target_arch = "wasm32")]
-        let _ = (dropped, ctx);
     }
 
     /// Files dropped on the window: face models open their licence dialog, presets import as
     /// presets, photos and folders go to the import review (or straight in, Settings ▸ Import).
-    #[cfg(not(target_arch = "wasm32"))]
     fn handle_dropped_files(&mut self, ctx: &egui::Context, dropped: Vec<egui::DroppedFileHandle>) {
         let dropped: Vec<String> =
             dropped.iter().map(|f| egui::DroppedFile::path(f.as_ref()).to_string_lossy().to_string()).filter(|p| !p.is_empty()).collect();
@@ -2971,14 +2962,8 @@ impl egui::DroppedFile for InjectedDrop {
         &self.0
     }
 
-    #[cfg(not(target_arch = "wasm32"))]
     fn bytes(&self) -> Result<Vec<u8>, String> {
         std::fs::read(&self.0).map_err(|e| e.to_string())
-    }
-
-    #[cfg(target_arch = "wasm32")]
-    fn bytes_async(&self) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<Vec<u8>, String>> + '_>> {
-        Box::pin(async { Err("the web build has no files to read".to_string()) })
     }
 }
 

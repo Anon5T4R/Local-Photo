@@ -193,7 +193,6 @@ pub fn paint(primitives: &[ClippedPrimitive], textures: &dyn TextureSource, size
         for (i, b) in bands.into_iter().enumerate() {
             groups[i % threads].push(b);
         }
-        #[cfg(not(target_arch = "wasm32"))]
         std::thread::scope(|s| {
             for g in groups {
                 let prepared = &prepared;
@@ -204,18 +203,12 @@ pub fn paint(primitives: &[ClippedPrimitive], textures: &dyn TextureSource, size
                 });
             }
         });
-        #[cfg(target_arch = "wasm32")]
-        for g in groups {
-            for (y0, band) in g {
-                paint_band(&prepared, band, y0, w);
-            }
-        }
     }
     ColorImage::new(size, pixels)
 }
 
 fn thread_count() -> usize {
-    if cfg!(target_arch = "wasm32") { 1 } else { std::thread::available_parallelism().map_or(1, |n| n.get()).min(16) }
+    std::thread::available_parallelism().map_or(1, |n| n.get()).min(16)
 }
 
 fn paint_band(prepared: &[Prepared<'_>], band: &mut [Color32], y0: usize, w: usize) {

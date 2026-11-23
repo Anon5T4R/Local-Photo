@@ -25,7 +25,6 @@ use crate::Cancelled;
 use crate::membrane::membrane_fill;
 
 /// Below this many grid cells a level runs single-threaded (thread hand-off costs more than it saves).
-#[cfg(not(target_arch = "wasm32"))]
 const PAR_MIN: usize = 128 * 128;
 
 /// SplitMix64: tiny deterministic RNG.
@@ -275,7 +274,6 @@ impl Solver<'_> {
                 }
             }
         };
-        #[cfg(not(target_arch = "wasm32"))]
         if w * self.h >= PAR_MIN {
             use rayon::prelude::*;
             nnf.par_chunks_mut(BAND * w).zip(cost.par_chunks_mut(BAND * w)).enumerate().for_each(|(bi, (nn, co))| band_fn(bi, nn, co));
@@ -341,15 +339,12 @@ impl Solver<'_> {
             }
             out
         };
-        #[cfg(not(target_arch = "wasm32"))]
         let rows: Vec<Vec<(usize, Vec<f32>)>> = if w * h >= PAR_MIN {
             use rayon::prelude::*;
             (0..h).into_par_iter().map(row).collect()
         } else {
             (0..h).map(row).collect()
         };
-        #[cfg(target_arch = "wasm32")]
-        let rows: Vec<Vec<(usize, Vec<f32>)>> = (0..h).map(row).collect();
         for (y, r) in rows.into_iter().enumerate() {
             for (x, v) in r {
                 self.img[(y * w + x) * ch..(y * w + x + 1) * ch].copy_from_slice(&v);

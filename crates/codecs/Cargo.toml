@@ -28,8 +28,6 @@ tiff = { workspace = true }
 image-webp = { workspace = true }
 moxcms = { workspace = true }
 jxl-oxide = { workspace = true, optional = true }
-
-[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 ravif = { workspace = true, optional = true }
 rav1e = { workspace = true, optional = true }
 avif-serialize = { workspace = true, optional = true }
@@ -56,6 +54,4 @@ jxl-oxide = { workspace = true }
 proptest = { workspace = true }
 # Lossless synthetic HEIC files for the `heif` feature's tests.
 localphoto-heif = { workspace = true, features = ["testdata"] }
-
-[target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
 dhat = { workspace = true }

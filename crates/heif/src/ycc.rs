@@ -218,13 +218,10 @@ pub fn to_rgb16(planes: &Planes<'_>, signal: Signal, alpha: bool, mode: Upsampli
         Some(())
     };
     let row_len = w * ch;
-    #[cfg(not(target_arch = "wasm32"))]
     let ok = {
         use rayon::prelude::*;
         out.par_chunks_mut(row_len).enumerate().all(|(y, dst)| row(y, dst).is_some())
     };
-    #[cfg(target_arch = "wasm32")]
-    let ok = out.chunks_mut(row_len).enumerate().all(|(y, dst)| row(y, dst).is_some());
     ok.then_some(out)
 }
 

@@ -38,7 +38,7 @@ fn lines(app: &LocalPhotoApp, paths: Vec<String>, unknown: bool) -> Vec<String> 
     let plural = |n: usize| if n == 1 { "" } else { "s" };
     // no library open yet (desktop: the web build's drops import into its session as before):
     // photos wait for the library chosen, presets are refused (the drop handler does the same)
-    let waiting = crate::panels::library_problem::holds_drops(app) && !cfg!(target_arch = "wasm32");
+    let waiting = crate::panels::library_problem::holds_drops(app);
     if !drop.presets.is_empty() && waiting {
         out.push(crate::i18n::tr("Open a library first, then drop the presets again").to_string());
     } else if !drop.presets.is_empty() {
@@ -47,15 +47,15 @@ fn lines(app: &LocalPhotoApp, paths: Vec<String>, unknown: bool) -> Vec<String> 
     }
     if !drop.photos.is_empty() && waiting {
         out.push(crate::i18n::tr("The photos are imported once a library is open").to_string());
-    } else if !drop.photos.is_empty() && app.lightroom.is_some() && !cfg!(target_arch = "wasm32") {
+    } else if !drop.photos.is_empty() && app.lightroom.is_some() {
         // the drop is refused while a Lightroom catalog import owns the catalog
         out.push(crate::i18n::tr("Finish Lightroom catalog import before adding photos").to_string());
-    } else if !drop.photos.is_empty() && crate::import::running(app) && !cfg!(target_arch = "wasm32") {
+    } else if !drop.photos.is_empty() && crate::import::running(app) {
         out.push(crate::i18n::tr("An import is running. Drop photos when it has finished").to_string());
     } else if !drop.photos.is_empty() {
         let n = drop.photos.len();
         // the web build has no review to open: its drops import at once
-        if app.ui.settings.import_dropped_directly || cfg!(target_arch = "wasm32") {
+        if app.ui.settings.import_dropped_directly {
             out.push(crate::i18n::tr_format!("Drop to import {n} item{}", plural(n), n = n));
         } else {
             out.push(crate::i18n::tr_format!("Drop to review {n} item{} for import", plural(n), n = n));

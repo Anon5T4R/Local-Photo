@@ -336,17 +336,13 @@ impl SourceRef {
                 };
                 // An offline original renders from its smart preview (no decoder facts: header ones).
                 return match (r, fallback) {
-                    #[cfg(not(target_arch = "wasm32"))]
                     (Err(e), Some(sp)) if denoise.as_ref().is_none_or(|(spec, _)| spec.make.is_none()) && crate::smart::is_valid(sp) => {
                         crate::smart::load(sp).map_err(|e2| format!("{e}; smart preview: {e2}"))
                     }
                     (r, _) => r,
                 };
             }
-            #[cfg(not(target_arch = "wasm32"))]
             SourceRef::Smart { path } => return crate::smart::load(path),
-            #[cfg(target_arch = "wasm32")]
-            SourceRef::Smart { .. } => return Err("smart previews are not available here".into()),
         };
         Ok(DecodedSource::new(image, None))
     }
@@ -712,7 +708,6 @@ impl MediaCache {
         // the original is offline: its smart preview, when there is one. Only cached answers are
         // used here (no file-system call on the UI thread in the app); an original not known to
         // be offline is tried first and its smart preview is the render worker's fallback.
-        #[cfg(not(target_arch = "wasm32"))]
         if let (Source::File { path }, Some(dir)) = (&p.source, &self.smart_dir) {
             let sharded = crate::smart::sharded_file_path(dir, p);
             let legacy = dir.join(crate::smart::file_name(p));
@@ -1570,7 +1565,6 @@ impl crate::Session {
     /// The camera's embedded preview of a raw file, for the face scan. Faces are read from the unedited picture, so the
     /// photo's edits do not matter, and the camera's own JPEG (oriented, display-ready) costs a fraction of decoding the
     /// raw. `None` for anything else, and where the host installed no loader.
-    #[cfg(not(target_arch = "wasm32"))]
     pub(crate) fn scan_preview_of(&self, p: &Photo) -> Option<(String, PreviewLoader)> {
         match (&p.source, &self.media.preview_loader) {
             (Source::File { path }, Some(l)) if p.kind == MediaKind::Raw => Some((path.clone(), l.clone())),

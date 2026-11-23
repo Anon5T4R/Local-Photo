@@ -88,10 +88,7 @@ fn start<T: Send + 'static>(
             c.request_repaint();
         }
     };
-    #[cfg(not(target_arch = "wasm32"))]
     std::thread::Builder::new().name(format!("lc-task-{label}")).spawn(job).map_err(|e| format!("{label}: could not start: {e}"))?;
-    #[cfg(target_arch = "wasm32")]
-    job();
     app.tasks.running.push(Task { label: label.to_string(), rx, _guard: guard });
     Ok(())
 }
@@ -121,7 +118,6 @@ pub fn poll(app: &mut LocalPhotoApp, ctx: &egui::Context) {
 
 /// Wait for every task and apply it (tests, and commands asked to `wait`). `false` on timeout.
 pub fn wait(app: &mut LocalPhotoApp, ctx: &egui::Context, timeout: std::time::Duration) -> bool {
-    #[cfg(not(target_arch = "wasm32"))]
     {
         let t0 = std::time::Instant::now();
         loop {
@@ -135,19 +131,11 @@ pub fn wait(app: &mut LocalPhotoApp, ctx: &egui::Context, timeout: std::time::Du
             std::thread::sleep(std::time::Duration::from_millis(2));
         }
     }
-    #[cfg(target_arch = "wasm32")]
-    {
-        // tasks ran inline: their results are already waiting
-        let _ = timeout;
-        poll(app, ctx);
-        app.tasks.is_empty()
-    }
 }
 
 /// Wait for a specific task by label and apply finished tasks. Returns `true` once the labeled
 /// task finishes (or is removed), or `false` on timeout. Other background tasks may continue running.
 pub fn wait_for(app: &mut LocalPhotoApp, ctx: &egui::Context, label: &str, timeout: std::time::Duration) -> bool {
-    #[cfg(not(target_arch = "wasm32"))]
     {
         let t0 = std::time::Instant::now();
         loop {
@@ -160,11 +148,5 @@ pub fn wait_for(app: &mut LocalPhotoApp, ctx: &egui::Context, label: &str, timeo
             }
             std::thread::sleep(std::time::Duration::from_millis(2));
         }
-    }
-    #[cfg(target_arch = "wasm32")]
-    {
-        let _ = timeout;
-        poll(app, ctx);
-        !app.tasks.is_running(label)
     }
 }

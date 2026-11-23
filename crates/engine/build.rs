@@ -3,9 +3,7 @@
 //! Recipe from craft-fonts' docs/integration.md; craft-fonts is never a Cargo dependency, and this
 //! script only reads a local directory (no network).
 //!
-//! wasm32 embeds BIZ UDPGothic Regular (~4.5 MB) and Noto Sans Thai (~214 KiB) and Noto Sans Georgian, to keep the
-//! `.wasm` within the web size budget (Cloudflare serves at most 25 MiB per file); the export
-//! watermark falls back to it there. Native builds embed every font.
+//! Every font in the manifest is embedded.
 use std::fmt::Write as _;
 use std::path::{Path, PathBuf};
 
@@ -65,7 +63,6 @@ fn craft_fonts(dir: &Path, required: bool) -> Result<String, String> {
     let manifest = dir.join("fonts/manifest.txt");
     println!("cargo::rerun-if-changed={}", manifest.display());
     let text = std::fs::read_to_string(&manifest).map_err(|e| format!("{}: {e}", manifest.display()))?;
-    let wasm = std::env::var("CARGO_CFG_TARGET_ARCH").is_ok_and(|a| a == "wasm32");
     let mut out = String::new();
     let mut has_japanese_ui = false;
     let mut has_chinese_ui = false;
@@ -78,9 +75,6 @@ fn craft_fonts(dir: &Path, required: bool) -> Result<String, String> {
         has_japanese_ui |= (*family, *style) == ("BIZ UDPGothic", "Regular");
         has_chinese_ui |= (*family, *style) == ("Noto Sans CJK SC", "Regular") && scripts.split(',').any(|script| script.trim() == "Hans");
         has_thai_ui |= (*family, *style) == ("Noto Sans Thai", "Regular") && scripts.split(',').any(|script| script.trim() == "Thai");
-        if wasm && !matches!((*family, *style), ("BIZ UDPGothic" | "Noto Sans Thai" | "Noto Sans Georgian", "Regular")) {
-            continue;
-        }
         let path = dir.join(file).canonicalize().map_err(|e| format!("{file}: {e}"))?;
         println!("cargo::rerun-if-changed={}", path.display());
         let scripts: Vec<String> = scripts.split(',').map(|s| format!("{:?}", s.trim())).collect();
@@ -97,7 +91,7 @@ fn craft_fonts(dir: &Path, required: bool) -> Result<String, String> {
     if required && !has_japanese_ui {
         return Err("required Japanese UI face BIZ UDPGothic Regular is missing from fonts/manifest.txt".into());
     }
-    if required && !wasm && !has_chinese_ui {
+    if required && !has_chinese_ui {
         return Err("required Simplified Chinese UI face Noto Sans CJK SC Regular (Hans) is missing from fonts/manifest.txt".into());
     }
     Ok(out)

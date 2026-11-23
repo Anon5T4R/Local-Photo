@@ -84,7 +84,6 @@ fn the_empty_grid_offers_import_as_buttons() {
     h.step();
     h.step();
     assert!(has(&h, "button:emptyImportPhotos"));
-    #[cfg(not(target_arch = "wasm32"))]
     assert!(has(&h, "button:emptyImportLightroom"));
     // a click asks for the photos, as File ▸ Import Photos… does
     let asked = counting_picker(&mut h);

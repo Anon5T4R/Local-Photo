@@ -1649,7 +1649,7 @@ pub fn run_ui_command(app: &mut LocalPhotoApp, id: &str, p: &Value) -> Option<Re
             app.ui.settings.keymap.clear();
             Ok(Value::Null)
         }
-        "library.browse" if !cfg!(target_arch = "wasm32") => {
+        "library.browse" => {
             if crate::lightroom_import::is_running(app) {
                 return Some(Err("finish Lightroom catalog import before browsing folders".into()));
             }
@@ -2281,12 +2281,8 @@ pub fn ui_enabled(app: &LocalPhotoApp, id: &str) -> bool {
     match id {
         "library.selectOnlyActive" => app.session.active().is_some(),
         "view.thumbSizeUp" | "view.thumbSizeDown" => thumb_size_view(app),
-        "dialog.contactSheet" | "app.contactSheet" | "dialog.print" | "app.print" => {
-            !cfg!(target_arch = "wasm32") && app.session.active().is_some() && app.export.is_none()
-        }
-        "dialog.slideshowExport" | "app.slideshowExport" => {
-            !cfg!(target_arch = "wasm32") && !app.session.slideshow_export.as_ref().is_some_and(|r| r.running())
-        }
+        "dialog.contactSheet" | "app.contactSheet" | "dialog.print" | "app.print" => app.session.active().is_some() && app.export.is_none(),
+        "dialog.slideshowExport" | "app.slideshowExport" => !app.session.slideshow_export.as_ref().is_some_and(|r| r.running()),
         s if s.starts_with("panel.") || s.starts_with("tool.") || s.starts_with("section.") => app.session.active().is_some() || s == "panel.close",
         "app.export" | "dialog.export" | "dialog.createPreset" | "dialog.rename" | "dialog.captureTime" | "dialog.copySettings" => {
             app.session.active().is_some()

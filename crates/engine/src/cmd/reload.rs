@@ -66,7 +66,6 @@ pub fn probe(
 ) -> Vec<std::result::Result<ProbeInfo, String>> {
     let paths: Vec<String> = items.iter().map(|i| i.path.clone()).collect();
     let done = AtomicUsize::new(0);
-    #[cfg(not(target_arch = "wasm32"))]
     let r = std::thread::scope(|sc| {
         let h = sc.spawn(|| crate::import::probe_all(probe, &paths, &done, cancel));
         while !h.is_finished() {
@@ -76,8 +75,6 @@ pub fn probe(
         // a probe that panicked (already logged): nothing is known about any file
         h.join().unwrap_or_else(|_| paths.iter().map(|p| Err(format!("{p}: could not be read"))).collect())
     });
-    #[cfg(target_arch = "wasm32")]
-    let r = crate::import::probe_all(probe, &paths, &done, cancel);
     progress(done.load(Ordering::Relaxed));
     r
 }

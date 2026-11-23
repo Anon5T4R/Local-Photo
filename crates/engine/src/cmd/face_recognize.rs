@@ -269,7 +269,6 @@ fn person(s: &mut Session, p: &Value) -> Result<Value> {
     )
 }
 
-#[cfg(not(target_arch = "wasm32"))]
 mod imp {
     use std::sync::Arc;
     use std::time::{Duration, Instant};
@@ -1073,38 +1072,6 @@ mod imp {
             assert!(similar(&mut s, "nobody", 10).items.is_empty());
             let _ = std::fs::remove_dir_all(&d);
         }
-    }
-}
-
-#[cfg(target_arch = "wasm32")]
-mod imp {
-    use serde_json::Value;
-
-    use super::super::bad;
-    use crate::{Result, Session};
-
-    pub fn index(_: &mut Session, _: &Value) -> Result<Value> {
-        Err(bad("faces.index", "this build cannot run face recognition"))
-    }
-
-    pub fn suggest(_: &mut Session, _: &Value) -> Result<Value> {
-        Err(bad("faces.suggest", "this build cannot run face recognition"))
-    }
-
-    pub fn evaluate(_: &mut Session, _: &Value) -> Result<Value> {
-        Err(bad("faces.evaluate", "this build cannot run face recognition"))
-    }
-
-    pub fn pump(_: &mut Session, _: &Value) -> Result<Value> {
-        Ok(serde_json::json!({"active": false}))
-    }
-
-    pub fn similar(_: &mut Session, _: &str, _: usize) -> super::Similar {
-        super::Similar { items: Vec::new(), ready: false, pending: 0 }
-    }
-
-    pub fn arrange_unnamed(_: &mut Session, _: &mut Vec<(u64, usize, localphoto_geom::Rect)>, _: usize) -> super::Arranged {
-        super::Arranged { ordered: false, ready: false, suggestions: Default::default() }
     }
 }
 

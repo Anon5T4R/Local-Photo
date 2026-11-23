@@ -142,10 +142,7 @@ fn spawn(app: &LocalPhotoApp, options: &MergeDialog, ids: &[PhotoId], preview: b
         let r = std::panic::catch_unwind(std::panic::AssertUnwindSafe(run)).unwrap_or_else(|_| Err("the merge failed unexpectedly".into()));
         let _ = tx.send(r);
     };
-    #[cfg(not(target_arch = "wasm32"))]
     std::thread::Builder::new().name("photo-merge".into()).spawn(work).map_err(|e| e.to_string())?;
-    #[cfg(target_arch = "wasm32")]
-    work();
     Ok(MergeTask { preview, job, options: options.clone(), progress, cancel, rx, guard: None })
 }
 

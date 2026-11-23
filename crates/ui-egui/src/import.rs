@@ -21,11 +21,6 @@ use crate::render::Slot;
 use crate::theme::Tokens;
 use crate::widgets::register;
 
-/// Files per batch in the browser build (each batch joins the catalog as it is ready, so the
-/// progress window updates); the desktop's worker uses [`localphoto_engine::import::batch_size`].
-#[cfg(target_arch = "wasm32")]
-const BATCH: usize = 8;
-
 /// The review dialog's first size (points). It can be resized; the photo grid takes the height.
 pub(crate) const DIALOG_SIZE: [f32; 2] = [960.0, 720.0];
 /// Memory keys: where the photo grid ended and where the dialog's content (its buttons) ended, last
@@ -302,10 +297,7 @@ impl ImportTask {
 /// Where an import's batches are readied: a worker thread, or (browser build: no threads, and no
 /// slow drives) inline, one batch per frame.
 enum Runner {
-    #[cfg(not(target_arch = "wasm32"))]
     Thread(std::sync::mpsc::Receiver<localphoto_engine::import::Prepared>),
-    #[cfg(target_arch = "wasm32")]
-    Inline { job: Box<localphoto_engine::import::ImportJob>, queue: Vec<String>, files: Option<std::collections::VecDeque<String>> },
 }
 
 struct ImportRun {
@@ -347,7 +339,6 @@ impl ImportRun {
         Ok(ImportRun { runner, cancel, total, done, opts, now, album, album_name })
     }
 
-    #[cfg(not(target_arch = "wasm32"))]
     fn spawn(
         mut job: localphoto_engine::import::ImportJob,
         queue: Vec<String>,
@@ -378,20 +369,9 @@ impl ImportRun {
         std::thread::Builder::new().name("lc-import".into()).spawn(work).map(|_| Runner::Thread(rx)).map_err(|e| format!("could not start: {e}"))
     }
 
-    #[cfg(target_arch = "wasm32")]
-    fn spawn(
-        job: localphoto_engine::import::ImportJob,
-        queue: Vec<String>,
-        _cancel: std::sync::Arc<std::sync::atomic::AtomicBool>,
-        _ctx: &egui::Context,
-    ) -> Result<Runner, String> {
-        Ok(Runner::Inline { job: Box::new(job), queue, files: None })
-    }
-
     /// Readied batches (at most a few per frame). `None` once the worker is done.
     fn next_batches(&mut self) -> Option<Vec<localphoto_engine::import::Prepared>> {
         match &mut self.runner {
-            #[cfg(not(target_arch = "wasm32"))]
             Runner::Thread(rx) => {
                 let mut out = Vec::new();
                 while out.len() < 4 {
@@ -402,23 +382,6 @@ impl ImportRun {
                     }
                 }
                 Some(out)
-            }
-            #[cfg(target_arch = "wasm32")]
-            Runner::Inline { job, queue, files } => {
-                if self.cancel.load(Ordering::Relaxed) {
-                    return None;
-                }
-                if files.is_none() {
-                    *files = Some(job.expand(queue).into());
-                    return Some(Vec::new());
-                }
-                let Some(files) = files.as_mut() else { return None };
-                if files.is_empty() {
-                    return None;
-                }
-                let n = files.len().min(BATCH);
-                let batch: Vec<String> = files.drain(..n).collect();
-                Some(vec![job.prepare_files(batch, &self.cancel)])
             }
         }
     }
@@ -457,7 +420,6 @@ pub(crate) fn busy_synchronizing(app: &LocalPhotoApp) -> Result<(), String> {
 /// each device scan while it's on. The first look only notes the cards already in. A card that
 /// shows up after that opens Import from Device once nothing else is open, and a card that is
 /// taken out and put back in asks again.
-#[cfg(not(target_arch = "wasm32"))]
 pub(crate) fn cards_seen(app: &mut LocalPhotoApp, now: Vec<localphoto_engine::devices::Device>) {
     let Some(known) = app.ui.known_cards.as_mut() else {
         app.ui.known_cards = Some(now.into_iter().map(|d| d.root).collect());
@@ -491,10 +453,7 @@ pub fn open(app: &mut LocalPhotoApp, paths: Vec<String>) -> Result<Value, String
     let job = move || {
         let _ = tx.send(scan_with(input, &paths, &p));
     };
-    #[cfg(not(target_arch = "wasm32"))]
     std::thread::spawn(job);
-    #[cfg(target_arch = "wasm32")]
-    job();
     let guard = scan_guard(app, &progress, false);
     app.scan = Some(ScanTask { progress, rx, copy: false, album: None, browse: false, sources, guard });
     Ok(json!({"scanning": true}))
@@ -556,10 +515,7 @@ pub fn browse(app: &mut LocalPhotoApp, path: &str, subfolders: Option<bool>) -> 
         };
         let _ = tx.send(scan_with(input, &files, &p));
     };
-    #[cfg(not(target_arch = "wasm32"))]
     std::thread::spawn(job);
-    #[cfg(target_arch = "wasm32")]
-    job();
     let guard = scan_guard(app, &progress, true);
     app.scan = Some(ScanTask { progress, rx, copy: false, album: None, browse: true, sources: Vec::new(), guard });
     app.renderer.forget_imports();

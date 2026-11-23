@@ -386,11 +386,11 @@ fn menu(ui: &mut Ui, widget: &str, id: egui::Id, text: &str, action: &mut Option
         (Action::Cut, "cut", "Cut", "Cmd+X", selected),
         (Action::Copy, "copy", "Copy", "Cmd+C", selected),
         // a browser only pastes from its own paste event, never on request
-        (Action::Paste, "paste", "Paste", "Cmd+V", !cfg!(target_arch = "wasm32")),
+        (Action::Paste, "paste", "Paste", "Cmd+V", true),
         (Action::SelectAll, "selectAll", "Select All", "Cmd+A", !text.is_empty()),
     ];
     for (a, key, label, shortcut, enabled) in items {
-        if a == Action::Paste && cfg!(target_arch = "wasm32") {
+        if a == Action::Paste && false {
             continue;
         }
         if a == Action::SelectAll {

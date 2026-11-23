@@ -4,19 +4,14 @@ use serde_json::Value;
 
 use crate::LocalPhotoApp;
 
-#[cfg(not(target_arch = "wasm32"))]
 use craft_update::updater::{Action, Status, Updater};
 
 pub(crate) struct Runtime {
-    #[cfg(not(target_arch = "wasm32"))]
     updater: Updater,
     /// The desktop app turns the check at start on; tests and the web build leave it off.
-    #[cfg(not(target_arch = "wasm32"))]
     startup_check: bool,
-    #[cfg(not(target_arch = "wasm32"))]
     check_requested: bool,
     /// The context of the last frame, to wake the UI when a check is queued from a menu callback.
-    #[cfg(not(target_arch = "wasm32"))]
     repaint: Option<egui::Context>,
     pub(crate) manual_window_open: bool,
     pub(crate) status_message: Option<String>,
@@ -25,13 +20,9 @@ pub(crate) struct Runtime {
 impl Default for Runtime {
     fn default() -> Self {
         Self {
-            #[cfg(not(target_arch = "wasm32"))]
             updater: Updater::new(&craft_update::suite::LOCALPHOTO, env!("CARGO_PKG_VERSION")),
-            #[cfg(not(target_arch = "wasm32"))]
             startup_check: false,
-            #[cfg(not(target_arch = "wasm32"))]
             check_requested: false,
-            #[cfg(not(target_arch = "wasm32"))]
             repaint: None,
             manual_window_open: false,
             status_message: None,
@@ -41,13 +32,12 @@ impl Default for Runtime {
 
 impl LocalPhotoApp {
     /// Whether the app asks for a newer release when it starts (off until the desktop app turns it on).
-    #[cfg(not(target_arch = "wasm32"))]
     pub fn set_startup_update_check(&mut self, on: bool) {
         self.updates_rt.startup_check = on;
     }
 
     /// Test only: a newer release is on offer, so the update prompt is up.
-    #[cfg(all(test, not(target_arch = "wasm32")))]
+    #[cfg(test)]
     pub(crate) fn offer_update_for_test(&mut self, name: &str) {
         self.updates_rt.updater.offer(craft_update::Release {
             tag: "v99.0.0".into(),
@@ -61,19 +51,10 @@ impl LocalPhotoApp {
 
 /// The update prompt owns the keyboard while it is open: shortcuts must not reach the library behind it.
 pub(crate) fn blocks_input(app: &LocalPhotoApp) -> bool {
-    #[cfg(not(target_arch = "wasm32"))]
-    {
-        app.updates_rt.updater.prompt_open()
-    }
-    #[cfg(target_arch = "wasm32")]
-    {
-        let _ = app;
-        false
-    }
+    app.updates_rt.updater.prompt_open()
 }
 
 pub(crate) fn check(app: &mut LocalPhotoApp) -> Result<Value, String> {
-    #[cfg(not(target_arch = "wasm32"))]
     {
         app.updates_rt.check_requested = true;
         if let Some(ctx) = &app.updates_rt.repaint {
@@ -81,16 +62,9 @@ pub(crate) fn check(app: &mut LocalPhotoApp) -> Result<Value, String> {
         }
         Ok(Value::Null)
     }
-    #[cfg(target_arch = "wasm32")]
-    {
-        app.updates_rt.manual_window_open = true;
-        app.updates_rt.status_message = Some("Update check is not supported in the web browser.".into());
-        Ok(Value::Null)
-    }
 }
 
 pub(crate) fn tick(app: &mut LocalPhotoApp, ctx: &egui::Context) {
-    #[cfg(not(target_arch = "wasm32"))]
     {
         let rt = &mut app.updates_rt;
         rt.repaint = Some(ctx.clone());
@@ -101,12 +75,9 @@ pub(crate) fn tick(app: &mut LocalPhotoApp, ctx: &egui::Context) {
         }
         rt.updater.tick(ctx);
     }
-    #[cfg(target_arch = "wasm32")]
-    let _ = (app, ctx);
 }
 
 pub(crate) fn show(app: &mut LocalPhotoApp, ctx: &egui::Context) {
-    #[cfg(not(target_arch = "wasm32"))]
     {
         // The restart helper is scheduled before the app closes, so no update starts over unsaved work.
         let clean = app.session.unsaved().is_none();
@@ -154,7 +125,6 @@ pub(crate) fn show(app: &mut LocalPhotoApp, ctx: &egui::Context) {
     }
 
     // Closing the window dismisses the outcome it showed.
-    #[cfg(not(target_arch = "wasm32"))]
     if !app.updates_rt.manual_window_open {
         app.updates_rt.updater.dismiss_status();
     }
@@ -169,7 +139,6 @@ mod tests {
     fn default_runtime_is_idle() {
         let rt = Runtime::default();
         assert!(!rt.manual_window_open);
-        #[cfg(not(target_arch = "wasm32"))]
         {
             assert!(!rt.startup_check);
             assert!(!rt.updater.prompt_open());
@@ -178,7 +147,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg(not(target_arch = "wasm32"))]
     fn startup_prompt_shows_and_closes() {
         let mut app = LocalPhotoApp::new(Session::new(), Default::default());
         let ctx = egui::Context::default();

@@ -525,7 +525,7 @@ fn import_tab(app: &mut LocalPhotoApp, ui: &mut egui::Ui, t: &Tokens) {
             let _ = app.run("library.xmpPreferences", json!({"naming": naming}));
         }
     });
-    if !cfg!(target_arch = "wasm32") {
+    {
         heading(ui, t, crate::i18n::tr("Dropped Files"));
         check(ui, "settings.importDropped", &mut app.ui.settings.import_dropped_directly, "Import dropped files without review");
         heading(ui, t, crate::i18n::tr("Cameras and Cards"));
@@ -655,13 +655,11 @@ fn performance_tab(app: &mut LocalPhotoApp, ui: &mut egui::Ui, t: &Tokens) {
             "Photos seen in Local but never added or changed leave the catalog when their folder hasn't been browsed for this long (checked when the library opens). Files stay on disk; browsing the folder shows them again.",
         ),
     );
-    #[cfg(not(target_arch = "wasm32"))]
     smart_previews(app, ui, t);
 }
 
 /// Where this library keeps its smart previews (the offline-editing proxies, which can be large):
 /// the effective folder, what is in it, and choosing another one.
-#[cfg(not(target_arch = "wasm32"))]
 fn smart_previews(app: &mut LocalPhotoApp, ui: &mut egui::Ui, t: &Tokens) {
     // listing a big folder every frame would be slow: refresh every 2 s and after a change
     let cache = egui::Id::unique("smart-location");

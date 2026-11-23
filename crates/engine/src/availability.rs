@@ -39,7 +39,7 @@ pub const RECHECK: Duration = Duration::from_secs(15);
 
 fn fs_exists(path: &str) -> bool {
     // the browser build has no file system: its originals are always "there"
-    cfg!(target_arch = "wasm32") || std::path::Path::new(path).exists()
+    std::path::Path::new(path).exists()
 }
 
 #[derive(Default)]
@@ -98,9 +98,6 @@ impl Availability {
     /// Answer from the cache and check on a worker thread from now on; `wake` runs when an
     /// answer changed. No effect in the browser build (no threads, no file system).
     pub fn run_in_background(&mut self, wake: Waker) {
-        if cfg!(target_arch = "wasm32") {
-            return;
-        }
         self.background = Some(wake);
     }
 

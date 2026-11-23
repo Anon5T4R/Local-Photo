@@ -208,7 +208,7 @@ fn list(s: &mut Session, _: &Value) -> Result<Value> {
         // where the models run: {cpuOnly, detection, recognition} as `faces.gpu` gives it
         "gpu": super::face_detect::gpu_json(s),
         // Native builds always have the pure-Rust runner; model files/background scanning remain native-only.
-        "runtime": cfg!(not(target_arch = "wasm32")),
+        "runtime": true,
         "models": models,
         // the user's own list of models to download: where it goes, how many it holds, and what was wrong with the rest
         "catalog": {
@@ -355,9 +355,7 @@ fn download(s: &mut Session, p: &Value) -> Result<Value> {
     let dir = models_dir(s, C)?;
     refresh_catalog(s);
     let spec = download_spec(s, id).ok_or_else(|| bad(C, "Local Photo has no download for that model: get the file from its page, then add it"))?;
-    if cfg!(target_arch = "wasm32") {
-        return Err(bad(C, "the web build downloads no models"));
-    }
+
     if p.get("acknowledged").and_then(Value::as_bool) != Some(true) {
         return Err(bad(
             C,
@@ -405,7 +403,6 @@ fn download_cancel(s: &mut Session, p: &Value) -> Result<Value> {
 
 /// Load the model and run its self-test: `Ok(null)` in a build without the recognition runtime (nothing can
 /// be checked), `Ok(result)` when it passes, `Err(reason)` when it does not load or fails a check.
-#[cfg(not(target_arch = "wasm32"))]
 fn self_test(path: &Path, m: &ModelManifest) -> std::result::Result<Value, String> {
     if m.role == Role::Detector {
         let bytes = read_capped(path, 8 << 20).ok_or("the detector cannot be read within its 8 MiB limit")?;
@@ -428,19 +425,12 @@ fn self_test(path: &Path, m: &ModelManifest) -> std::result::Result<Value, Strin
     serde_json::to_value(&t).map_err(|e| e.to_string())
 }
 
-#[cfg(target_arch = "wasm32")]
-fn self_test(_: &Path, _: &ModelManifest) -> std::result::Result<Value, String> {
-    Ok(Value::Null)
-}
-
 /// `faces.models.test {id}`: run an installed model's self-test again.
 fn test(s: &mut Session, p: &Value) -> Result<Value> {
     const C: &str = "faces.models.test";
     let id = str_param(p, "id").ok_or_else(|| bad(C, "missing `id`"))?;
     let dir = models_dir(s, C)?;
-    if !cfg!(not(target_arch = "wasm32")) {
-        return Err(bad(C, "this build cannot run face recognition models"));
-    }
+
     let found = installed_models(&dir).into_iter().find(|i| i.manifest.id == id).ok_or_else(|| bad(C, "that model is not installed"))?;
     if found.manifest.role != Role::Embedder {
         return Err(bad(C, "only recognition models have a self-test"));
@@ -516,7 +506,6 @@ fn enable(s: &mut Session, p: &Value) -> Result<Value> {
     st.enabled = on;
     write_settings(&dir, &st)?;
     // the background scan notices at once, not within the second it trusts its last look
-    #[cfg(not(target_arch = "wasm32"))]
     {
         s.faces.enabled_seen = None;
     }

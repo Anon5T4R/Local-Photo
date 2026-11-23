@@ -6,24 +6,12 @@ use serde_json::Value;
 use super::{CommandSpec, cmd};
 use crate::{Result, Session};
 
-#[cfg(not(target_arch = "wasm32"))]
 fn read_points(s: &mut Session, p: &Value) -> Result<Value> {
     crate::focus_scan::read_points(s, p)
 }
 
-#[cfg(target_arch = "wasm32")]
-fn read_points(_: &mut Session, _: &Value) -> Result<Value> {
-    Err(super::bad("photo.readFocusPoints", "reading focus points needs the photos' files on disk"))
-}
-
-#[cfg(not(target_arch = "wasm32"))]
 fn pump(s: &mut Session, p: &Value) -> Result<Value> {
     crate::focus_scan::pump(s, p)
-}
-
-#[cfg(target_arch = "wasm32")]
-fn pump(_: &mut Session, _: &Value) -> Result<Value> {
-    Ok(serde_json::json!({"active": false}))
 }
 
 pub fn specs() -> Vec<CommandSpec> {

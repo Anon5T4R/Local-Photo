@@ -62,7 +62,7 @@ impl SidebarSection {
 
     /// Whether this build has the section at all (Local browses folders on disk: not on the web).
     pub const fn available(self) -> bool {
-        !(cfg!(target_arch = "wasm32") && matches!(self, SidebarSection::Local))
+        true
     }
 
     /// The ids of every section, for error messages (`albums|local|…`).

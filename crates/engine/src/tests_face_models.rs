@@ -36,7 +36,7 @@ fn the_list_knows_the_known_models_and_is_honest_about_the_runtime() {
     let mut s = session(&d);
     let l = s.execute("faces.models.list", &json!({})).unwrap();
     assert_eq!(l["enabled"], false);
-    assert_eq!(l["runtime"], cfg!(not(target_arch = "wasm32")));
+    assert_eq!(l["runtime"], true);
     assert_eq!(find(&l, "yunet-2023mar")["installed"], false, "nothing ships with Local Photo");
     assert_eq!(find(&l, "auraface-v1")["installed"], false);
     assert_eq!(find(&l, "auraface-v1")["licence"]["commercial"], "yes");
@@ -389,7 +389,6 @@ fn real_downloads_of_the_recognisers_start_and_can_be_cancelled() {
 
 /// With the recognition runtime: installing runs the model's self-test, a model that does not work is refused
 /// and leaves nothing behind, and `faces.models.test` runs it again.
-#[cfg(not(target_arch = "wasm32"))]
 #[test]
 fn installing_runs_the_self_test_and_refuses_models_that_do_not_work() {
     let d = temp("selftest");
@@ -420,7 +419,6 @@ fn installing_runs_the_self_test_and_refuses_models_that_do_not_work() {
     let _ = std::fs::remove_dir_all(&d);
 }
 
-#[cfg(not(target_arch = "wasm32"))]
 #[test]
 fn failed_replacement_keeps_the_installed_model_and_records() {
     let d = temp("replacement");

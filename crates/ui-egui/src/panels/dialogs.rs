@@ -44,12 +44,9 @@ pub(crate) fn rename_preview(
         *out.lock().unwrap_or_else(std::sync::PoisonError::into_inner) = Some(plans);
         repaint.request_repaint();
     };
-    #[cfg(not(target_arch = "wasm32"))]
     if let Err(e) = std::thread::Builder::new().name("lc-rename-preview".into()).spawn(work) {
         log::warn!("rename preview: {e}");
     }
-    #[cfg(target_arch = "wasm32")]
-    work();
     ctx.data_mut(|d| d.insert_temp(id, (key, rows.clone())));
     (read(&rows), total)
 }
@@ -90,8 +87,6 @@ fn watermark_preview(
             // the thumbnail, then as wide as the dialog (a tall photo up to three times that high)
             let jobs: Vec<_> = [app.session.thumb_job(id, 512), app.session.render_job(id, px, px * 3, false, true)].into_iter().flatten().collect();
             // the web build has no worker thread: a full render there would hold up the page
-            #[cfg(target_arch = "wasm32")]
-            let jobs: Vec<_> = jobs.into_iter().take(1).collect();
             if jobs.is_empty() {
                 *base.lock().unwrap_or_else(std::sync::PoisonError::into_inner) = (1, Some(Err("no such photo".into())));
             } else {
@@ -108,12 +103,9 @@ fn watermark_preview(
                         }
                     }
                 };
-                #[cfg(not(target_arch = "wasm32"))]
                 if let Err(e) = std::thread::Builder::new().name("lc-watermark-preview".into()).spawn(work) {
                     log::warn!("watermark preview: {e}");
                 }
-                #[cfg(target_arch = "wasm32")]
-                work();
             }
             ctx.data_mut(|d| d.insert_temp(base_id, (key, base.clone())));
             base
@@ -1052,7 +1044,7 @@ pub fn show(app: &mut LocalPhotoApp, ctx: &egui::Context, blocked: bool) {
                     // like Lightroom Classic's Export To: one folder, or each photo's own folder (not on
                     // the web, where originals live in the browser's storage, not in folders)
                     use localphoto_engine::export::DestinationMode as D;
-                    if !cfg!(target_arch = "wasm32") || opts.destination_mode != D::SpecificFolder {
+                    {
                     choices(
                         ui,
                         "Export to",

@@ -29,22 +29,15 @@ use localphoto_develop::DevelopSettings;
 use localphoto_pipeline::{RenderRequest, Rendered, SourceInfo, StageCache};
 use localphoto_raster::Rgb32f;
 
-#[cfg(not(target_arch = "wasm32"))]
 pub mod backend;
-#[cfg(not(target_arch = "wasm32"))]
 mod ctx;
-#[cfg(not(target_arch = "wasm32"))]
 mod exit;
-#[cfg(not(target_arch = "wasm32"))]
 pub mod faces;
-#[cfg(all(feature = "denoise", not(target_arch = "wasm32")))]
+#[cfg(feature = "denoise")]
 pub mod nn;
-#[cfg(not(target_arch = "wasm32"))]
 mod params;
-#[cfg(not(target_arch = "wasm32"))]
 mod render;
 
-#[cfg(not(target_arch = "wasm32"))]
 pub use render::GpuStages;
 
 static ENABLED: AtomicBool = AtomicBool::new(true);
@@ -57,7 +50,6 @@ static BROKEN_REASON: Mutex<Option<String>> = Mutex::new(None);
 static LAST_FALLBACK: Mutex<Option<String>> = Mutex::new(None);
 
 /// Stop using the GPU for the rest of the process (after a device error).
-#[cfg_attr(target_arch = "wasm32", allow(dead_code))]
 fn mark_broken(reason: &str) {
     let mut r = BROKEN_REASON.lock().unwrap_or_else(|e| e.into_inner());
     if r.is_none() {
@@ -66,7 +58,6 @@ fn mark_broken(reason: &str) {
     BROKEN.store(true, Ordering::Relaxed);
 }
 
-#[cfg_attr(target_arch = "wasm32", allow(dead_code))]
 fn record_fallback(reason: String) {
     *LAST_FALLBACK.lock().unwrap_or_else(|e| e.into_inner()) = Some(reason);
 }
@@ -91,16 +82,11 @@ pub fn unavailable_reason() -> Option<String> {
     if let Some(r) = broken_here() {
         return Some(format!("stopped after a GPU failure: {r}"));
     }
-    #[cfg(not(target_arch = "wasm32"))]
     {
         match GPU.get() {
             Some(Err(e)) => Some(e.clone()),
             _ => None,
         }
-    }
-    #[cfg(target_arch = "wasm32")]
-    {
-        Some("the browser build has no GPU path yet".into())
     }
 }
 
@@ -162,13 +148,11 @@ pub fn inject_fault(f: Fault) {
     FAULT.with(|c| c.set(Some(f)));
 }
 
-#[cfg_attr(target_arch = "wasm32", allow(dead_code))]
 fn take_fault() -> Option<Fault> {
     FAULT.with(|c| c.take())
 }
 
 /// Stop using the GPU on this thread (a simulated fatal failure).
-#[cfg_attr(target_arch = "wasm32", allow(dead_code))]
 fn mark_broken_here(reason: &str) {
     let _ = BROKEN_HERE.try_with(|b| {
         let mut b = b.borrow_mut();
@@ -206,40 +190,23 @@ pub fn enabled() -> bool {
 /// `None` (callers render on the CPU), the devices are not created and denoise tiles fail over to
 /// the CPU. There is no way back. Follow it with [`wait_idle`].
 pub fn begin_shutdown() {
-    #[cfg(not(target_arch = "wasm32"))]
     exit::begin_shutdown();
 }
 
 /// Whether [`begin_shutdown`] was called.
 pub fn shutting_down() -> bool {
-    #[cfg(not(target_arch = "wasm32"))]
-    {
-        exit::shutting_down()
-    }
-    #[cfg(target_arch = "wasm32")]
-    {
-        false
-    }
+    exit::shutting_down()
 }
 
 /// Wait up to `timeout` for the GPU work in flight on every thread to end. `true`: none is left,
 /// and after [`begin_shutdown`] none can start, so the process may end; `false`: the deadline
 /// passed with a render (or a device being created) still inside the driver.
 pub fn wait_idle(timeout: std::time::Duration) -> bool {
-    #[cfg(not(target_arch = "wasm32"))]
-    {
-        exit::wait_idle(timeout)
-    }
-    #[cfg(target_arch = "wasm32")]
-    {
-        let _ = timeout;
-        true
-    }
+    exit::wait_idle(timeout)
 }
 
 /// Why GPU compute that has a device of its own (denoise, faces) is switched off by the user's settings, or `None`: the
 /// environment switches and the rendering preference, but not a render-device failure (the devices are separate).
-#[cfg(not(target_arch = "wasm32"))]
 pub(crate) fn switched_off() -> Option<String> {
     if let Some(why) = env_off_reason() {
         return Some(why.into());
@@ -254,7 +221,6 @@ pub fn env_off_reason() -> Option<&'static str> {
     if !env_disabled() {
         return None;
     }
-    #[cfg(not(target_arch = "wasm32"))]
     if backend::env_off() {
         return Some("disabled by LOCALPHOTO_GPU_BACKEND=off");
     }
@@ -266,16 +232,13 @@ fn env_disabled() -> bool {
     static OFF: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
     *OFF.get_or_init(|| {
         let off = std::env::var("LOCALPHOTO_GPU").is_ok_and(|v| matches!(v.trim(), "0" | "off" | "false" | "no"));
-        #[cfg(not(target_arch = "wasm32"))]
-        let off = off || backend::env_off();
-        off
+
+        off || backend::env_off()
     })
 }
 
-#[cfg(not(target_arch = "wasm32"))]
 static GPU: std::sync::OnceLock<Result<ctx::Gpu, String>> = std::sync::OnceLock::new();
 
-#[cfg(not(target_arch = "wasm32"))]
 pub(crate) fn device() -> Option<&'static ctx::Gpu> {
     // turned off (preference, environment): don't even load the driver (issue #136)
     if env_disabled() || !ENABLED.load(Ordering::Relaxed) {
@@ -301,7 +264,6 @@ pub(crate) fn device() -> Option<&'static ctx::Gpu> {
 }
 
 /// The device if it has been created (never creates it).
-#[cfg(not(target_arch = "wasm32"))]
 pub(crate) fn existing_device() -> Option<&'static ctx::Gpu> {
     GPU.get().and_then(|g| g.as_ref().ok())
 }
@@ -310,7 +272,6 @@ pub(crate) fn existing_device() -> Option<&'static ctx::Gpu> {
 /// so the first render doesn't wait ~0.3–0.4 s for it and the UI thread never does. Does nothing
 /// while GPU rendering is turned off.
 pub fn warm_up() {
-    #[cfg(not(target_arch = "wasm32"))]
     if !env_disabled() && ENABLED.load(Ordering::Relaxed) && GPU.get().is_none() {
         let _ = std::thread::Builder::new().name("lc-gpu-init".into()).spawn(|| {
             let _ = device();
@@ -320,80 +281,38 @@ pub fn warm_up() {
 
 /// Has device creation finished (successfully or not)? Never blocks — for status displays.
 pub fn ready() -> bool {
-    #[cfg(not(target_arch = "wasm32"))]
-    {
-        env_disabled() || GPU.get().is_some()
-    }
-    #[cfg(target_arch = "wasm32")]
-    {
-        true
-    }
+    env_disabled() || GPU.get().is_some()
 }
 
 /// Whether a usable GPU adapter exists and GPU rendering is enabled (creates the device on first
 /// use).
 pub fn available() -> bool {
-    #[cfg(not(target_arch = "wasm32"))]
-    {
-        enabled() && device().is_some()
-    }
-    #[cfg(target_arch = "wasm32")]
-    {
-        false
-    }
+    enabled() && device().is_some()
 }
 
 /// The adapter's name and backend, e.g. "Apple M4 Pro (Metal)".
 pub fn adapter_name() -> Option<String> {
-    #[cfg(not(target_arch = "wasm32"))]
-    {
-        device().map(|g| format!("{} ({:?})", g.info.name, g.info.backend))
-    }
-    #[cfg(target_arch = "wasm32")]
-    {
-        None
-    }
+    device().map(|g| format!("{} ({:?})", g.info.name, g.info.backend))
 }
 
 /// Device buffers held by the renderer.
-#[cfg(not(target_arch = "wasm32"))]
 pub use ctx::GpuMemory;
-
-/// Device buffers held by the renderer.
-#[cfg(target_arch = "wasm32")]
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
-pub struct GpuMemory {
-    pub allocated: u64,
-    pub pooled: u64,
-    pub retired: u64,
-}
 
 /// Device memory held by the renderer's buffers (zero without a device).
 pub fn memory() -> GpuMemory {
-    #[cfg(not(target_arch = "wasm32"))]
-    {
-        ctx::memory()
-    }
-    #[cfg(target_arch = "wasm32")]
-    {
-        GpuMemory::default()
-    }
+    ctx::memory()
 }
 
 /// Keep at most `bytes` of recycled buffers in the free pool from now on (trimming it now).
 pub fn set_pool_limit(bytes: u64) {
-    #[cfg(not(target_arch = "wasm32"))]
     {
         ctx::POOL_LIMIT.store(bytes, Ordering::Relaxed);
         trim_pool(bytes);
     }
-    #[cfg(target_arch = "wasm32")]
-    let _ = bytes;
 }
 
 /// Free recycled buffers until at most `keep` bytes stay pooled (e.g. when the app goes idle).
 pub fn trim_pool(keep: u64) {
-    #[cfg(not(target_arch = "wasm32"))]
     if let Some(g) = existing_device()
         && let Some(_work) = exit::enter()
     {
@@ -402,45 +321,21 @@ pub fn trim_pool(keep: u64) {
         }
         g.trim(keep);
     }
-    #[cfg(target_arch = "wasm32")]
-    let _ = keep;
 }
 
 /// Device bytes of the one big source (a zoom window's original) shared by every view of the photo.
 pub fn shared_source_bytes() -> usize {
-    #[cfg(not(target_arch = "wasm32"))]
-    {
-        render::shared_source_bytes()
-    }
-    #[cfg(target_arch = "wasm32")]
-    {
-        0
-    }
+    render::shared_source_bytes()
 }
 
 /// Big sources uploaded to the shared copy so far (a diagnostic: one big photo is uploaded once, not once per window).
 pub fn source_uploads() -> u64 {
-    #[cfg(not(target_arch = "wasm32"))]
-    {
-        render::source_uploads()
-    }
-    #[cfg(target_arch = "wasm32")]
-    {
-        0
-    }
+    render::source_uploads()
 }
 
 /// Device bytes held by a view's GPU stages (kept with its [`StageCache`]); 0 when it has none.
 pub fn stage_bytes(stages: &StageCache) -> usize {
-    #[cfg(not(target_arch = "wasm32"))]
-    {
-        stages.peek_extension::<GpuStages>().map(|g| g.bytes()).unwrap_or(0)
-    }
-    #[cfg(target_arch = "wasm32")]
-    {
-        let _ = stages;
-        0
-    }
+    stages.peek_extension::<GpuStages>().map(|g| g.bytes()).unwrap_or(0)
 }
 
 /// Render `src` with `s` on the GPU, reusing the device-resident stages kept with `stages` (the
@@ -469,7 +364,6 @@ pub fn try_render(
     req: &RenderRequest,
     stages: Option<&StageCache>,
 ) -> Result<Rendered, Fallback> {
-    #[cfg(not(target_arch = "wasm32"))]
     {
         // sections switched off with their eye render as if at their defaults (issue #316)
         let effective = s.effective();
@@ -542,11 +436,6 @@ pub fn try_render(
         };
         record_fallback(reason.clone());
         Err(Fallback::Failed(reason))
-    }
-    #[cfg(target_arch = "wasm32")]
-    {
-        let _ = (src, info, s, req, stages);
-        Err(Fallback::NotTried)
     }
 }
 

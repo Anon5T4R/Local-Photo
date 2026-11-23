@@ -3,7 +3,6 @@
 #![forbid(unsafe_code)]
 #![deny(clippy::unwrap_used, clippy::expect_used, clippy::panic, clippy::unimplemented, clippy::todo, clippy::unreachable)]
 
-#[cfg(not(target_arch = "wasm32"))]
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut args = std::env::args().skip(1);
     let dir = args.next().ok_or("usage: localphoto-sam3-worker MODEL_DIR [127.0.0.1:8793]")?;
@@ -12,7 +11,3 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     localphoto_segment::remote::serve(address, std::path::Path::new(&dir), device)?;
     Ok(())
 }
-
-/// The worker serves a local GPU over a socket; there is nothing to serve in a browser.
-#[cfg(target_arch = "wasm32")]
-fn main() {}

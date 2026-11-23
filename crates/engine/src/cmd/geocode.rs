@@ -180,7 +180,6 @@ fn reverse(s: &mut Session, p: &Value) -> Result<Value> {
     Ok(json!({"looked": todo.len(), "found": found.len(), "changed": changed, "photos": found, "attribution": GEONAMES_ATTRIBUTION}))
 }
 
-#[cfg(not(target_arch = "wasm32"))]
 mod download {
     use std::path::Path;
     use std::sync::Arc;
@@ -300,7 +299,6 @@ pub fn specs() -> Vec<CommandSpec> {
         ),
         cmd!(query "metadata.placeNamesStatus", "Place Names Status", [], None, "{dataset?: folder} → {downloaded, bytes, path, attribution, source}", always, status),
     ];
-    #[cfg(not(target_arch = "wasm32"))]
     v.push(cmd!(
         "metadata.downloadPlaceNames",
         "Download Place Names (GeoNames)",
@@ -429,7 +427,6 @@ mod tests {
 
     /// A local HTTP server; the first path segment picks the behaviour: `good` (the synthetic dump), `garbage` (a zip
     /// that isn't one), `short` (the body ends before its Content-Length), anything else 404.
-    #[cfg(not(target_arch = "wasm32"))]
     fn serve() -> String {
         use std::io::{BufRead, BufReader, Write};
         let l = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
@@ -463,7 +460,6 @@ mod tests {
         format!("http://127.0.0.1:{port}")
     }
 
-    #[cfg(not(target_arch = "wasm32"))]
     fn download(s: &mut Session, base: &str, dir: &Path) -> DownloadOutcome {
         s.execute("metadata.downloadPlaceNames", &json!({"dataset": dir, "base": base})).unwrap();
         assert!(s.place_names.downloading() || s.place_names.lock().unreported.is_some());
@@ -482,7 +478,6 @@ mod tests {
         }
     }
 
-    #[cfg(not(target_arch = "wasm32"))]
     #[test]
     fn download_end_to_end_and_its_failures() {
         let mut s = Session::with_demo();

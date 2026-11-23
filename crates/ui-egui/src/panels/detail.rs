@@ -671,7 +671,6 @@ pub fn show(app: &mut LocalPhotoApp, ui: &mut egui::Ui) {
         app.renderer.request(Slot::Main, job, 100);
         // a drag's draft that renders in a few ms (GPU) is drawn in this frame, not the next (zoomed
         // in, what changes on screen is the window's draft)
-        #[cfg(not(target_arch = "wasm32"))]
         if interacting && plan.window_edge.is_none() {
             let frame = ui.input(|i| i.predicted_dt).clamp(1.0 / 240.0, 1.0 / 30.0);
             // (a frame time that is not a number waits for nothing)

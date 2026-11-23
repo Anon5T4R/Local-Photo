@@ -5,5 +5,4 @@
 
 mod equivalence;
 mod fallback;
-#[cfg(not(target_arch = "wasm32"))]
 mod gpu_probe;

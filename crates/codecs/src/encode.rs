@@ -332,7 +332,7 @@ pub fn encode_webp_lossless(img: &EncodeImage, meta: &EncodeMeta) -> Result<Vec<
 /// when built without the `avif` feature.
 pub fn encode_avif(img: &EncodeImage, quality: u8, speed: u8, meta: &EncodeMeta) -> Result<Vec<u8>> {
     img.validate()?;
-    #[cfg(all(feature = "avif", not(target_arch = "wasm32")))]
+    #[cfg(feature = "avif")]
     {
         let mut enc = ravif::Encoder::new()
             .with_quality(quality.clamp(1, 100) as f32)
@@ -362,7 +362,7 @@ pub fn encode_avif(img: &EncodeImage, quality: u8, speed: u8, meta: &EncodeMeta)
         let _ = img.has_alpha();
         Ok(r.avif_file)
     }
-    #[cfg(not(all(feature = "avif", not(target_arch = "wasm32"))))]
+    #[cfg(not(feature = "avif"))]
     {
         let _ = (quality, speed, meta, img.has_alpha());
         Err(Error::Encode("AVIF encoding is not available in this build".into()))
@@ -434,7 +434,7 @@ pub fn encode_avif_hdr(width: u32, height: u32, rgb: &[f32], quality: u8, speed:
     if n == 0 || n.checked_mul(3).is_none_or(|need| rgb.len() < need) {
         return Err(Error::Encode("HDR AVIF: sample buffer too short".into()));
     }
-    #[cfg(all(feature = "avif", not(target_arch = "wasm32")))]
+    #[cfg(feature = "avif")]
     {
         use rav1e::prelude::*;
         const K: [f32; 3] = [0.2627, 0.6780, 0.0593]; // BT.2020 NCL
@@ -539,7 +539,7 @@ pub fn encode_avif_hdr(width: u32, height: u32, rgb: &[f32], quality: u8, speed:
         }
         Ok(a.to_vec(&av1, None, width, height, 10))
     }
-    #[cfg(not(all(feature = "avif", not(target_arch = "wasm32"))))]
+    #[cfg(not(feature = "avif"))]
     {
         let _ = (quality, speed, meta, transfer);
         Err(Error::Encode("AVIF encoding is not available in this build".into()))
@@ -601,7 +601,7 @@ pub fn encode_png_pq(width: u32, height: u32, rgb: &[f32], meta: &EncodeMeta) ->
 }
 
 /// 16-bit RGB(A) → 10-bit BT.601 full-range YCbCr planes (the matrix `ravif` uses for 8-bit input).
-#[cfg(all(feature = "avif", not(target_arch = "wasm32")))]
+#[cfg(feature = "avif")]
 fn avif_10bit(enc: &ravif::Encoder, img: &EncodeImage, s: &[u16]) -> Result<Vec<u8>> {
     const K: [f32; 3] = [0.299, 0.587, 0.114];
     let n = img.width as usize * img.height as usize;

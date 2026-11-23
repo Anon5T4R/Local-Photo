@@ -462,11 +462,9 @@ fn a_busy_renderer_still_answers_a_headless_capture_at_the_forced_instant() {
     assert_eq!(app.shot_bytes, 0, "the grown/shrunk reservation is released");
 }
 
-#[cfg(not(target_arch = "wasm32"))]
 #[derive(Debug)]
 struct TestDropped(std::path::PathBuf);
 
-#[cfg(not(target_arch = "wasm32"))]
 impl egui::DroppedFile for TestDropped {
     fn path(&self) -> &std::path::Path {
         &self.0
@@ -477,7 +475,6 @@ impl egui::DroppedFile for TestDropped {
     }
 }
 
-#[cfg(not(target_arch = "wasm32"))]
 #[test]
 fn one_synthetic_batch_until_a_completed_pass_and_drops_wait_for_the_ui_phase() {
     let ctx = egui::Context::default();

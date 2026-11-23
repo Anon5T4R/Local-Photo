@@ -276,7 +276,6 @@ pub struct Headless {
 /// false}`), bounded, so it never abandons osascript or the import's result.
 impl Drop for Headless {
     fn drop(&mut self) {
-        #[cfg(not(target_arch = "wasm32"))]
         self.app.session.wait_for_photos_imports();
     }
 }

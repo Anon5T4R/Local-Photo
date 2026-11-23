@@ -123,7 +123,6 @@ fn run_all(jobs: Vec<Vec<RenderJob>>, state: &PreviewBuild, task: &TaskGuard, la
             task.progress(done as u64, total as u64);
         }
     };
-    #[cfg(not(target_arch = "wasm32"))]
     std::thread::scope(|sc| {
         for k in 1..lanes.max(1) {
             // a lane that can't start leaves its photos to the others (and to this thread)
@@ -133,11 +132,6 @@ fn run_all(jobs: Vec<Vec<RenderJob>>, state: &PreviewBuild, task: &TaskGuard, la
         }
         work();
     });
-    #[cfg(target_arch = "wasm32")]
-    {
-        let _ = lanes;
-        work();
-    }
     state.finished.store(true, Ordering::Relaxed);
 }
 
@@ -158,12 +152,11 @@ fn build(s: &mut Session, p: &Value) -> Result<Value> {
     s.preview_build = Some(state.clone());
     let task = task_for(s, &state);
     let lanes = lanes(jobs.len(), edge.is_none());
-    let wait = p.get("wait").and_then(Value::as_bool).unwrap_or(false) || cfg!(target_arch = "wasm32");
+    let wait = p.get("wait").and_then(Value::as_bool).unwrap_or(false);
     if wait {
         run_all(jobs, &state, &task, lanes);
         return Ok(state.json());
     }
-    #[cfg(not(target_arch = "wasm32"))]
     {
         // the row stays while the worker runs (it is dropped with the closure, however that ends)
         let st = state.clone();
@@ -179,22 +172,18 @@ fn build(s: &mut Session, p: &Value) -> Result<Value> {
 /// how to load the original at preview size, whether the photo can take a preview-fitted look:
 /// vendor raws and DNGs (whose tone can come from their preview); only those proxies go stale when
 /// the fit changes; an older encoding makes any proxy stale).
-#[cfg(not(target_arch = "wasm32"))]
 type SmartJob = (localphoto_catalog::PhotoId, std::path::PathBuf, Option<crate::media::SourceRef>, bool);
 
 /// DNG tone fits also go stale, although DNGs keep their own matrix and Kelvin white-balance scale.
-#[cfg(not(target_arch = "wasm32"))]
 fn preview_fitted_look(photo: &localphoto_catalog::Photo) -> bool {
     photo.fitted_look() || (photo.develops_raw() && photo.format.eq_ignore_ascii_case("DNG"))
 }
 
 /// Held while one proxy is checked and (re)written, so Build Smart Previews and the opening look
 /// refresh ([`refresh_stale_smart_previews`]), on their own threads, never write the same file at once.
-#[cfg(not(target_arch = "wasm32"))]
 static SMART_WRITE: std::sync::Mutex<()> = std::sync::Mutex::new(());
 
 /// What Build / Discard Smart Previews did.
-#[cfg(not(target_arch = "wasm32"))]
 #[derive(Default)]
 struct SmartCounts {
     /// Proxies there now (complete ones kept, missing or damaged ones written).
@@ -215,7 +204,6 @@ struct SmartCounts {
 /// (it now carries the proxy's stored facts), a proxy standing in for an offline original, and the
 /// proxy fallback of a file source are not the original: refreshing a stale proxy from one of them
 /// would stamp its older look as current.
-#[cfg(not(target_arch = "wasm32"))]
 fn original_only(source: crate::media::SourceRef) -> Option<crate::media::SourceRef> {
     use crate::media::SourceRef;
     match source {
@@ -230,7 +218,6 @@ fn original_only(source: crate::media::SourceRef) -> Option<crate::media::Source
 /// The file-system half of Build / Discard Smart Previews (runs on a worker thread in the app).
 /// `custom`: the folder was chosen (on another drive, perhaps): it must be there, it is never
 /// recreated. With `state`, progress and cancel.
-#[cfg(not(target_arch = "wasm32"))]
 fn smart_run(
     dir: &std::path::Path,
     custom: bool,
@@ -328,7 +315,6 @@ fn smart_run(
 /// Smart previews: build (from the original, at preview size) or discard the proxies that keep
 /// photos editable while their originals are offline. With `background` (the app) the files are
 /// read and written on a worker thread; progress like Build Previews (`library.previewProgress`).
-#[cfg(not(target_arch = "wasm32"))]
 fn smart(s: &mut Session, p: &Value) -> Result<Value> {
     const C: &str = "library.smartPreviews";
     let dir = s.media.smart_dir.clone().ok_or_else(|| bad(C, "smart previews need a library on disk"))?;
@@ -381,7 +367,6 @@ fn smart(s: &mut Session, p: &Value) -> Result<Value> {
 /// One whose original can't be read (offline) is kept as it is, still marked stale in its header:
 /// Build Smart Previews rebuilds it once the original is back. Only existing proxies are touched:
 /// none is built, and a missing folder is never created. Returns the thread, if started.
-#[cfg(not(target_arch = "wasm32"))]
 pub(crate) fn refresh_stale_smart_previews(s: &mut Session) -> Option<std::thread::JoinHandle<()>> {
     let dir = s.media.smart_dir.clone()?;
     if !dir.is_dir() || crate::smart::look_checked(&dir) {
@@ -401,7 +386,6 @@ pub(crate) fn refresh_stale_smart_previews(s: &mut Session) -> Option<std::threa
 }
 
 /// The body of [`refresh_stale_smart_previews`]: rebuild the stale proxies among `jobs`.
-#[cfg(not(target_arch = "wasm32"))]
 fn refresh_stale(dir: &std::path::Path, jobs: Vec<SmartJob>) {
     let stale: Vec<SmartJob> = jobs
         .into_iter()
@@ -426,7 +410,6 @@ fn refresh_stale(dir: &std::path::Path, jobs: Vec<SmartJob>) {
 
 /// The smart previews folder: where it is, whether it is custom, what it holds, whether it can be
 /// used now (a chosen folder on an unplugged drive is `available: false`).
-#[cfg(not(target_arch = "wasm32"))]
 fn location_json(s: &Session) -> Value {
     let dir = s.media.smart_dir.clone();
     let default = s.library.as_ref().filter(|l| l.on_disk).map(|l| crate::smart::dir(&l.dir));
@@ -442,7 +425,6 @@ fn location_json(s: &Session) -> Value {
 }
 
 /// Show or change where smart previews are kept (per library).
-#[cfg(not(target_arch = "wasm32"))]
 fn smart_location(s: &mut Session, p: &Value) -> Result<Value> {
     const C: &str = "library.smartPreviewsLocation";
     let current = s.media.smart_dir.clone().ok_or_else(|| bad(C, "smart previews need a library on disk"))?;
@@ -497,7 +479,6 @@ pub fn has_smart_preview(s: &Session, id: localphoto_catalog::PhotoId) -> bool {
 
 pub fn specs() -> Vec<CommandSpec> {
     vec![
-        #[cfg(not(target_arch = "wasm32"))]
         cmd!(
             "library.smartPreviews",
             "Build Smart Previews",
@@ -507,7 +488,6 @@ pub fn specs() -> Vec<CommandSpec> {
             always,
             smart
         ),
-        #[cfg(not(target_arch = "wasm32"))]
         cmd!(
             "library.smartPreviewsLocation",
             "Smart Previews Location",

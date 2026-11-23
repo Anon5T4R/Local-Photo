@@ -312,9 +312,7 @@ fn tpl_export(s: &mut Session, p: &Value) -> Result<Value> {
 /// `slideshow.export`: prepare on this thread, run on a worker (or here with `wait`).
 fn export(s: &mut Session, p: &Value) -> Result<Value> {
     const C: &str = "slideshow.export";
-    if cfg!(target_arch = "wasm32") {
-        return Err(bad(C, "slideshow export needs the desktop app or localphoto-cli"));
-    }
+
     if s.slideshow_export.as_ref().is_some_and(|r| r.running()) {
         return Err(bad(C, "a slideshow export is already running (activity.cancel stops it)"));
     }
@@ -356,7 +354,6 @@ fn export(s: &mut Session, p: &Value) -> Result<Value> {
             None => Err(bad(C, "the export did not finish")),
         };
     }
-    #[cfg(not(target_arch = "wasm32"))]
     {
         // the row goes when the worker ends, however it ends
         let r = run.clone();
