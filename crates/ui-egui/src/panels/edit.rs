@@ -1893,7 +1893,7 @@ fn give_pointer_back(ctx: &egui::Context, origin: Pos2) {
     if cfg!(target_os = "macos") {
         ctx.send_viewport_cmd(egui::ViewportCommand::CursorGrab(egui::CursorGrab::None));
     }
-    if cfg!(not(target_arch = "wasm32")) {
+    {
         ctx.send_viewport_cmd(egui::ViewportCommand::CursorPosition(origin));
     }
 }

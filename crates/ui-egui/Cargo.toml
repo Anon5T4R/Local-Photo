@@ -32,6 +32,7 @@ egui_extras = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 log = { workspace = true }
+craft-update = { workspace = true }
 
 [dev-dependencies]
 # tests record why they skip (`cargo xtask ci` lists the skips)
@@ -50,6 +51,3 @@ localphoto-merge = { workspace = true }
 [build-dependencies]
 serde_json = { workspace = true }
 toml = "1"
-
-[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-craft-update = { workspace = true }

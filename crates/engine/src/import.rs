@@ -555,7 +555,6 @@ pub(crate) fn probe_all(
             })
             .collect();
     };
-    #[cfg(not(target_arch = "wasm32"))]
     {
         let n = workers(paths.len());
         if n > 1 {
@@ -1067,9 +1066,7 @@ impl ImportJob {
             .iter()
             .map(|f| {
                 // (the web's files are not std::fs files: kept as probed)
-                self.cache
-                    .remove(f)
-                    .filter(|info| cfg!(target_arch = "wasm32") || std::fs::metadata(f).is_ok_and(|m| m.is_file() && m.len() == info.file_size))
+                self.cache.remove(f).filter(|info| std::fs::metadata(f).is_ok_and(|m| m.is_file() && m.len() == info.file_size))
             })
             .collect();
         let missing: Vec<String> = todo.iter().zip(&cached).filter(|(_, c)| c.is_none()).map(|(f, _)| f.clone()).collect();
@@ -1283,7 +1280,6 @@ fn name_family(name: &str) -> String {
 }
 
 /// Threads for `jobs` file reads (probes, copies) at once.
-#[cfg(not(target_arch = "wasm32"))]
 pub(crate) fn workers(jobs: usize) -> usize {
     std::thread::available_parallelism().map(|n| n.get()).unwrap_or(4).clamp(1, 8).min(jobs.max(1))
 }
@@ -1292,14 +1288,7 @@ pub(crate) fn workers(jobs: usize) -> usize {
 /// enough to keep every probe and copy thread busy (a batch waits for its slowest file), few
 /// enough that each batch soon joins the catalog.
 pub fn batch_size() -> usize {
-    #[cfg(not(target_arch = "wasm32"))]
-    {
-        workers(usize::MAX).saturating_mul(2).clamp(8, 16)
-    }
-    #[cfg(target_arch = "wasm32")]
-    {
-        8
-    }
+    { workers(usize::MAX).saturating_mul(2).clamp(8, 16) }
 }
 
 /// Run `transfers` (several at once where threads exist); their outcomes in order, `None` for one
@@ -1321,7 +1310,6 @@ fn run_transfers(
         done.fetch_add(1, Relaxed);
         Some(item)
     };
-    #[cfg(not(target_arch = "wasm32"))]
     {
         let n = workers(transfers.len());
         if n > 1 {
@@ -1399,11 +1387,10 @@ fn run_transfer(t: Transfer, file_bytes: Option<&crate::merge::ByteReader>) -> P
 /// A trashed photo's file is not where the library had it (never on the web, where paths are
 /// storage keys, not files).
 fn trashed_file_is_gone(cat: &localphoto_catalog::Catalog, id: PhotoId) -> bool {
-    !cfg!(target_arch = "wasm32")
-        && match cat.photo(id).map(|p| &p.source) {
-            Some(Source::File { path }) => !Path::new(path).exists(),
-            _ => false,
-        }
+    true && match cat.photo(id).map(|p| &p.source) {
+        Some(Source::File { path }) => !Path::new(path).exists(),
+        _ => false,
+    }
 }
 
 /// The catalog half of an import: add the photos [`ImportJob::prepare`] readied (one undoable op;
@@ -1586,14 +1573,9 @@ fn finish_moves(s: &mut Session, placed: Vec<crate::import_move::Placed>, log0: 
 /// The current local time as ISO 8601 (`YYYY-MM-DDTHH:MM:SS`, UTC on targets without a clock
 /// offset); for [`Session::clock`] on native hosts.
 pub fn system_clock() -> String {
-    #[cfg(not(target_arch = "wasm32"))]
     {
         let secs = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs() as i64).unwrap_or(0);
         civil(secs)
-    }
-    #[cfg(target_arch = "wasm32")]
-    {
-        "2026-01-01T00:00:00".to_string()
     }
 }
 

@@ -251,12 +251,10 @@ pub struct Renderer {
     /// The monitor profile textures are made for (`app.displayProfile`; `None`: sRGB).
     display: Option<Arc<localphoto_engine::display::Display>>,
     /// Since when nothing has been pending, and whether the GPU pool was trimmed since.
-    #[cfg(not(target_arch = "wasm32"))]
     idle: Option<(std::time::Instant, bool)>,
 }
 
 /// After this long without renders the GPU renderer's pool of recycled buffers is freed.
-#[cfg(not(target_arch = "wasm32"))]
 const IDLE_TRIM: std::time::Duration = std::time::Duration::from_secs(3);
 
 impl Slot {
@@ -269,7 +267,7 @@ impl Slot {
 
 impl Default for Renderer {
     fn default() -> Self {
-        let threads = if cfg!(target_arch = "wasm32") { 0 } else { JobPool::<Slot, Finished>::default_threads().min(6) };
+        let threads = JobPool::<Slot, Finished>::default_threads().min(6);
         Self::with_worker_threads(threads)
     }
 }
@@ -278,7 +276,7 @@ impl Renderer {
     /// Explicit worker count for hosts and bounded validation runs (one to six on native).
     /// Browser hosts continue to use inline jobs or their installed worker offload.
     pub fn with_worker_threads(threads: usize) -> Self {
-        let threads = if cfg!(target_arch = "wasm32") { 0 } else { threads.clamp(1, 6) };
+        let threads = threads.clamp(1, 6);
         Renderer {
             #[cfg(test)]
             thumb_jobs_built: 0,
@@ -314,7 +312,6 @@ impl Renderer {
             #[cfg(test)]
             stage_budget_override: None,
             display: None,
-            #[cfg(not(target_arch = "wasm32"))]
             idle: None,
         }
     }
@@ -790,17 +787,9 @@ impl Renderer {
         self.frame += 1;
         self.trim_stages();
         // wasm: run one job per frame on this thread, timed with the host clock
-        #[cfg(target_arch = "wasm32")]
-        let inline_ms = {
-            let t0 = crate::monotonic_ms();
-            self.pool.run_inline(1);
-            crate::monotonic_ms() - t0
-        };
-        #[cfg(not(target_arch = "wasm32"))]
         let inline_ms = 0.0;
         let changed = self.collect(ctx, session, inline_ms);
         self.evict_variants();
-        #[cfg(not(target_arch = "wasm32"))]
         self.trim_when_idle(ctx);
         if !self.pending.is_empty() {
             ctx.request_repaint_after(std::time::Duration::from_millis(16));
@@ -812,7 +801,6 @@ impl Renderer {
     /// is drawn in this frame rather than picked up at the start of the next one. Only when the last
     /// loupe render took well under the budget (a GPU draft takes a few milliseconds; a CPU render
     /// that would only make the frame late is not waited for).
-    #[cfg(not(target_arch = "wasm32"))]
     pub fn wait_for_draft(&mut self, ctx: &egui::Context, session: &mut Session, budget: std::time::Duration) {
         if self.offload.is_some() || self.last_main_ms * 1.5 >= budget.as_secs_f64() * 1e3 {
             return;
@@ -961,7 +949,6 @@ impl Renderer {
     /// are reallocated by the next render; while working, renders reuse them). A zoomed view
     /// showing its windows is not idle: the device copy of the original they are cut from stays for
     /// the next pan (a 64 MP raw is 800 MB to upload again, over a second).
-    #[cfg(not(target_arch = "wasm32"))]
     fn trim_when_idle(&mut self, ctx: &egui::Context) {
         if !self.pending.is_empty() || self.textures.contains_key(&Slot::Region) || self.textures.contains_key(&Slot::RegionBefore) {
             self.idle = None;
@@ -1853,7 +1840,6 @@ mod stage_budget_tests {
 
     // Given a zoomed view showing a window, the app idling does not free the GPU copy of the
     // original the next window is cut from; once the windows are gone the idle trim runs again
-    #[cfg(not(target_arch = "wasm32"))]
     #[test]
     fn a_zoomed_view_is_not_trimmed_while_idle() {
         let ctx = egui::Context::default();

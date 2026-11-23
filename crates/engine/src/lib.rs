@@ -15,7 +15,6 @@
 extern crate localphoto_denoise_core as localphoto_denoise;
 
 pub mod activity;
-#[cfg(not(target_arch = "wasm32"))]
 pub mod apple_photos;
 pub mod availability;
 pub(crate) mod camera_preview;
@@ -34,12 +33,9 @@ mod errors;
 pub mod export;
 pub mod face_download;
 pub mod face_tiles;
-#[cfg(not(target_arch = "wasm32"))]
 mod faces_index;
-#[cfg(not(target_arch = "wasm32"))]
 mod faces_worker;
 pub mod files;
-#[cfg(not(target_arch = "wasm32"))]
 mod focus_scan;
 pub mod fonts;
 pub mod guard;
@@ -289,10 +285,8 @@ pub struct Session {
     /// The user's own list of models to download (`catalog.json` in the models folder), as last read.
     pub(crate) face_catalog: localphoto_faces::catalog::Catalog,
     /// The loaded recognition model and the face embeddings made with it.
-    #[cfg(not(target_arch = "wasm32"))]
     pub(crate) faces: faces_index::FacesState,
     /// Reading focus points for photos imported before they were read (`photo.readFocusPoints`, `focus.pump`).
-    #[cfg(not(target_arch = "wasm32"))]
     pub(crate) focus_scan: focus_scan::FocusScan,
     /// Copied develop settings (partial JSON) for Paste.
     pub clipboard: Option<Value>,
@@ -420,16 +414,13 @@ pub struct Session {
     /// Adds exported files to Apple Photos ([`apple_photos`]): `/usr/bin/osascript`, installed by
     /// [`Session::with_fs`] on macOS; `None` elsewhere and in sessions without a file system. Tests
     /// put a fake here.
-    #[cfg(not(target_arch = "wasm32"))]
     pub apple_photos: Option<apple_photos::Runner>,
     /// This session's Apple Photos imports, running or finished (`export.photosImports`).
-    #[cfg(not(target_arch = "wasm32"))]
     pub apple_photos_imports: apple_photos::Imports,
     /// Apple Photos imports run on a worker by default (`export.addToPhotos` without `wait`,
     /// `app.export` without `background`): set by the desktop app, which answers control requests
     /// on its UI thread. Off (the default), they wait for Photos, so a one-shot process
     /// (localphoto-cli, a script) never ends in the middle of one.
-    #[cfg(not(target_arch = "wasm32"))]
     pub apple_photos_background: bool,
 }
 
@@ -478,9 +469,7 @@ impl Session {
             face_downloads: Default::default(),
             place_names: Default::default(),
             face_catalog: Default::default(),
-            #[cfg(not(target_arch = "wasm32"))]
             faces: Default::default(),
-            #[cfg(not(target_arch = "wasm32"))]
             focus_scan: Default::default(),
             clipboard: None,
             meta_clipboard: None,
@@ -538,11 +527,8 @@ impl Session {
             slide_backdrop: Default::default(),
             smart_previews_dir: None,
             forget_local_days: localphoto_catalog::DEFAULT_FORGET_DAYS,
-            #[cfg(not(target_arch = "wasm32"))]
             apple_photos: None,
-            #[cfg(not(target_arch = "wasm32"))]
             apple_photos_imports: Default::default(),
-            #[cfg(not(target_arch = "wasm32"))]
             apple_photos_background: false,
         }
     }
@@ -668,12 +654,9 @@ impl Session {
         for id in invalidated {
             self.media.forget(id);
         }
-        #[cfg(not(target_arch = "wasm32"))]
         for id in replaced {
             self.faces.content_replaced(id);
         }
-        #[cfg(target_arch = "wasm32")]
-        let _ = replaced;
         Ok(inv)
     }
 
@@ -690,7 +673,6 @@ impl Session {
     /// The box to cut a face's picture from: the detector's, when the scan has looked at the face (every face is then shown
     /// equally close, however loosely or tightly its own region was drawn), else the region's own box.
     pub fn face_view(&self, id: PhotoId, rect: localphoto_geom::Rect) -> localphoto_geom::Rect {
-        #[cfg(not(target_arch = "wasm32"))]
         if let Some(v) = self.faces.index.view(id.0, &rect) {
             return v;
         }
@@ -1380,14 +1362,12 @@ mod tests_export;
 #[cfg(test)]
 mod tests_face_models;
 #[cfg(test)]
-#[cfg(not(target_arch = "wasm32"))]
 mod tests_face_recognize;
 #[cfg(test)]
-#[cfg(not(target_arch = "wasm32"))]
 mod tests_face_tiles;
 #[cfg(test)]
 mod tests_filesystem_history;
-#[cfg(all(test, not(target_arch = "wasm32")))]
+#[cfg(test)]
 mod tests_focus_scan;
 #[cfg(test)]
 mod tests_folders;

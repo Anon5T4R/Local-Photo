@@ -11,9 +11,6 @@ use super::{CommandSpec, bad, bool_or, cmd, str_param};
 use crate::{Result, Session};
 
 fn can_merge(s: &Session) -> std::result::Result<(), String> {
-    if cfg!(target_arch = "wasm32") && s.media.file_bytes.is_none() {
-        return Err("Photo Merge needs access to the photo files".into());
-    }
     // the photo count is checked when run (an explicit `ids` parameter may name them)
     if s.catalog.photos().nth(1).is_none() { Err("the library has fewer than 2 photos".into()) } else { Ok(()) }
 }

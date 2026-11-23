@@ -77,10 +77,7 @@ pub fn start(app: &mut LocalPhotoApp, items: Vec<PreparedExport>, opts: ExportOp
         });
         let _ = tx.send(r);
     };
-    #[cfg(not(target_arch = "wasm32"))]
     std::thread::Builder::new().name("export".into()).spawn(work).map_err(|e| e.to_string())?;
-    #[cfg(target_arch = "wasm32")]
-    work();
     app.export = Some(ExportTask { total, progress, cancel, rx, guard });
     Ok(json!({"background": true, "total": total}))
 }
@@ -122,10 +119,7 @@ pub fn start_contact_sheet(app: &mut LocalPhotoApp, params: &Value) -> Result<Va
         // a PDF isn't something Photos imports: contact sheets never add to Apple Photos
         let _ = tx.send(result.map(|files| (files, None, c.load(Ordering::Relaxed))));
     };
-    #[cfg(not(target_arch = "wasm32"))]
     std::thread::Builder::new().name("contact-sheet".into()).spawn(work).map_err(|e| e.to_string())?;
-    #[cfg(target_arch = "wasm32")]
-    work();
     let row = app.session.activity.start("export", "Exporting contact sheet", Cancel::Flag(cancel.clone()));
     row.progress(0, total as u64);
     app.export = Some(ExportTask { total, progress, cancel, rx, guard: row });
@@ -175,10 +169,7 @@ pub fn start_print(app: &mut LocalPhotoApp, params: &Value) -> Result<Value, Str
             });
         let _ = tx.send(result.map(|files| (files, None, c.load(Ordering::Relaxed))));
     };
-    #[cfg(not(target_arch = "wasm32"))]
     std::thread::Builder::new().name("print".into()).spawn(work).map_err(|e| e.to_string())?;
-    #[cfg(target_arch = "wasm32")]
-    work();
     let row = app.session.activity.start("export", "Printing to PDF", Cancel::Flag(cancel.clone()));
     row.progress(0, total as u64);
     app.export = Some(ExportTask { total, progress, cancel, rx, guard: row });
@@ -209,7 +200,6 @@ pub fn apple_photos_note(outcome: &Value) -> String {
 
 /// Per frame: when an Apple Photos import that no export task reports finishes (`app.export`
 /// without `background`, `export.addToPhotos`), say how it went.
-#[cfg(not(target_arch = "wasm32"))]
 pub fn poll_photos(app: &mut LocalPhotoApp, ctx: &egui::Context) {
     let jobs = app.session.apple_photos_imports.all();
     if jobs.iter().any(|j| !j.finished()) {
@@ -227,10 +217,6 @@ pub fn poll_photos(app: &mut LocalPhotoApp, ctx: &egui::Context) {
         }
     }
 }
-
-/// No Apple Photos on the web.
-#[cfg(target_arch = "wasm32")]
-pub fn poll_photos(_: &mut LocalPhotoApp, _: &egui::Context) {}
 
 /// Per frame: keep the activity row up to date; when the batch finishes, report it.
 pub fn poll(app: &mut LocalPhotoApp, ctx: &egui::Context) {

@@ -428,13 +428,10 @@ impl<'a> Coded<'a> {
             heic_rs::image::check_pixels(frame.width, frame.height, limit).map_err(err)?;
             Ok(frame)
         };
-        #[cfg(not(target_arch = "wasm32"))]
         let frames: Result<Vec<Frame>, Error> = {
             use rayon::prelude::*;
             ids.par_iter().map(decode_one).collect()
         };
-        #[cfg(target_arch = "wasm32")]
-        let frames: Result<Vec<Frame>, Error> = ids.iter().map(decode_one).collect();
         let frames = frames.map_err(|e| match e {
             Error::Malformed(_) if chroma_format >= 2 => Error::Unsupported(CHROMA_422_444),
             e => e,

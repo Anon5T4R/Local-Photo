@@ -302,7 +302,6 @@ fn is_old(at: &str, now_s: Option<i64>, days: u32, max_age: i64) -> bool {
 /// where there are many.
 fn untouched_of(photos: &[&Photo]) -> HashSet<PhotoId> {
     let check = |chunk: &[&Photo]| chunk.iter().filter(|p| p.untouched_local()).map(|p| p.id).collect::<Vec<_>>();
-    #[cfg(not(target_arch = "wasm32"))]
     {
         let threads = std::thread::available_parallelism().map_or(1, |n| n.get()).min(8);
         if threads > 1 && photos.len() >= 256 {

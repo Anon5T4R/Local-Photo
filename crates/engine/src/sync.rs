@@ -210,7 +210,7 @@ impl SyncInput {
 pub fn scan_with(input: SyncInput, progress: &SyncProgress) -> FolderChanges {
     let SyncInput { folder, scan, ids, naming, labels } = input;
     let seen: Vec<Arc<Photo>> = ids.iter().filter_map(|id| labels.photo(*id)).map(Arc::clone).collect();
-    if !cfg!(target_arch = "wasm32") && !Path::new(&folder).is_dir() {
+    if !Path::new(&folder).is_dir() {
         progress.listed.store(true, std::sync::atomic::Ordering::Release);
         return FolderChanges { path: folder, seen, offline: true, ..Default::default() };
     }
@@ -249,9 +249,6 @@ pub fn scan_with(input: SyncInput, progress: &SyncProgress) -> FolderChanges {
     }
     let listing = &listing;
     // (no threads on the web: one after the other there)
-    #[cfg(target_arch = "wasm32")]
-    let (out, checks) = (crate::import::scan_files(scan, files, &progress.files), check_photos(&photos, &labels, listing, progress));
-    #[cfg(not(target_arch = "wasm32"))]
     let (out, checks) = std::thread::scope(|sc| {
         let photos = &photos;
         let labels = &labels;
@@ -532,10 +529,7 @@ fn check_photos(photos: &[(Arc<Photo>, SidecarNaming)], labels: &Catalog, listin
         progress.checked.fetch_add(1, Relaxed);
         c
     };
-    if cfg!(target_arch = "wasm32") {
-        return vec![Check::Nothing; photos.len()];
-    }
-    #[cfg(not(target_arch = "wasm32"))]
+
     {
         let n = crate::import::workers(photos.len());
         if n > 1 {

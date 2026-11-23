@@ -38,9 +38,7 @@ struct Shared<S, R> {
     cv: Condvar,
     shutdown: AtomicBool,
     /// The worker threads that have not ended yet, and the signal that one did.
-    #[cfg(not(target_arch = "wasm32"))]
     live: Mutex<Vec<std::thread::ThreadId>>,
-    #[cfg(not(target_arch = "wasm32"))]
     ended: Condvar,
 }
 
@@ -63,11 +61,9 @@ pub struct JobPool<S, R> {
     rx: Receiver<Done<S, R>>,
     /// A finished job [`Self::wait`] took off the channel, handed out first by [`Self::try_recv`].
     early: Option<Done<S, R>>,
-    #[cfg_attr(target_arch = "wasm32", allow(dead_code))]
     threads: usize,
     started: bool,
     seq: u64,
-    #[cfg(not(target_arch = "wasm32"))]
     workers: Vec<std::thread::JoinHandle<()>>,
     /// [`JobPool::shutdown`] ran: dropping the pool doesn't wait a second time.
     stopped: bool,
@@ -83,9 +79,7 @@ impl<S: Copy + Eq + Hash + Send + 'static, R: Send + 'static> JobPool<S, R> {
                 busy: Mutex::new(Vec::new()),
                 cv: Condvar::new(),
                 shutdown: AtomicBool::new(false),
-                #[cfg(not(target_arch = "wasm32"))]
                 live: Mutex::new(Vec::new()),
-                #[cfg(not(target_arch = "wasm32"))]
                 ended: Condvar::new(),
             }),
             tx,
@@ -94,7 +88,6 @@ impl<S: Copy + Eq + Hash + Send + 'static, R: Send + 'static> JobPool<S, R> {
             threads,
             started: false,
             seq: 0,
-            #[cfg(not(target_arch = "wasm32"))]
             workers: Vec::new(),
             stopped: false,
         }
@@ -102,14 +95,7 @@ impl<S: Copy + Eq + Hash + Send + 'static, R: Send + 'static> JobPool<S, R> {
 
     /// Workers for this machine: cores − 1, between 2 and 8.
     pub fn default_threads() -> usize {
-        #[cfg(not(target_arch = "wasm32"))]
-        {
-            std::thread::available_parallelism().map(|n| n.get().saturating_sub(1)).unwrap_or(4).clamp(2, 8)
-        }
-        #[cfg(target_arch = "wasm32")]
-        {
-            1
-        }
+        { std::thread::available_parallelism().map(|n| n.get().saturating_sub(1)).unwrap_or(4).clamp(2, 8) }
     }
 
     fn start(&mut self) {
@@ -117,7 +103,6 @@ impl<S: Copy + Eq + Hash + Send + 'static, R: Send + 'static> JobPool<S, R> {
             return;
         }
         self.started = true;
-        #[cfg(not(target_arch = "wasm32"))]
         {
             // held while spawning: a worker that ends at once still finds its id listed
             let mut live = self.shared.live.lock().unwrap_or_else(|e| e.into_inner());
@@ -154,28 +139,12 @@ impl<S: Copy + Eq + Hash + Send + 'static, R: Send + 'static> JobPool<S, R> {
     /// dropping the pool may come too late or never (`std::process::exit`).
     pub fn shutdown(&mut self, timeout: Duration) -> bool {
         self.stopped = true;
-        #[cfg(not(target_arch = "wasm32"))]
-        {
-            stop(&self.shared, &mut self.workers, timeout)
-        }
-        #[cfg(target_arch = "wasm32")]
-        {
-            let _ = timeout;
-            close(&self.shared);
-            true
-        }
+        { stop(&self.shared, &mut self.workers, timeout) }
     }
 
     /// Worker threads that have not ended (0 before the first job, and on wasm).
     pub fn live_workers(&self) -> usize {
-        #[cfg(not(target_arch = "wasm32"))]
-        {
-            self.shared.live.lock().map(|l| l.len()).unwrap_or(0)
-        }
-        #[cfg(target_arch = "wasm32")]
-        {
-            0
-        }
+        { self.shared.live.lock().map(|l| l.len()).unwrap_or(0) }
     }
 
     /// Queue `job` for `slot`, replacing a queued (not yet running) job for the same slot.
@@ -295,10 +264,8 @@ impl<S: PartialEq, R> Drop for Free<'_, S, R> {
 }
 
 /// Takes a worker off the live list when its thread ends (also when a job panicked).
-#[cfg(not(target_arch = "wasm32"))]
 struct Ended<'a, S, R>(&'a Shared<S, R>);
 
-#[cfg(not(target_arch = "wasm32"))]
 impl<S, R> Drop for Ended<'_, S, R> {
     fn drop(&mut self) {
         let me = std::thread::current().id();
@@ -321,7 +288,6 @@ fn close<S, R>(shared: &Shared<S, R>) {
 
 /// [`JobPool::shutdown`]: wait up to `timeout` for the workers to end, without holding the queue
 /// lock, and never for the calling thread (a pool dropped by one of its own jobs).
-#[cfg(not(target_arch = "wasm32"))]
 fn stop<S, R>(shared: &Shared<S, R>, workers: &mut Vec<std::thread::JoinHandle<()>>, timeout: Duration) -> bool {
     close(shared);
     let me = std::thread::current().id();
@@ -351,9 +317,6 @@ impl<S, R> Drop for JobPool<S, R> {
         if self.stopped {
             return;
         }
-        #[cfg(not(target_arch = "wasm32"))]
         stop(&self.shared, &mut self.workers, DROP_WAIT);
-        #[cfg(target_arch = "wasm32")]
-        close(&self.shared);
     }
 }

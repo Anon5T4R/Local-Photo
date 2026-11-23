@@ -820,7 +820,7 @@ fn jxl_lossless_exact_with_metadata() {
 
 /// #1517: the pixel limit rejects an oversized image; selected truncations never panic.
 #[test]
-#[cfg(all(feature = "jxl", not(target_arch = "wasm32")))]
+#[cfg(feature = "jxl")]
 fn jxl_size_limit_and_truncation() {
     let b = encode_jxl(&EncodeImage::rgba8(&gradient(97, 61)), &JxlOptions { lossless: true, ..Default::default() }, &EncodeMeta::default()).unwrap();
     let r = decode(&b, DecodeOptions { max_pixels: 97 * 61 - 1, ..Default::default() });

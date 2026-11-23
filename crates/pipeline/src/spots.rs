@@ -128,7 +128,7 @@ pub fn pick_source(
 }
 
 /// The most a window grows to take in the spots that touch it.
-const MAX_SPOT_SPAN: usize = if cfg!(target_arch = "wasm32") { 4096 } else { 8192 };
+const MAX_SPOT_SPAN: usize = 8192;
 /// Strokes with more dabs than this are not examined dab by dab (the render would be too slow anyway).
 const MAX_DABS_CONSIDERED: usize = 200_000;
 

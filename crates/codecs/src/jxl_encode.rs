@@ -71,14 +71,14 @@ impl Default for JxlOptions {
 /// has no place in the format. Returns [`Error::Encode`] on wasm32 or without the `jxl` feature.
 pub fn encode_jxl(img: &EncodeImage, o: &JxlOptions, meta: &EncodeMeta) -> Result<Vec<u8>> {
     img.validate()?;
-    #[cfg(all(feature = "jxl", not(target_arch = "wasm32")))]
+    #[cfg(feature = "jxl")]
     {
         let pixels = Pixels::from(img, o.colour)?;
         // jixel asserts internally; a panic there is an export error, not a crash
         std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| run(&pixels, img.width as usize, img.height as usize, o, meta)))
             .unwrap_or_else(|_| Err(Error::Encode("JPEG XL encoder panicked".into())))
     }
-    #[cfg(not(all(feature = "jxl", not(target_arch = "wasm32"))))]
+    #[cfg(not(feature = "jxl"))]
     {
         let _ = (o, meta);
         Err(Error::Encode("JPEG XL encoding is not available in this build".into()))
@@ -86,13 +86,13 @@ pub fn encode_jxl(img: &EncodeImage, o: &JxlOptions, meta: &EncodeMeta) -> Resul
 }
 
 /// Interleaved RGB or RGBA samples for jixel.
-#[cfg(all(feature = "jxl", not(target_arch = "wasm32")))]
+#[cfg(feature = "jxl")]
 enum Pixels {
     U8 { data: Vec<u8>, alpha: bool },
     U16 { data: Vec<u16>, alpha: bool },
 }
 
-#[cfg(all(feature = "jxl", not(target_arch = "wasm32")))]
+#[cfg(feature = "jxl")]
 impl Pixels {
     fn from(img: &EncodeImage, colour: JxlColour) -> Result<Self> {
         let n = (img.width as usize).checked_mul(img.height as usize).ok_or_else(|| Error::Encode("image too large".into()))?;
@@ -145,7 +145,7 @@ impl Pixels {
     }
 }
 
-#[cfg(all(feature = "jxl", not(target_arch = "wasm32")))]
+#[cfg(feature = "jxl")]
 fn run(px: &Pixels, w: usize, h: usize, o: &JxlOptions, meta: &EncodeMeta) -> Result<Vec<u8>> {
     use jixel::{ColorEncoding, EncodeConfig, Primaries, Speed, TransferFunction};
     let colour = match o.colour {

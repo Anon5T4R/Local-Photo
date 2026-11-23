@@ -127,9 +127,7 @@ fn busy(app: &LocalPhotoApp) -> Result<(), String> {
 /// while the window asks (`into`: the choice it opens with).
 pub fn import(app: &mut LocalPhotoApp, path: &str, req: &Request) -> Result<Value, String> {
     // the browser build can't import a catalog at all: the import says so (and no library is made)
-    if cfg!(target_arch = "wasm32") {
-        return app.run("library.importLightroom", json!({"path": path}));
-    }
+
     let on_disk = library_dir(app).is_some();
     match decide(app.ui.settings.lightroom_import, on_disk, library_photos(app), req.into) {
         Plan::Merge => app.run("library.importLightroom", json!({"path": path})),

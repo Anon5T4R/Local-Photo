@@ -26,37 +26,24 @@
 #![forbid(unsafe_code)]
 #![deny(clippy::unwrap_used, clippy::expect_used, clippy::panic, clippy::unimplemented, clippy::todo, clippy::unreachable)]
 
-#[cfg(not(target_arch = "wasm32"))]
 mod clip;
-#[cfg(not(target_arch = "wasm32"))]
 mod detector;
-#[cfg(not(target_arch = "wasm32"))]
 pub mod fetch;
 pub mod mask;
-#[cfg(not(target_arch = "wasm32"))]
 mod neck;
-#[cfg(not(target_arch = "wasm32"))]
 mod nn;
-#[cfg(not(target_arch = "wasm32"))]
 pub mod remote;
 pub mod tokenizer;
-#[cfg(not(target_arch = "wasm32"))]
 mod tracker;
-#[cfg(not(target_arch = "wasm32"))]
 mod vit;
-#[cfg(not(target_arch = "wasm32"))]
 mod weights;
 
 use std::path::{Path, PathBuf};
-#[cfg(not(target_arch = "wasm32"))]
 use std::sync::Arc;
 
-#[cfg(not(target_arch = "wasm32"))]
 use candle_core::{DType, Device, Tensor};
-#[cfg(not(target_arch = "wasm32"))]
 use candle_nn::VarBuilder;
 
-#[cfg(not(target_arch = "wasm32"))]
 pub use tracker::Click;
 
 #[derive(Debug, thiserror::Error)]
@@ -65,7 +52,6 @@ pub enum Error {
     Model(String),
     #[error("SAM 3 model files not found in {0} (expected model.safetensors, vocab.json, merges.txt)")]
     Missing(PathBuf),
-    #[cfg(not(target_arch = "wasm32"))]
     #[error(transparent)]
     Candle(#[from] candle_core::Error),
 }
@@ -76,7 +62,6 @@ pub type Result<T> = std::result::Result<T, Error>;
 pub const INPUT: usize = 1008;
 /// Side of the low-resolution masks the model predicts.
 pub const MASK_SIDE: usize = 288;
-#[cfg(not(target_arch = "wasm32"))]
 const _: () = assert!(MASK_SIDE == tracker::LOW_RES && INPUT == vit::IMAGE);
 
 /// The files of a model directory.
@@ -87,12 +72,10 @@ pub fn is_model_dir(dir: &Path) -> bool {
     dir.join(WEIGHTS_FILE).is_file() && dir.join("vocab.json").is_file() && dir.join("merges.txt").is_file()
 }
 
-#[cfg(not(target_arch = "wasm32"))]
 /// Whether [`best_device`] can be a GPU in this build (Metal on macOS). Where it can, a caller that
 /// sees the model fail there can load it again with [`Sam3::load_cpu`].
 pub const GPU_BUILD: bool = cfg!(target_os = "macos");
 
-#[cfg(not(target_arch = "wasm32"))]
 /// The best device here: Metal on macOS (when a GPU is available), else the CPU.
 pub fn best_device() -> Device {
     #[cfg(target_os = "macos")]
@@ -102,7 +85,6 @@ pub fn best_device() -> Device {
     Device::Cpu
 }
 
-#[cfg(not(target_arch = "wasm32"))]
 /// A loaded model. The vision backbone loads with it; the point and text heads load on first use.
 pub struct Sam3 {
     dir: PathBuf,
@@ -115,7 +97,6 @@ pub struct Sam3 {
     tokenizer: Option<tokenizer::Tokenizer>,
 }
 
-#[cfg(not(target_arch = "wasm32"))]
 /// An image run through the backbone, with the head-specific features computed on demand.
 pub struct Encoded {
     backbone: Tensor,
@@ -131,7 +112,6 @@ pub struct Prediction {
     pub score: f32,
 }
 
-#[cfg(not(target_arch = "wasm32"))]
 impl Sam3 {
     /// Load from a directory holding `model.safetensors` (the `facebook/sam3` checkpoint in
     /// Hugging Face format), `vocab.json` and `merges.txt`.
@@ -252,7 +232,6 @@ impl Sam3 {
     }
 }
 
-#[cfg(not(target_arch = "wasm32"))]
 impl Encoded {
     /// The backbone output `[1, 1024, 72, 72]` (tests).
     pub fn backbone(&self) -> &Tensor {
@@ -260,15 +239,12 @@ impl Encoded {
     }
 }
 
-#[cfg(not(target_arch = "wasm32"))]
 fn sigmoid(x: f32) -> f32 {
     1.0 / (1.0 + (-x).exp())
 }
 
-#[cfg(not(target_arch = "wasm32"))]
 pub use detector::Output as DetectorOutput;
 
-#[cfg(not(target_arch = "wasm32"))]
 /// Wait for queued GPU work to finish (benchmarks).
 pub fn sync(model: &Sam3) -> Result<()> {
     Ok(model.device.synchronize()?)

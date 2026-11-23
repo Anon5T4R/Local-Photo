@@ -1,4 +1,4 @@
-#![cfg(all(feature = "jxl", not(target_arch = "wasm32")))]
+#![cfg(feature = "jxl")]
 
 use localphoto_codecs::*;
 use localphoto_raster::Rgba8;

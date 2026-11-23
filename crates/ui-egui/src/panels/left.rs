@@ -846,15 +846,12 @@ fn missing_count(app: &mut LocalPhotoApp, ui: &mut egui::Ui) -> usize {
         job.rev = rev;
         let (n, running, ctx) = (job.n.clone(), job.running.clone(), ui.ctx().clone());
         let work = move || {
-            let missing = if cfg!(target_arch = "wasm32") { 0 } else { paths.iter().filter(|p| !std::path::Path::new(p).exists()).count() };
+            let missing = paths.iter().filter(|p| !std::path::Path::new(p).exists()).count();
             n.store(missing, Relaxed);
             running.store(false, Relaxed);
             ctx.request_repaint();
         };
-        #[cfg(not(target_arch = "wasm32"))]
         std::thread::spawn(work);
-        #[cfg(target_arch = "wasm32")]
-        work();
         ui.data_mut(|d| d.insert_temp(id, job.clone()));
     }
     job.n.load(Relaxed)
@@ -1108,13 +1105,10 @@ pub(crate) fn fs_cached<T: Clone + Send + 'static>(ui: &egui::Ui, kind: &'static
             done.fetch_sub(1, Ordering::AcqRel);
             repaint.request_repaint();
         };
-        #[cfg(not(target_arch = "wasm32"))]
         if std::thread::Builder::new().name("lc-fs-list".into()).spawn(work).is_err() {
             cell.lock().unwrap_or_else(std::sync::PoisonError::into_inner).running = false;
             running.fetch_sub(1, Ordering::AcqRel);
         }
-        #[cfg(target_arch = "wasm32")]
-        work();
     }
     lock(&cell)
 }

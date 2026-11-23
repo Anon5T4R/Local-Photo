@@ -1770,9 +1770,7 @@ fn prepare_guarded(
 /// photo, and on the web, where an original lives in the browser's storage, not in a folder.
 fn original_folder(source: &localphoto_catalog::Source) -> Option<String> {
     let localphoto_catalog::Source::File { path } = source else { return None };
-    if cfg!(target_arch = "wasm32") {
-        return None;
-    }
+
     let dir = std::path::Path::new(path).parent()?.to_string_lossy().to_string();
     (!dir.is_empty()).then_some(dir)
 }
@@ -1909,7 +1907,6 @@ pub struct Destination {
 /// worker.
 #[derive(Default)]
 pub struct AfterExport {
-    #[cfg(not(target_arch = "wasm32"))]
     apple_photos: Option<crate::apple_photos::Reservation>,
 }
 
@@ -1917,21 +1914,13 @@ impl AfterExport {
     /// Add the files to Apple Photos with `runner`, into `album` when it isn't blank, reserving
     /// the import slot of `imports` now. (Front ends get this from
     /// [`crate::Session::after_export`], which checks the platform first.)
-    #[cfg(not(target_arch = "wasm32"))]
     pub fn apple_photos(runner: crate::apple_photos::Runner, album: &str, imports: &crate::apple_photos::Imports) -> Result<Self, String> {
         Ok(Self { apple_photos: Some(imports.reserve(runner, album)?) })
     }
 
     /// Nothing to do.
-    #[cfg(not(target_arch = "wasm32"))]
     pub fn is_none(&self) -> bool {
         self.apple_photos.is_none()
-    }
-
-    /// Nothing to do.
-    #[cfg(target_arch = "wasm32")]
-    pub fn is_none(&self) -> bool {
-        true
     }
 
     /// Do it now for an export's per-photo results ([`run_batch`]'s: only the files written
@@ -1942,7 +1931,6 @@ impl AfterExport {
     /// export was cancelled or wrote nothing). Never fails the export: its files are written
     /// either way.
     pub fn run(self, files: &[serde_json::Value], cancelled: bool) -> Option<serde_json::Value> {
-        #[cfg(not(target_arch = "wasm32"))]
         if let Some(r) = self.apple_photos {
             return Some(r.run(files, cancelled));
         }
@@ -1955,7 +1943,6 @@ impl AfterExport {
     /// from `export.photosImports`, and the desktop app announces it). For a caller on the UI
     /// thread, which must not wait minutes for Photos.
     pub fn start(self, files: &[serde_json::Value]) -> Option<serde_json::Value> {
-        #[cfg(not(target_arch = "wasm32"))]
         if let Some(r) = self.apple_photos {
             return Some(r.start(files));
         }
@@ -1966,7 +1953,6 @@ impl AfterExport {
     /// [`AfterExport::start`] where the session answers on a UI thread
     /// ([`crate::Session::apple_photos_background`]), else [`AfterExport::run`].
     pub fn finish(self, s: &crate::Session, files: &[serde_json::Value]) -> Option<serde_json::Value> {
-        #[cfg(not(target_arch = "wasm32"))]
         if s.apple_photos_background {
             return self.start(files);
         }
@@ -1986,15 +1972,12 @@ impl crate::Session {
         if let Some(why) = apple_photos_unsupported() {
             return Err(why.into());
         }
-        #[cfg(not(target_arch = "wasm32"))]
         {
             let runner = self.apple_photos.clone().ok_or_else(|| crate::apple_photos::unavailable().to_string())?;
             let mut after = AfterExport::apple_photos(runner, &o.photos_album, &self.apple_photos_imports)?;
             after.apple_photos = after.apple_photos.map(|r| r.shown_in(self.activity.clone()));
             Ok(after)
         }
-        #[cfg(target_arch = "wasm32")]
-        Err("Apple Photos is only available on macOS".into())
     }
 }
 
@@ -2081,9 +2064,6 @@ pub fn run_batch(
 /// over every core; the others fill the cores while it decodes, encodes or waits for the GPU.
 /// One on wasm32 (no threads).
 pub fn export_parallelism(n: usize) -> usize {
-    if cfg!(target_arch = "wasm32") {
-        return 1;
-    }
     let cores = std::thread::available_parallelism().map_or(1, |c| c.get());
     (cores / 4).clamp(1, 4).min(n.max(1))
 }
@@ -3411,7 +3391,6 @@ mod tests {
         }
     }
 
-    #[cfg(not(target_arch = "wasm32"))]
     #[test]
     fn avif_ten_bit() {
         let o = ExportOptions { format: ExportFormat::Avif, bit_depth: Some(10), quality: 60, ..Default::default() };

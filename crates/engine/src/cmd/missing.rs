@@ -38,9 +38,6 @@ pub fn missing_with(cat: &Catalog, mut exists: impl FnMut(&str) -> bool) -> Vec<
 
 /// Library photos whose original file can't be found: (id, path).
 pub fn missing(s: &Session) -> Vec<(PhotoId, String)> {
-    if cfg!(target_arch = "wasm32") {
-        return Vec::new();
-    }
     missing_with(&s.catalog, |f| Path::new(f).exists())
 }
 
@@ -48,7 +45,7 @@ pub fn missing(s: &Session) -> Vec<(PhotoId, String)> {
 /// the photos its query already narrowed to). In the app `avail` answers from its cache (files
 /// not checked yet count as present until the background check finds them gone).
 pub fn is_missing(cat: &Catalog, avail: &crate::availability::Availability, id: PhotoId) -> bool {
-    !cfg!(target_arch = "wasm32") && cat.photo(id).and_then(|p| checked_path(p)).is_some_and(|f| avail.is_offline(f))
+    cat.photo(id).and_then(|p| checked_path(p)).is_some_and(|f| avail.is_offline(f))
 }
 
 pub(crate) fn relink_op(id: PhotoId, path: &str) -> Op {
@@ -295,9 +292,7 @@ pub fn plan_find_missing(candidates: &[FindCandidate], folder: &str) -> std::res
     if !Path::new(folder).is_dir() {
         return Err(format!("{folder}: not a folder"));
     }
-    if cfg!(target_arch = "wasm32") {
-        return Ok(FindPlan::default());
-    }
+
     let lost: Vec<&FindCandidate> = candidates.iter().filter(|c| !Path::new(&c.path).exists()).collect();
     if lost.is_empty() {
         return Ok(FindPlan::default());

@@ -1470,7 +1470,7 @@ pub fn specs() -> Vec<CommandSpec> {
             |s, p| {
                 if let Some(f) = p.get("folder") {
                     s.import_defaults.auto_folder = match f.as_str().map(str::trim).filter(|f| !f.is_empty()) {
-                        Some(f) if std::path::Path::new(f).is_dir() || cfg!(target_arch = "wasm32") => Some(f.to_string()),
+                        Some(f) if std::path::Path::new(f).is_dir() => Some(f.to_string()),
                         Some(f) => return Err(bad("library.autoImport", format!("`{f}` is not a folder"))),
                         None => None,
                     };

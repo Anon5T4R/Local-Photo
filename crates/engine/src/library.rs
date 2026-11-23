@@ -348,7 +348,6 @@ impl Session {
     /// folder that was not made or tidied by this build yet. On a thread of its own, with a row
     /// in the activity stack that can stop it: a large cache is some 100 000 files to rename.
     fn tidy_thumbnail_cache(&mut self) {
-        #[cfg(not(target_arch = "wasm32"))]
         {
             use std::sync::atomic::{AtomicBool, Ordering};
             let cache = self.media.rendered.clone();
@@ -465,7 +464,6 @@ impl Session {
         self.denoise.library_changed();
         self.media.denoise.clear();
         // what was learned about the old library's faces is saved, and none of it carries over (photo ids are per library)
-        #[cfg(not(target_arch = "wasm32"))]
         self.faces.library_changed();
         let (mut journal, mut catalog, report) = Journal::open(catalog)?;
         // A loaded catalog counts revisions from 0, like every other one. Caches (sidebar counts,
@@ -606,7 +604,6 @@ impl Session {
             }
         }
         // smart previews written by an older camera-look fit are brought up to date in the background
-        #[cfg(not(target_arch = "wasm32"))]
         if on_disk {
             crate::cmd::previews::refresh_stale_smart_previews(self);
         }

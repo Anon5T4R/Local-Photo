@@ -185,7 +185,6 @@ impl Drop for Downloads {
         // threads, and `Instant::now` / `thread::sleep` panic on wasm32 ("time not implemented"),
         // which killed the page when a `Session` was replaced after its library failed to open
         // (issue #1507).
-        #[cfg(not(target_arch = "wasm32"))]
         {
             let started = std::time::Instant::now();
             while self.running() && started.elapsed() < Duration::from_secs(1) {
@@ -196,7 +195,6 @@ impl Drop for Downloads {
 }
 
 /// What went wrong, in words the user can act on.
-#[cfg(not(target_arch = "wasm32"))]
 fn explain(e: &localphoto_fetch::DownloadError) -> String {
     use localphoto_fetch::DownloadError;
     match e {
@@ -209,17 +207,11 @@ fn explain(e: &localphoto_fetch::DownloadError) -> String {
 }
 
 /// Fetch `spec` from `mirror` (the address without the file name) into `staging`, check it and leave it there.
-#[cfg(not(target_arch = "wasm32"))]
 fn fetch(spec: &Download, mirror: &str, staging: &Path, shared: &Shared) -> Result<(), localphoto_fetch::DownloadError> {
     let file = localphoto_fetch::FileSpec { name: &spec.file_name, size: Some(spec.size_bytes), sha256: Some(&spec.sha256), max: spec.size_bytes };
     localphoto_fetch::download(&[file], &[mirror.to_string()], staging, &localphoto_fetch::Options::default(), &shared.cancel, &mut |p| {
         shared.set(State::Running { bytes: p.done.min(spec.size_bytes), total: spec.size_bytes });
     })
-}
-
-#[cfg(target_arch = "wasm32")]
-fn fetch(_: &Download, _: &str, _: &Path, _: &Shared) -> Result<(), String> {
-    Err("the web build downloads no models".into())
 }
 
 /// The whole job: reuse a verified earlier copy, else fetch, check and stage. Always ends in a final [`State`].
@@ -228,25 +220,18 @@ fn run(spec: &Download, mirror: &str, staging: &Path, shared: &Shared) {
     let part = staging.join(format!("{}.part", spec.file_name));
     match fetch(spec, mirror, staging, shared) {
         Ok(()) => shared.set(State::Done { path: target, sha256: spec.sha256.to_string() }),
-        #[cfg(not(target_arch = "wasm32"))]
         Err(localphoto_fetch::DownloadError::Cancelled) => {
             let _ = std::fs::remove_file(&part);
             shared.set(State::Cancelled);
         }
-        #[cfg(not(target_arch = "wasm32"))]
         Err(e) => {
             let _ = std::fs::remove_file(&part);
             shared.set(State::Failed(explain(&e)));
         }
-        #[cfg(target_arch = "wasm32")]
-        Err(e) => {
-            let _ = std::fs::remove_file(&part);
-            shared.set(State::Failed(e));
-        }
     }
 }
 
-#[cfg(all(test, not(target_arch = "wasm32")))]
+#[cfg(test)]
 mod tests {
     use super::*;
     use localphoto_faces::hash::sha256_hex;

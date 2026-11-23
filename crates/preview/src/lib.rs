@@ -30,11 +30,9 @@ pub use pool::JobPool;
 /// Images that deferred disk writes ([`PreviewCache::put_deferred`]) may hold waiting for the writer, in bytes. A
 /// write that would go past it is skipped (the image stays in memory; a later render writes it), so renders that
 /// arrive faster than the disk takes them can't pile up threads and memory (issue #1522).
-#[cfg(not(target_arch = "wasm32"))]
 const MAX_QUEUED_BYTES: usize = 128 << 20;
 
 /// A deferred disk write waiting for the cache's writer thread.
-#[cfg(not(target_arch = "wasm32"))]
 struct Write {
     generation: u64,
     key: Hash128,
@@ -49,7 +47,6 @@ pub struct PreviewCache {
     mem: Mutex<Lru<Hash128, Arc<Rgba8>>>,
     disk: Option<DiskCache>,
     /// The writer thread's queue (started with the first deferred write), and the bytes waiting in it.
-    #[cfg(not(target_arch = "wasm32"))]
     writer: Mutex<Option<std::sync::mpsc::Sender<Write>>>,
     queued: Arc<AtomicUsize>,
 }
@@ -65,7 +62,6 @@ impl PreviewCache {
             generation: RwLock::new(Some(0)),
             mem: Mutex::new(Lru::new(mem_bytes)),
             disk,
-            #[cfg(not(target_arch = "wasm32"))]
             writer: Mutex::new(None),
             queued: Arc::new(AtomicUsize::new(0)),
         }
@@ -139,11 +135,6 @@ impl PreviewCache {
         self.mem.lock().unwrap_or_else(|e| e.into_inner()).insert(key, img.clone(), c);
         drop(current);
         let Some(d) = &self.disk else { return };
-        #[cfg(target_arch = "wasm32")]
-        {
-            d.put(key, &img);
-        }
-        #[cfg(not(target_arch = "wasm32"))]
         {
             let _ = d;
             if self.queued.load(Ordering::Relaxed).saturating_add(c) > MAX_QUEUED_BYTES {
@@ -165,7 +156,6 @@ impl PreviewCache {
 
     /// The thread that makes the deferred disk writes, one after another. It holds the cache weakly, so it ends
     /// once the cache is dropped (its queue's sender with it).
-    #[cfg(not(target_arch = "wasm32"))]
     fn start_writer(self: &Arc<Self>) -> Option<std::sync::mpsc::Sender<Write>> {
         let (tx, rx) = std::sync::mpsc::channel::<Write>();
         let cache = Arc::downgrade(self);

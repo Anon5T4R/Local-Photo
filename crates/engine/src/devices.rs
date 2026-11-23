@@ -56,7 +56,6 @@ struct WatchState {
     list: Vec<Device>,
     /// When the served list was scanned (`None`: never). No clock (and no threads) on wasm, where
     /// there are no mounted volumes either.
-    #[cfg(not(target_arch = "wasm32"))]
     scanned: Option<std::time::Instant>,
     /// A background scan is running.
     refreshing: bool,
@@ -65,7 +64,6 @@ struct WatchState {
 /// A cached device list, refreshed off the calling thread.
 pub struct DeviceWatch {
     scanner: Box<Scanner>,
-    #[cfg_attr(target_arch = "wasm32", allow(dead_code))]
     max_age: Duration,
     state: Mutex<WatchState>,
     notify: Mutex<Option<Arc<Notify>>>,
@@ -88,7 +86,6 @@ impl DeviceWatch {
     /// The last scan, immediately; starts a background rescan when it is stale and none is running.
     pub fn get(self: &Arc<Self>) -> Vec<Device> {
         let mut s = self.state();
-        #[cfg(not(target_arch = "wasm32"))]
         if !s.refreshing && s.scanned.is_none_or(|t| t.elapsed() >= self.max_age) {
             s.refreshing = true;
             let me = self.clone();
@@ -109,10 +106,7 @@ impl DeviceWatch {
     pub fn get_scanned(self: &Arc<Self>) -> Option<Vec<Device>> {
         let _ = self.get();
         let s = self.state();
-        #[cfg(not(target_arch = "wasm32"))]
         let scanned = s.scanned.is_some();
-        #[cfg(target_arch = "wasm32")]
-        let scanned = false;
         scanned.then(|| s.list.clone())
     }
 
@@ -127,7 +121,6 @@ impl DeviceWatch {
         let changed = {
             let mut s = self.state();
             s.refreshing = false;
-            #[cfg(not(target_arch = "wasm32"))]
             {
                 s.scanned = Some(std::time::Instant::now());
             }

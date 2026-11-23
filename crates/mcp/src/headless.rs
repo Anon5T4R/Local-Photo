@@ -21,7 +21,6 @@ impl Drop for Headless {
     /// Photos import still running (`export.addToPhotos {wait: false}`) has ended: the process
     /// must not end in the middle of one, abandoning osascript and the import's result.
     fn drop(&mut self) {
-        #[cfg(not(target_arch = "wasm32"))]
         self.session.wait_for_photos_imports();
         let _ = self.session.close_library();
     }

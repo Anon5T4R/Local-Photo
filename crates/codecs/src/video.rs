@@ -771,7 +771,7 @@ pub struct VideoConfig {
 }
 
 /// Is AV1 video encoding in this build (native, `avif` feature)?
-pub const AV1_AVAILABLE: bool = cfg!(all(feature = "avif", not(target_arch = "wasm32")));
+pub const AV1_AVAILABLE: bool = cfg!(feature = "avif");
 
 /// BT.709 limited-range 4:2:0 planes of an sRGB RGBA image (alpha ignored), `w × h` (even).
 pub fn yuv420(rgba: &[[u8; 4]], w: usize, h: usize) -> Result<(Vec<u8>, Vec<u8>, Vec<u8>)> {
@@ -830,10 +830,10 @@ pub fn quantizer(quality: u8) -> usize {
 /// An AV1 encoder fed RGBA frames, each with how many frame periods it stays up; it hands back
 /// the samples as they come out (in order: no frame reordering).
 pub struct Av1Encoder {
-    #[cfg(all(feature = "avif", not(target_arch = "wasm32")))]
+    #[cfg(feature = "avif")]
     ctx: rav1e::Context<u8>,
     /// Each frame sent so far: its duration (by input frame number).
-    #[cfg_attr(not(all(feature = "avif", not(target_arch = "wasm32"))), allow(dead_code))]
+    #[cfg_attr(not(feature = "avif"), allow(dead_code))]
     durations: Vec<u64>,
     width: usize,
     height: usize,
@@ -846,7 +846,7 @@ impl Av1Encoder {
         if w < 16 || h < 16 || w > 8192 || h > 8192 || !(1..=240).contains(&c.fps) {
             return Err(bad("unsupported video size or frame rate"));
         }
-        #[cfg(all(feature = "avif", not(target_arch = "wasm32")))]
+        #[cfg(feature = "avif")]
         {
             use rav1e::prelude::*;
             let mut ec = EncoderConfig::with_speed_preset(c.speed.clamp(1, 10));
@@ -873,7 +873,7 @@ impl Av1Encoder {
             let ctx: Context<u8> = Config::new().with_encoder_config(ec).new_context().map_err(|e| bad(format!("AV1: {e}")))?;
             Ok(Av1Encoder { ctx, durations: Vec::new(), width: w, height: h, seq_header: None })
         }
-        #[cfg(not(all(feature = "avif", not(target_arch = "wasm32"))))]
+        #[cfg(not(feature = "avif"))]
         {
             let _ = (w, h);
             Err(bad("AV1 video encoding is not available in this build"))
@@ -896,7 +896,7 @@ impl Av1Encoder {
     /// then clean of the slide before it, and seeking lands on it).
     pub fn push(&mut self, rgba: &[[u8; 4]], periods: u64, key: bool) -> Result<Vec<Sample>> {
         let (y, u, v) = yuv420(rgba, self.width, self.height)?;
-        #[cfg(all(feature = "avif", not(target_arch = "wasm32")))]
+        #[cfg(feature = "avif")]
         {
             let mut frame = self.ctx.new_frame();
             for (plane, (data, w)) in frame.planes.iter_mut().zip([(&y, self.width), (&u, self.width / 2), (&v, self.width / 2)]) {
@@ -910,7 +910,7 @@ impl Av1Encoder {
             self.durations.push(periods.max(1));
             self.drain()
         }
-        #[cfg(not(all(feature = "avif", not(target_arch = "wasm32"))))]
+        #[cfg(not(feature = "avif"))]
         {
             let _ = (y, u, v, periods, key);
             Err(bad("AV1 video encoding is not available in this build"))
@@ -919,16 +919,16 @@ impl Av1Encoder {
 
     /// Flush the encoder: the samples still inside.
     pub fn finish(&mut self) -> Result<Vec<Sample>> {
-        #[cfg(all(feature = "avif", not(target_arch = "wasm32")))]
+        #[cfg(feature = "avif")]
         {
             self.ctx.flush();
             self.drain()
         }
-        #[cfg(not(all(feature = "avif", not(target_arch = "wasm32"))))]
+        #[cfg(not(feature = "avif"))]
         Err(bad("AV1 video encoding is not available in this build"))
     }
 
-    #[cfg(all(feature = "avif", not(target_arch = "wasm32")))]
+    #[cfg(feature = "avif")]
     fn drain(&mut self) -> Result<Vec<Sample>> {
         use rav1e::prelude::*;
         let mut out = Vec::new();
@@ -1128,7 +1128,7 @@ mod tests {
         assert!(Av1Encoder::new(&VideoConfig { width: 8, height: 8, fps: 30, quality: 50, speed: 10 }).is_err());
     }
 
-    #[cfg(all(feature = "avif", not(target_arch = "wasm32")))]
+    #[cfg(feature = "avif")]
     #[test]
     fn encodes_av1_into_a_playable_mp4() {
         let c = VideoConfig { width: 64, height: 48, fps: 24, quality: 60, speed: 10 };
