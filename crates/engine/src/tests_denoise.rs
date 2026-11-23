@@ -243,7 +243,30 @@ fn a_model_is_installed_chosen_and_removed_with_the_terms_accepted() {
     x.s.denoise.loader = Arc::new(|_, _| Err("it does not load".into()));
     let e = x.s.execute("denoise.models.install", &json!({"path": onnx.to_string_lossy(), "acknowledged": true})).unwrap_err().to_string();
     assert!(e.contains("it does not load"), "{e}");
-    assert!(!x.dir.join("denoise-models").join("stand-in").exists());
+    let home = x.dir.join("denoise-models").join("stand-in");
+    assert!(!home.join("model.onnx.part").exists(), "the staged file of the failed install is gone, not left behind");
+    assert!(!home.exists());
+    let _ = std::fs::remove_dir_all(&x.dir);
+}
+
+#[test]
+fn a_staged_file_left_by_an_aborted_install_is_removed_when_the_models_folder_is_opened() {
+    let mut x = setup("orphan-part", false);
+    let home = x.dir.join("denoise-models").join("stand-in");
+    std::fs::create_dir_all(&home).unwrap();
+    let part = home.join("model.onnx.part");
+    std::fs::write(&part, vec![0u8; 4096]).unwrap();
+    // Nobody has touched the file for an hour: the install that was writing it died.
+    let old = std::time::SystemTime::now() - std::time::Duration::from_secs(3600);
+    std::fs::File::options().write(true).open(&part).unwrap().set_modified(old).unwrap();
+    x.s.execute("denoise.models.list", &json!({})).unwrap();
+    assert!(!part.exists(), "the staged file of an aborted install is removed");
+    assert!(!home.exists(), "the folder that only held it goes too");
+    // An install in flight keeps writing its staged file: a recent one is left alone.
+    std::fs::create_dir_all(&home).unwrap();
+    std::fs::write(&part, b"being written").unwrap();
+    x.s.execute("denoise.models.list", &json!({})).unwrap();
+    assert!(part.exists(), "an install in flight keeps its staged file");
     let _ = std::fs::remove_dir_all(&x.dir);
 }
 
