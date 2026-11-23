@@ -195,14 +195,14 @@ pub fn begin_shutdown() {
 
 /// Whether [`begin_shutdown`] was called.
 pub fn shutting_down() -> bool {
-    { exit::shutting_down() }
+    exit::shutting_down()
 }
 
 /// Wait up to `timeout` for the GPU work in flight on every thread to end. `true`: none is left,
 /// and after [`begin_shutdown`] none can start, so the process may end; `false`: the deadline
 /// passed with a render (or a device being created) still inside the driver.
 pub fn wait_idle(timeout: std::time::Duration) -> bool {
-    { exit::wait_idle(timeout) }
+    exit::wait_idle(timeout)
 }
 
 /// Why GPU compute that has a device of its own (denoise, faces) is switched off by the user's settings, or `None`: the
@@ -281,18 +281,18 @@ pub fn warm_up() {
 
 /// Has device creation finished (successfully or not)? Never blocks — for status displays.
 pub fn ready() -> bool {
-    { env_disabled() || GPU.get().is_some() }
+    env_disabled() || GPU.get().is_some()
 }
 
 /// Whether a usable GPU adapter exists and GPU rendering is enabled (creates the device on first
 /// use).
 pub fn available() -> bool {
-    { enabled() && device().is_some() }
+    enabled() && device().is_some()
 }
 
 /// The adapter's name and backend, e.g. "Apple M4 Pro (Metal)".
 pub fn adapter_name() -> Option<String> {
-    { device().map(|g| format!("{} ({:?})", g.info.name, g.info.backend)) }
+    device().map(|g| format!("{} ({:?})", g.info.name, g.info.backend))
 }
 
 /// Device buffers held by the renderer.
@@ -300,7 +300,7 @@ pub use ctx::GpuMemory;
 
 /// Device memory held by the renderer's buffers (zero without a device).
 pub fn memory() -> GpuMemory {
-    { ctx::memory() }
+    ctx::memory()
 }
 
 /// Keep at most `bytes` of recycled buffers in the free pool from now on (trimming it now).
@@ -325,17 +325,17 @@ pub fn trim_pool(keep: u64) {
 
 /// Device bytes of the one big source (a zoom window's original) shared by every view of the photo.
 pub fn shared_source_bytes() -> usize {
-    { render::shared_source_bytes() }
+    render::shared_source_bytes()
 }
 
 /// Big sources uploaded to the shared copy so far (a diagnostic: one big photo is uploaded once, not once per window).
 pub fn source_uploads() -> u64 {
-    { render::source_uploads() }
+    render::source_uploads()
 }
 
 /// Device bytes held by a view's GPU stages (kept with its [`StageCache`]); 0 when it has none.
 pub fn stage_bytes(stages: &StageCache) -> usize {
-    { stages.peek_extension::<GpuStages>().map(|g| g.bytes()).unwrap_or(0) }
+    stages.peek_extension::<GpuStages>().map(|g| g.bytes()).unwrap_or(0)
 }
 
 /// Render `src` with `s` on the GPU, reusing the device-resident stages kept with `stages` (the

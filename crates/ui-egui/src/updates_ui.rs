@@ -51,7 +51,7 @@ impl LocalPhotoApp {
 
 /// The update prompt owns the keyboard while it is open: shortcuts must not reach the library behind it.
 pub(crate) fn blocks_input(app: &LocalPhotoApp) -> bool {
-    { app.updates_rt.updater.prompt_open() }
+    app.updates_rt.updater.prompt_open()
 }
 
 pub(crate) fn check(app: &mut LocalPhotoApp) -> Result<Value, String> {

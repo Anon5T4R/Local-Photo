@@ -95,7 +95,7 @@ impl<S: Copy + Eq + Hash + Send + 'static, R: Send + 'static> JobPool<S, R> {
 
     /// Workers for this machine: cores − 1, between 2 and 8.
     pub fn default_threads() -> usize {
-        { std::thread::available_parallelism().map(|n| n.get().saturating_sub(1)).unwrap_or(4).clamp(2, 8) }
+        std::thread::available_parallelism().map(|n| n.get().saturating_sub(1)).unwrap_or(4).clamp(2, 8)
     }
 
     fn start(&mut self) {
@@ -139,12 +139,12 @@ impl<S: Copy + Eq + Hash + Send + 'static, R: Send + 'static> JobPool<S, R> {
     /// dropping the pool may come too late or never (`std::process::exit`).
     pub fn shutdown(&mut self, timeout: Duration) -> bool {
         self.stopped = true;
-        { stop(&self.shared, &mut self.workers, timeout) }
+        stop(&self.shared, &mut self.workers, timeout)
     }
 
     /// Worker threads that have not ended (0 before the first job, and on wasm).
     pub fn live_workers(&self) -> usize {
-        { self.shared.live.lock().map(|l| l.len()).unwrap_or(0) }
+        self.shared.live.lock().map(|l| l.len()).unwrap_or(0)
     }
 
     /// Queue `job` for `slot`, replacing a queued (not yet running) job for the same slot.

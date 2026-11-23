@@ -1288,7 +1288,7 @@ pub(crate) fn workers(jobs: usize) -> usize {
 /// enough to keep every probe and copy thread busy (a batch waits for its slowest file), few
 /// enough that each batch soon joins the catalog.
 pub fn batch_size() -> usize {
-    { workers(usize::MAX).saturating_mul(2).clamp(8, 16) }
+    workers(usize::MAX).saturating_mul(2).clamp(8, 16)
 }
 
 /// Run `transfers` (several at once where threads exist); their outcomes in order, `None` for one
