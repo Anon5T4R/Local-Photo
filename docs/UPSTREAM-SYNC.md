@@ -1,84 +1,86 @@
-# Sincronização com o upstream
+# Upstream sync
 
-Porta/rebrand da suíte Local: o `main` é nosso, o upstream é fonte de mudanças candidatas e nada
-entra sem revisão. Regras gerais em `docs/planos/licoes-de-porta.md` (dev-notes).
+The Local suite's port/rebrand: `main` is ours, the upstream is a source of candidate changes and
+nothing enters without review. General rules in `docs/planos/licoes-de-porta.md` (dev-notes).
 
 ## Base
 
-- Upstream: `storytold/lightcraft`, commit **bb08a69** (`0.14.0`), sem tag no commit — a árvore foi
-  copiada do `git archive` desse commit (sem histórico).
-- Fork: `Styx-Studios/Local-Photo`, versão própria `0.1.x` (numeração nova evita auto-update falso
-  para o upstream).
-- Nada é lido de `C:\Dev\storytold` em build, teste ou release; a pasta é só referência local para
-  a skill `sync-upstream`.
+- Upstream: `storytold/lightcraft`, commit **bb08a69** (`0.14.0`), no tag on the commit — the tree
+  was copied from that commit's `git archive` (with no history).
+- Fork: `Styx-Studios/Local-Photo`, own version `0.1.x` (a new numbering avoids a false auto-update to
+  the upstream).
+- Nothing is read from `C:\Dev\storytold` in build, test or release; the folder is only a local
+  reference for the `sync-upstream` skill.
 
-## Vendorizado (fora do sync normal)
+## Vendored (outside the normal sync)
 
-| Caminho | Origem | Rev |
+| Path | Origin | Rev |
 |---|---|---|
 | `libs/craft-libs` | `storytold/craft-libs` | `1e6f1278` |
-| `libs/craft-libs/crates/update` | **`Styx-Studios/local-libs`** (fonte única da suíte) | ver `HASHES.update` do repo |
+| `libs/craft-libs/crates/update` | **`Styx-Studios/local-libs`** (the suite's single source) | see the repo's `HASHES.update` |
 | `libs/egui` | `storytold/egui` | `6d518fc` |
 | `libs/winit` | `storytold/winit` | `a517b38` |
-| `libs/winprint.rs` | `storytold/winprint.rs` | `417ac3c` (o craft-libs pina também `5f80b9b`; os dois crates resolvem por path) |
-| `libs/rustls-rustcrypto` | fork da suíte (provider TLS 100% Rust) | `0.0.2-alpha` |
+| `libs/winprint.rs` | `storytold/winprint.rs` | `417ac3c` (craft-libs also pins `5f80b9b`; both crates resolve by path) |
+| `libs/rustls-rustcrypto` | the suite's fork (100% Rust TLS provider) | `0.0.2-alpha` |
 | `assets/craft-fonts` | `storytold/craft-fonts` (build input `CRAFT_FONTS_DIR`) | `b076417` |
 
-`craft-update` é **fork permanente consciente** e fica fora do sync: bugfix vai direto na fonte
-(`local-libs`) e é replicado com `sync.ps1 -Mode push` (guarda de hash; a cópia aqui é espelho).
-Nunca edite `libs/craft-libs/crates/update` à mão.
+`craft-update` is a **conscious permanent fork** and stays outside the sync: bugfixes go straight
+into the source (`local-libs`) and are replicated with `sync.ps1 -Mode push` (hash guard; the copy
+here is a mirror). Never edit `libs/craft-libs/crates/update` by hand.
 
-## Divergências do rebrand (o que é nosso)
+## Rebrand divergences (what is ours)
 
-- Identidade: crates `localphoto-*`, binários `localphoto`/`localphoto-cli`, app id
-  `com.localphoto.app` (desktop entry, Ícone hicolor, Wayland app id, Info.plist, pacman),
-  ProgIds/UpgradeCode do MSI, chaves de registro (`Software\Local Photo` +
-  `Software\Anon5T4R\LocalPhoto\InstallDir`, App Paths), pasta de configuração `LocalPhoto`.
-- CI próprio: sem `craft-common-actions`, sem sonarcloud, sem nix/flake, sem jobs macOS/FreeBSD/
-  windows-arm64. Release por **tag** (o upstream usa a branch `release` + draft).
-- `libs/` e `assets/craft-fonts/` vendorizados (o upstream busca os dois por git no CI).
-- `cargo xtask fmt` (escopo = membros do workspace) no lugar de `cargo fmt --all`: os caminhos
-  vendorizados mantêm o estilo de origem.
-- Links de comunidade: os menus/About apontam só para este repositório (o upstream tinha site e
-  Discord próprios).
-- Ícone próprio (v0.1.2): iris de câmera branca em tile fúcsia, SVG desenhado neste repo (o upstream
-  usava um lince gravado, arte herdada que saiu inteira — hicolor, `.ico`, `.icns`,
-  `localphoto-1024.png`, DMG background). Geração: `packaging/icons.sh` + `cargo xtask ico` + packer
-  de `.icns` por chunks PNG (sem macOS).
-- MSI (v0.1.2): atalho na **área de trabalho** além do menu Iniciar (componente próprio, atalho
-  não-advertised, key path no registro `Software\Local Photo\Shortcuts`), padrão do local-paint.
-- `packaging/windows/package.ps1` monta o zip portable com `ZipArchive` e barras `/` (o
-  `Compress-Archive` do PS 5.1 grava `\`, que o updater recusa).
-- `crates/ui-egui/src/render.rs` (`request_needed`): `clippy::needless_bool` novo do stable 1.100
-  reprovava o `if … { return false; } true` do upstream. Condição negada (sugestão do próprio
-  lint), sem mudança de comportamento — divergência local mínima até o upstream acompanhar.
-- `.github/`, README, AGENTS/CLAUDE e `docs/releasing.md` reescritos para a suíte.
+- Identity: crates `localphoto-*`, binaries `localphoto`/`localphoto-cli`, app id
+  `com.localphoto.app` (desktop entry, hicolor Icon, Wayland app id, Info.plist, pacman),
+  MSI ProgIds/UpgradeCode, registry keys (`Software\Local Photo` +
+  `Software\Anon5T4R\LocalPhoto\InstallDir`, App Paths), configuration folder `LocalPhoto`.
+- Own CI: no `craft-common-actions`, no sonarcloud, no nix/flake, no macOS/FreeBSD/windows-arm64
+  jobs. Release by **tag** (the upstream uses the `release` branch + draft).
+- `libs/` and `assets/craft-fonts/` vendored (the upstream fetches both by git in CI).
+- `cargo xtask fmt` (scope = workspace members) in place of `cargo fmt --all`: the vendored paths
+  keep their origin's style.
+- Community links: the menus/About point only to this repository (the upstream had its own site and
+  Discord).
+- Own icon (v0.1.2): a white camera iris on a fuchsia tile, SVG drawn in this repo (the upstream
+  used an engraved lynx, inherited art that left entirely — hicolor, `.ico`, `.icns`,
+  `localphoto-1024.png`, DMG background). Generation: `packaging/icons.sh` + `cargo xtask ico` +
+  PNG-chunk `.icns` packer (no macOS).
+- MSI (v0.1.2): a **desktop** shortcut besides the Start menu (own component, non-advertised
+  shortcut, key path in the `Software\Local Photo\Shortcuts` registry), local-paint's standard.
+- `packaging/windows/package.ps1` builds the portable zip with `ZipArchive` and `/` bars (PS 5.1's
+  `Compress-Archive` writes `\`, which the updater refuses).
+- `crates/ui-egui/src/render.rs` (`request_needed`): a new `clippy::needless_bool` from stable 1.100
+  rejected the upstream's `if … { return false; } true`. The condition was negated (the lint's own
+  suggestion), with no behavior change — a minimal local divergence until the upstream catches up.
+- `.github/`, README, AGENTS/CLAUDE and `docs/releasing.md` rewritten for the suite.
 
-## Registro de sync
+## Sync log
 
-A base continua `bb08a69`: só pontos escolhidos entram (skill `sync-upstream`), não um bump.
+The base stays `bb08a69`: only chosen points enter (skill `sync-upstream`), not a bump.
 
-| Data | Alvo (lightcraft) | Pegos | Descartados relevantes |
+| Date | Target (lightcraft) | Taken | Relevant discards |
 |---|---|---|---|
-| 2026-11-21 | `origin/main` do dia | série #2589 `de9b0a89` `7c74ae0a` `a31a4367` `5b8b9b52` → `8682269` (duplicata por conteúdo no catálogo do Lightroom); `8ffe73cc` → `89fbbc7` (lente X-S20, sensores X-S10/X-S20/X-M5) | `2d905e0a` `89d11ab1` (backup ZIP do .lrcat: não temos), `5c598189` `d7372407` `e689453e` `19985a3f` `690f6cfb` (log do catálogo: não temos), `6c3083eb` `5a242898` (dependem do `craft-raw`), `cb91d69e` (hot-pixel: não temos), `a57bd69d` (perf menor, depende do job novo) |
+| 2026-11-21 | the day's `origin/main` | series #2589 `de9b0a89` `7c74ae0a` `a31a4367` `5b8b9b52` → `8682269` (duplicate by content in the Lightroom catalog); `8ffe73cc` → `89fbbc7` (X-S20 lens, X-S10/X-S20/X-M5 sensors) | `2d905e0a` `89d11ab1` (.lrcat ZIP backup: we don't have it), `5c598189` `d7372407` `e689453e` `19985a3f` `690f6cfb` (catalog log: we don't have it), `6c3083eb` `5a242898` (depend on `craft-raw`), `cb91d69e` (hot pixel: we don't have it), `a57bd69d` (minor perf, depends on the new job) |
 
-## Pendências/gaps conhecidos desta porta
+## Known pending items/gaps of this port
 
-- Assinatura minisign dos assets: fail-open até os secrets `MINISIGN_KEY`/`MINISIGN_PASSPHRASE`
-  existirem neste repo (ver `docs/releasing.md`).
-- macOS: `packaging/macos/dmg/dmg-layout.DS_Store` ainda carrega o nome upstream no layout do
-  Finder (regenerar exige macOS); o bundle em si já é `Local Photo.app`.
-- Testes rodam no CI só no Linux (como no upstream); no Windows o job compila `cargo test
-  --no-run` — os testes de UI renderizam por wgpu e o runner não tem GPU. Três testes do upstream
-  não passavam no Windows e foram corrigidos/limitados aqui: dois comparavam caminhos montados com
-  `join("a/b")` (separador misto) e um espera detecção de hard link por nome diferente, que no
-  Windows dependeria do file index (metadata instável) — a asserção de *admissão* ficou `#[cfg(unix)]`
-  e a de *write-time* (caminho que apareceu) continua valendo nos dois.
-- `docs/images/` e `docs/showcase/` são capturas do app upstream (título antigo nos pixels);
-  regenerar quando o visual estabilizar.
-- **Flake de carga (não suprimido):** `tests_segment::background_requests_never_wait_and_failures_come_back_as_messages`
-  mede o tempo de enfileirar pedidos ao modelo (< 1 s) e estourou uma vez (1,8 s) no Windows
-  local com a suíte inteira em paralelo; passa isolado e no binário do crate (1301 testes). Código
-  intocado aqui — se flecar no CI, investigar contenção de I/O do modelo antes de mexer no limite.
-- Testes locais pedem `CRAFT_FONTS_DIR=assets/craft-fonts` (o teste de acessibilidade desenha "▸",
-  que só existe no set do craft-fonts; o CI já define a variável).
+- minisign signing of assets: fail-open until the `MINISIGN_KEY`/`MINISIGN_PASSPHRASE` secrets
+  exist in this repo (see `docs/releasing.md`).
+- macOS: `packaging/macos/dmg/dmg-layout.DS_Store` still carries the upstream name in the Finder
+  layout (regenerating requires macOS); the bundle itself is already `Local Photo.app`.
+- Tests run in CI on Linux only (as in the upstream); on Windows the job compiles `cargo test
+  --no-run` — the UI tests render through wgpu and the runner has no GPU. Three upstream tests did
+  not pass on Windows and were fixed/limited here: two compared paths built with `join("a/b")`
+  (mixed separator) and one expects hard-link detection by a different name, which on Windows would
+  depend on the file index (unstable metadata) — the *admission* assertion became `#[cfg(unix)]`
+  and the *write-time* one (the path that showed up) still holds on both.
+- `docs/images/` and `docs/showcase/` are captures of the upstream app (old title in the pixels);
+  regenerate once the look stabilizes.
+- **Load flake (not suppressed):**
+  `tests_segment::background_requests_never_wait_and_failures_come_back_as_messages`
+  measures the time to enqueue requests to the model (< 1 s) and burst once (1.8 s) on local
+  Windows with the whole suite in parallel; it passes isolated and in the crate's binary (1301
+  tests). Code untouched here — if it flakes in CI, look into the model's I/O contention before
+  touching the limit.
+- Local tests require `CRAFT_FONTS_DIR=assets/craft-fonts` (the accessibility test draws "▸",
+  which only exists in the craft-fonts set; CI already sets the variable).
