@@ -33,12 +33,6 @@
     <keyword>psd</keyword>
     <keyword>layers</keyword>
   </keywords>
-  <screenshots>
-    <screenshot type="default">
-      <caption>Photo editing with The Tetons and the Snake River by Ansel Adams</caption>
-      <image type="source">https://raw.githubusercontent.com/Styx-Studios/Local-Photo/3b4279fc2485bb51847c0071a1b3c514aa0f98f4/docs/images/hero-tetons.jpg</image>
-    </screenshot>
-  </screenshots>
   <branding>
     <color type="primary" scheme_preference="light">#9fd0ff</color>
     <color type="primary" scheme_preference="dark">#1f64ba</color>
