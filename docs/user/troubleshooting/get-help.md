@@ -5,7 +5,7 @@ order: 30
 verified: 0.7.1
 ---
 
-Open an issue in the [issue tracker](https://github.com/Anon5T4R/Local-Photo/issues), or ask in [Discord](https://discord.gg/artcraft). Include your version, your system, what you did, and what you expected.
+Open an issue in the [issue tracker](https://github.com/Styx-Studios/Local-Photo/issues), or ask in [Discord](https://discord.gg/artcraft). Include your version, your system, what you did, and what you expected.
 
 ## What to include
 

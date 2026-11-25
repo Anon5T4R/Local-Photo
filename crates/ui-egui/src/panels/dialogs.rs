@@ -1753,7 +1753,7 @@ fn sam_by_hand(sam: &localphoto_engine::segment::Segmenter) -> bool {
 }
 
 /// The model installation guide.
-const SAM_HELP: &str = "https://github.com/Anon5T4R/Local-Photo/blob/main/docs/ai-masks.md#getting-the-model";
+const SAM_HELP: &str = "https://github.com/Styx-Studios/Local-Photo/blob/main/docs/ai-masks.md#getting-the-model";
 
 /// Open the configured SAM 3 folder itself; revealing a file opens its parent instead.
 pub(crate) fn show_model_folder(app: &mut LocalPhotoApp) -> Result<serde_json::Value, String> {

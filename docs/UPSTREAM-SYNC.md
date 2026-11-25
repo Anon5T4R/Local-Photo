@@ -7,7 +7,7 @@ entra sem revisão. Regras gerais em `docs/planos/licoes-de-porta.md` (dev-notes
 
 - Upstream: `storytold/lightcraft`, commit **bb08a69** (`0.14.0`), sem tag no commit — a árvore foi
   copiada do `git archive` desse commit (sem histórico).
-- Fork: `Anon5T4R/Local-Photo`, versão própria `0.1.x` (numeração nova evita auto-update falso
+- Fork: `Styx-Studios/Local-Photo`, versão própria `0.1.x` (numeração nova evita auto-update falso
   para o upstream).
 - Nada é lido de `C:\Dev\storytold` em build, teste ou release; a pasta é só referência local para
   a skill `sync-upstream`.
@@ -17,7 +17,7 @@ entra sem revisão. Regras gerais em `docs/planos/licoes-de-porta.md` (dev-notes
 | Caminho | Origem | Rev |
 |---|---|---|
 | `libs/craft-libs` | `storytold/craft-libs` | `1e6f1278` |
-| `libs/craft-libs/crates/update` | **`Anon5T4R/local-libs`** (fonte única da suíte) | ver `HASHES.update` do repo |
+| `libs/craft-libs/crates/update` | **`Styx-Studios/local-libs`** (fonte única da suíte) | ver `HASHES.update` do repo |
 | `libs/egui` | `storytold/egui` | `6d518fc` |
 | `libs/winit` | `storytold/winit` | `a517b38` |
 | `libs/winprint.rs` | `storytold/winprint.rs` | `417ac3c` (o craft-libs pina também `5f80b9b`; os dois crates resolvem por path) |

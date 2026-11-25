@@ -3,13 +3,13 @@
 /// The app's id, as the repository and the release assets spell it.
 pub const APP: &str = "localphoto";
 /// This app's page: the fork's repository (there is no separate product website).
-pub const APP_PAGE: &str = "https://github.com/Anon5T4R/Local-Photo";
+pub const APP_PAGE: &str = "https://github.com/Styx-Studios/Local-Photo";
 /// This app's source repository.
-pub const GITHUB: &str = "https://github.com/Anon5T4R/Local-Photo";
+pub const GITHUB: &str = "https://github.com/Styx-Studios/Local-Photo";
 
 /// (UI command id, menu label, URL) for each link, in Help-menu order.
 /// The user documentation (docs/ in the repository).
-pub const HELP: &str = "https://github.com/Anon5T4R/Local-Photo/tree/main/docs";
+pub const HELP: &str = "https://github.com/Styx-Studios/Local-Photo/tree/main/docs";
 
 pub const LINKS: &[(&str, &str, &str)] = &[
     ("app.help", "Local Photo Help", HELP),
@@ -19,7 +19,7 @@ pub const LINKS: &[(&str, &str, &str)] = &[
 ];
 
 /// Where feedback and bug reports go.
-pub const FEEDBACK: &str = "https://github.com/Anon5T4R/Local-Photo/issues/new";
+pub const FEEDBACK: &str = "https://github.com/Styx-Studios/Local-Photo/issues/new";
 
 /// The URL behind a link command id.
 pub fn url_of(cmd: &str) -> Option<&'static str> {

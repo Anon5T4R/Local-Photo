@@ -24,4 +24,4 @@ You import photos, sort them with ratings, flags and albums, and edit them witho
 
 ## Get help
 
-Ask in [Discord](https://discord.gg/artcraft) or open an issue in the [issue tracker](https://github.com/Anon5T4R/Local-Photo/issues). Say which system and camera you use, and your Local Photo version (**Help** > **About Local Photo**; on macOS, **Local Photo** > **About Local Photo**).
+Ask in [Discord](https://discord.gg/artcraft) or open an issue in the [issue tracker](https://github.com/Styx-Studios/Local-Photo/issues). Say which system and camera you use, and your Local Photo version (**Help** > **About Local Photo**; on macOS, **Local Photo** > **About Local Photo**).

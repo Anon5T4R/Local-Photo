@@ -43,7 +43,7 @@ impl LocalPhotoApp {
             tag: "v99.0.0".into(),
             version: craft_update::parse_version("99.0.0"),
             name: name.into(),
-            html_url: "https://github.com/Anon5T4R/Local-Photo/releases/tag/v99.0.0".into(),
+            html_url: "https://github.com/Styx-Studios/Local-Photo/releases/tag/v99.0.0".into(),
             ..Default::default()
         });
     }
@@ -154,7 +154,7 @@ mod tests {
             tag: "v99.0.0".into(),
             version: craft_update::parse_version("99.0.0"),
             name: "Local Photo 99.0.0".into(),
-            html_url: "https://github.com/Anon5T4R/Local-Photo/releases/tag/v99.0.0".into(),
+            html_url: "https://github.com/Styx-Studios/Local-Photo/releases/tag/v99.0.0".into(),
             ..Default::default()
         };
         app.updates_rt.updater.offer(release);

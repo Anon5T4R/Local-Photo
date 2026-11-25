@@ -5,11 +5,11 @@ order: 10
 verified: 0.7.1
 ---
 
-Download the file for your system from the [latest release](https://github.com/Anon5T4R/Local-Photo/releases/latest) and install it. In the file names, `<version>` stands for the version number, for example `0.7.1`. The [Local Photo page on getartcraft.com](https://github.com/Anon5T4R/Local-Photo) also links the download.
+Download the file for your system from the [latest release](https://github.com/Styx-Studios/Local-Photo/releases/latest) and install it. In the file names, `<version>` stands for the version number, for example `0.7.1`. The [Local Photo page on getartcraft.com](https://github.com/Styx-Studios/Local-Photo) also links the download.
 
 ## Windows 11
 
-1. Open the [latest release](https://github.com/Anon5T4R/Local-Photo/releases/latest).
+1. Open the [latest release](https://github.com/Styx-Studios/Local-Photo/releases/latest).
 2. Download `localphoto-<version>-windows-x64.msi`. It fits most PCs (Intel and AMD, 64-bit).
 3. Run the file. The installer asks where to install. The default is `C:\Program Files\Local Photo`, and upgrades stay in the folder you chose.
 4. At the end, choose the option to start Local Photo.
@@ -50,4 +50,4 @@ RISC-V and FreeBSD builds are on the release page too. On a Wayland desktop, Loc
 
 ## Still stuck?
 
-Ask in [Discord](https://discord.gg/artcraft) or open an issue in the [issue tracker](https://github.com/Anon5T4R/Local-Photo/issues).
+Ask in [Discord](https://discord.gg/artcraft) or open an issue in the [issue tracker](https://github.com/Styx-Studios/Local-Photo/issues).

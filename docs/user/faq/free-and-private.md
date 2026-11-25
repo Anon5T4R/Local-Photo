@@ -17,4 +17,4 @@ Local Photo runs on Windows, macOS and Linux. See [Install Local Photo](../getti
 
 ## Is it finished?
 
-No. Local Photo is in alpha. Some things from Adobe Lightroom are not there yet, such as video and the Book and Map modules. The project's [roadmap](https://github.com/Anon5T4R/Local-Photo/blob/main/ROADMAP.md) lists what is missing.
+No. Local Photo is in alpha. Some things from Adobe Lightroom are not there yet, such as video and the Book and Map modules. The project's [roadmap](https://github.com/Styx-Studios/Local-Photo/blob/main/ROADMAP.md) lists what is missing.

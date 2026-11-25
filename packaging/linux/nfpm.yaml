@@ -14,7 +14,7 @@ section: graphics
 priority: optional
 maintainer: ${LOCALPHOTO_MAINTAINER}
 vendor: Local Photo contributors
-homepage: https://github.com/Anon5T4R/Local-Photo
+homepage: https://github.com/Styx-Studios/Local-Photo
 license: MIT OR Apache-2.0
 description: |-
   Open-source, native photo library and raw developer that works the way

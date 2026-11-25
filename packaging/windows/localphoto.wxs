@@ -29,9 +29,9 @@
 
     <Icon Id="LocalPhotoIcon.ico" SourceFile="$(var.IconPath)" />
     <Property Id="ARPPRODUCTICON" Value="LocalPhotoIcon.ico" />
-    <Property Id="ARPURLINFOABOUT" Value="https://github.com/Anon5T4R/Local-Photo" />
-    <Property Id="ARPURLUPDATEINFO" Value="https://github.com/Anon5T4R/Local-Photo" />
-    <Property Id="ARPHELPLINK" Value="https://github.com/Anon5T4R/Local-Photo/issues" />
+    <Property Id="ARPURLINFOABOUT" Value="https://github.com/Styx-Studios/Local-Photo" />
+    <Property Id="ARPURLUPDATEINFO" Value="https://github.com/Styx-Studios/Local-Photo" />
+    <Property Id="ARPHELPLINK" Value="https://github.com/Styx-Studios/Local-Photo/issues" />
 
     <StandardDirectory Id="ProgramFiles6432Folder">
       <Directory Id="INSTALLFOLDER" Name="Local Photo" />
