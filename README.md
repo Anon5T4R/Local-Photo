@@ -6,9 +6,9 @@
 
 <p align="center">
   A photo library and non-destructive RAW developer for Windows and Linux. Written in Rust, offline, no account.<br>
+  <a href="#where-it-comes-from">Where it comes from</a> ·
   <a href="https://github.com/Anon5T4R/Local-Photo/releases/latest">Download</a> ·
   <a href="ROADMAP.md">Roadmap and status</a> ·
-  <a href="#where-it-comes-from">Where it comes from</a> ·
   <a href="#how-it-is-made">How it is made</a>
 </p>
 
@@ -76,24 +76,6 @@ Security notes, all checkable in this repository:
 - Releases are built by GitHub Actions from a tagged commit with locked dependencies; `cargo-deny`
   checks advisories, licenses and bans, and no dependency points at a git URL.
 
-## Download
-
-Windows (x64): `.msi` per-machine installer or portable `.zip`. Linux (x86_64): `.AppImage`, `.deb`,
-`.rpm` or `.tar.gz`, and Arch Linux gets a `.pkg.tar.zst` built from the same tarball. All in
-[Releases](https://github.com/Anon5T4R/Local-Photo/releases). macOS and FreeBSD have packaging scripts
-in the repository, but no published build.
-
-Every release has a `SHA256SUMS.txt`. When the signing key is configured, each asset also gets a
-[minisign](https://jedisct1.github.io/minisign/) signature from the suite's key; a release is published
-unsigned rather than with a signature that does not match.
-
-```sh
-minisign -Vm <file> -P RWTqN+hTTCFbDCGCA1cEJRLp2FSluxIUiJfqdoAYwkwNNVH5MTYH8qSN
-```
-
-The public key is also in [packaging/minisign.pub](packaging/minisign.pub). It is the same key for every
-Local app.
-
 ## Where it comes from
 
 Local Photo is a fork of [lightcraft](https://github.com/storytold/lightcraft) by
@@ -127,6 +109,24 @@ pure-Rust RustCrypto provider.
 compatibility), reviewed one by one and adapted. New features and UI changes are not merged
 automatically. Each sync is recorded in [docs/UPSTREAM-SYNC.md](docs/UPSTREAM-SYNC.md).
 
+## Download
+
+Windows (x64): `.msi` per-machine installer or portable `.zip`. Linux (x86_64): `.AppImage`, `.deb`,
+`.rpm` or `.tar.gz`, and Arch Linux gets a `.pkg.tar.zst` built from the same tarball. All in
+[Releases](https://github.com/Anon5T4R/Local-Photo/releases). macOS and FreeBSD have packaging scripts
+in the repository, but no published build.
+
+Every release has a `SHA256SUMS.txt`. When the signing key is configured, each asset also gets a
+[minisign](https://jedisct1.github.io/minisign/) signature from the suite's key; a release is published
+unsigned rather than with a signature that does not match.
+
+```sh
+minisign -Vm <file> -P RWTqN+hTTCFbDCGCA1cEJRLp2FSluxIUiJfqdoAYwkwNNVH5MTYH8qSN
+```
+
+The public key is also in [packaging/minisign.pub](packaging/minisign.pub). It is the same key for every
+Local app.
+
 ## How the app is built
 
 One Cargo workspace, with the library in layers: a crate may depend only on lower layers, and nothing
@@ -145,6 +145,16 @@ The develop pipeline exists twice against one specification: a CPU reference and
 WGSL on wgpu. The GPU path is checked against the CPU one (within 1/255), and an unsupported adapter or
 a GPU error falls back to the CPU ([docs/gpu-pipeline.md](docs/gpu-pipeline.md)). More:
 [docs/architecture.md](docs/architecture.md).
+
+## How it is made
+
+Local Photo follows the same rules as every Local app: local files and no account, Rust only (including
+the interface and the cryptography), one self-contained repository per app, forks with selective sync,
+governed dependencies, releases built from a tag, optional AI with your own model, and MCP so
+agents can use the app. Most of the code is written by AI coding agents (Claude Code and OpenCode) from
+written plans, reviewed by the maintainer and held to the same checks and CI. The reasons for each
+decision:
+[How we make the Local apps](https://github.com/Styx-Studios/.github/blob/main/profile/README.md#how-we-make-the-local-apps).
 
 ## Build from source
 
@@ -169,16 +179,6 @@ pick, `X` reject, `U` clear the flag, `F` full screen, `Z` zoom. With the system
 `Ctrl+Shift+I` import, `Ctrl+P` print, `Ctrl+O` open a library, `Ctrl+,` settings, `Ctrl+/` the full
 list, `F1` help. Every shortcut can be changed in Help → Keyboard Shortcuts.
 
-## How it is made
-
-Local Photo follows the same rules as every Local app: local files and no account, Rust only (including
-the interface and the cryptography), one self-contained repository per app, forks with selective sync,
-governed dependencies, releases built from a tag, optional AI with your own model, and MCP so
-agents can use the app. Most of the code is written by AI coding agents (Claude Code and OpenCode) from
-written plans, reviewed by the maintainer and held to the same checks and CI. The reasons for each
-decision:
-[How we make the Local apps](https://github.com/Styx-Studios/.github/blob/main/profile/README.md#how-we-make-the-local-apps).
-
 ## AI
 
 No AI feature needs an account, and no weights ship with the app. Each piece is optional and separate:
@@ -195,6 +195,22 @@ No AI feature needs an account, and no weights ship with the app. Each piece is 
 
 Details: [docs/ai-masks.md](docs/ai-masks.md), [docs/denoise.md](docs/denoise.md),
 [docs/faces.md](docs/faces.md).
+
+## The Local apps
+
+[Local Word](https://github.com/Anon5T4R/local-office) ·
+[Local Sheets](https://github.com/Anon5T4R/local-sheets) ·
+[Local Slides](https://github.com/Anon5T4R/local-slides) ·
+[Local PDF](https://github.com/Anon5T4R/local-pdf) ·
+[Local Keys](https://github.com/Anon5T4R/Local-Keys) ·
+[Local Image](https://github.com/Anon5T4R/Local-Image) ·
+[Local Photo](https://github.com/Anon5T4R/Local-Photo) ·
+[Local Paint](https://github.com/Anon5T4R/Local-Paint) ·
+[Local Vector](https://github.com/Anon5T4R/Local-Vector) ·
+[Local Player](https://github.com/Anon5T4R/Local-Player) ·
+[Local Notebook](https://github.com/Anon5T4R/Local-Obsidian) ·
+[Local Mindmap](https://github.com/Anon5T4R/Local-Mind) ·
+[Local Utils](https://github.com/Anon5T4R/Local-Utils)
 
 ## License and credits
 
