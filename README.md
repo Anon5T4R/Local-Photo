@@ -33,7 +33,7 @@ the catalog, or in an XMP sidecar next to the file. The benchmark for behavior i
 - **Output.** Export as JPEG, PNG, TIFF, WebP, PSD, AVIF or JPEG XL, as the untouched original with a
   sidecar, or as a DNG; a print layout and a contact sheet written as PDF; a slideshow, exported as
   PDF, as JPEG frames or as AV1 video.
-- **Library health.** Find missing photos and relink them; back the library up and restore it.
+- **Library health.** Find missing photos and relink them.
 - **The same commands everywhere.** The interface, `localphoto-cli`, the JSON-lines control channel and
   the MCP server dispatch the same command ids, so an agent can do what a person does
   ([docs/control-protocol.md](docs/control-protocol.md), [docs/mcp.md](docs/mcp.md)).
@@ -46,7 +46,7 @@ What works, what is weak and what is planned is in the [roadmap](ROADMAP.md).
 
 | | |
 |---|---|
-| Opens | Camera raw: Canon CR2 and CR3, Nikon NEF and NRW, Sony ARW, SR2 and SRF, Fujifilm RAF, Olympus ORF, Panasonic RW2 and RWL, Pentax PEF, Samsung SRW, DNG (including Apple ProRAW, lossy and JPEG XL tiles), and CRW, MRW, IIQ, X3F, KDC, MOS, ERF, 3FR, FFF, MEF and `.raw`. Standard images: JPEG, PNG, TIFF, WebP, PSD and PSB, JPEG XL, GIF, BMP. HEIC/HEIF in builds compiled with the `heif` feature, which the releases are. |
+| Opens | Camera raw: Canon CR2 and CR3, Nikon NEF and NRW, Sony ARW, SR2 and SRF, Fujifilm RAF, Olympus ORF, Panasonic RW2 and RWL, Pentax PEF, Samsung SRW, DNG (including Apple ProRAW, lossy and JPEG XL tiles), Minolta MRW, Epson ERF, Mamiya MEF, and Hasselblad 3FR and FFF. CRW, IIQ, X3F, KDC and MOS open from the embedded preview only. Standard images: JPEG, PNG, TIFF, WebP, PSD and PSB, JPEG XL, GIF, BMP. HEIC/HEIF in builds compiled with the `heif` feature, which the releases are. |
 | Saves | The library folder: `catalog.snap` with `catalog.log`, an append-only journal of operations, a lock file, and `Originals/` for imported copies. XMP sidecars for the metadata and the develop settings, when you save them. |
 | Exports | JPEG, PNG, TIFF, WebP, PSD, AVIF and JPEG XL with a size, sharpening and metadata policy; the untouched original plus its XMP; a DNG of the raw data, or a rendered linear DNG. Output in sRGB, Display P3, Adobe RGB, ProPhoto RGB or Rec. 2020 with an embedded ICC profile. |
 | Imports | A Lightroom Classic catalog, XMP sidecars, presets and profiles, keywords and point-curve presets. |
@@ -60,16 +60,18 @@ measures it camera by camera.
 - Photos and edits never leave the computer.
 - On start the app asks GitHub whether a newer release exists, and downloads it only if you accept.
   There is no setting to turn the check off yet.
-- Everything else that uses the network is a download you ask for: model files (the face detection
-  model, and SAM 3 from a mirror you configure) and the GeoNames place names used to turn GPS
+- Everything else that uses the network is a download you ask for (some are offered the first time
+  you use a feature): the face detection model, SAM 3 (you download it yourself or from a mirror you
+  configure; the app ships no download location), and the GeoNames place names used to turn GPS
   coordinates into place names. A model's manifest pins a size and, where it is known, a SHA-256 that
   the download is checked against; the place names come from `download.geonames.org`.
 - No account, analytics or crash reporting.
 
 Security notes, all checkable in this repository:
 
-- The app's crates and binaries forbid `unsafe` code, and none contains an `unsafe` block; the one
-  exception is `crates/sysmem`, with a single FFI call (macOS memory-pressure relief).
+- The app's crates and binaries forbid `unsafe` code, and none contains an `unsafe` block outside
+  benchmark examples; the one exception is `crates/sysmem`, with a single FFI call (macOS
+  memory-pressure relief).
 - The raw decoders, the develop pipeline and the encoders are Rust; there is no LibRaw or dcraw.
 - TLS for the update check and the downloads is rustls with the suite's RustCrypto provider
   (`libs/rustls-rustcrypto`); no OpenSSL and no aws-lc.
